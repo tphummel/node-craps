@@ -11,3 +11,55 @@ tap.test('roll d6', function (t) {
 
   t.end()
 })
+
+tap.test('comeout', function (suite) {
+  suite.test('2', function (t) {
+    const handState = {
+      isComeOut: true
+    }
+
+    const result = lib.shoot(handState, [1, 1])
+
+    t.equal(result.result, 'comeout loss')
+    t.equal(result.die1, 1)
+    t.equal(result.die2, 1)
+    t.equal(result.diceSum, 2)
+    t.equal(result.isComeOut, true)
+
+    t.end()
+  })
+
+  suite.test('3', function (t) {
+    const handState = {
+      isComeOut: true
+    }
+
+    const result = lib.shoot(handState, [2, 1])
+
+    t.equal(result.result, 'comeout loss')
+    t.equal(result.die1, 1)
+    t.equal(result.die2, 2)
+    t.equal(result.diceSum, 3)
+    t.equal(result.isComeOut, true)
+
+    t.end()
+  })
+
+  suite.test('12', function (t) {
+    const handState = {
+      isComeOut: true
+    }
+
+    const result = lib.shoot(handState, [6, 6])
+
+    t.equal(result.result, 'comeout loss')
+    t.equal(result.die1, 6)
+    t.equal(result.die2, 6)
+    t.equal(result.diceSum, 12)
+    t.equal(result.isComeOut, true)
+
+    t.end()
+  })
+
+  suite.end()
+})
