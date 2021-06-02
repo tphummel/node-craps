@@ -17,6 +17,9 @@ function shoot (preState, dice) {
     if ([2, 3, 12].indexOf(postState.diceSum) !== -1) {
       postState.result = 'comeout loss'
       postState.isComeOut = true
+    } else if ([7].indexOf(postState.diceSum) !== -1) {
+      postState.result = 'comeout win'
+      postState.isComeOut = true
     }
   }
 

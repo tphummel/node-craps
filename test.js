@@ -61,5 +61,21 @@ tap.test('comeout', function (suite) {
     t.end()
   })
 
+  suite.test('7', function (t) {
+    const handState = {
+      isComeOut: true
+    }
+
+    const result = lib.shoot(handState, [5, 2])
+
+    t.equal(result.result, 'comeout win')
+    t.equal(result.die1, 2)
+    t.equal(result.die2, 5)
+    t.equal(result.diceSum, 7)
+    t.equal(result.isComeOut, true)
+
+    t.end()
+  })
+
   suite.end()
 })
