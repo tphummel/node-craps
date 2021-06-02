@@ -20,6 +20,10 @@ function shoot (preState, dice) {
     } else if ([7, 11].indexOf(postState.diceSum) !== -1) {
       postState.result = 'comeout win'
       postState.isComeOut = true
+    } else {
+      postState.result = 'point set'
+      postState.isComeOut = false
+      postState.point = postState.diceSum
     }
   }
 

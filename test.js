@@ -93,5 +93,107 @@ tap.test('comeout', function (suite) {
     t.end()
   })
 
+  suite.test('4', function (t) {
+    const handState = {
+      isComeOut: true
+    }
+
+    const result = lib.shoot(handState, [3, 1])
+
+    t.equal(result.result, 'point set')
+    t.equal(result.point, 4)
+    t.equal(result.die1, 1)
+    t.equal(result.die2, 3)
+    t.equal(result.diceSum, 4)
+    t.equal(result.isComeOut, false)
+
+    t.end()
+  })
+
+  suite.test('5', function (t) {
+    const handState = {
+      isComeOut: true
+    }
+
+    const result = lib.shoot(handState, [3, 2])
+
+    t.equal(result.result, 'point set')
+    t.equal(result.point, 5)
+    t.equal(result.die1, 2)
+    t.equal(result.die2, 3)
+    t.equal(result.diceSum, 5)
+    t.equal(result.isComeOut, false)
+
+    t.end()
+  })
+
+  suite.test('6', function (t) {
+    const handState = {
+      isComeOut: true
+    }
+
+    const result = lib.shoot(handState, [4, 2])
+
+    t.equal(result.result, 'point set')
+    t.equal(result.point, 6)
+    t.equal(result.die1, 2)
+    t.equal(result.die2, 4)
+    t.equal(result.diceSum, 6)
+    t.equal(result.isComeOut, false)
+
+    t.end()
+  })
+
+  suite.test('8', function (t) {
+    const handState = {
+      isComeOut: true
+    }
+
+    const result = lib.shoot(handState, [6, 2])
+
+    t.equal(result.result, 'point set')
+    t.equal(result.point, 8)
+    t.equal(result.die1, 2)
+    t.equal(result.die2, 6)
+    t.equal(result.diceSum, 8)
+    t.equal(result.isComeOut, false)
+
+    t.end()
+  })
+
+  suite.test('9', function (t) {
+    const handState = {
+      isComeOut: true
+    }
+
+    const result = lib.shoot(handState, [6, 3])
+
+    t.equal(result.result, 'point set')
+    t.equal(result.point, 9)
+    t.equal(result.die1, 3)
+    t.equal(result.die2, 6)
+    t.equal(result.diceSum, 9)
+    t.equal(result.isComeOut, false)
+
+    t.end()
+  })
+
+  suite.test('10', function (t) {
+    const handState = {
+      isComeOut: true
+    }
+
+    const result = lib.shoot(handState, [6, 4])
+
+    t.equal(result.result, 'point set')
+    t.equal(result.point, 10)
+    t.equal(result.die1, 4)
+    t.equal(result.die2, 6)
+    t.equal(result.diceSum, 10)
+    t.equal(result.isComeOut, false)
+
+    t.end()
+  })
+
   suite.end()
 })
