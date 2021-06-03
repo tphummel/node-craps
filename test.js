@@ -250,6 +250,23 @@ tap.test('point set', (suite) => {
     t.end()
   })
 
+  suite.test('seven out', (t) => {
+    const handState = {
+      isComeOut: false,
+      point: 6
+    }
+
+    const result = lib.shoot(handState, [3, 4])
+    t.equal(result.result, 'seven out')
+    t.notOk(result.point)
+    t.equal(result.die1, 3)
+    t.equal(result.die2, 4)
+    t.equal(result.diceSum, 7)
+    t.equal(result.isComeOut, true)
+
+    t.end()
+  })
+
   suite.test('point win 8', (t) => {
     const handState = {
       isComeOut: false,

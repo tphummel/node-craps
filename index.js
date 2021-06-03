@@ -31,6 +31,9 @@ function shoot (before, dice) {
     if (before.point === after.diceSum) {
       after.result = 'point win'
       after.isComeOut = true
+    } else if (after.diceSum === 7) {
+      after.result = 'seven out'
+      after.isComeOut = true
     }
   }
 
