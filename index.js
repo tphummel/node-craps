@@ -13,6 +13,8 @@ function shoot (before, dice) {
     diceSum: dice.reduce((m, r) => { return m + r }, 0)
   }
 
+  // game logic based on: https://github.com/tphummel/dice-collector/blob/master/PyTom/Dice/logic.py
+
   if (before.isComeOut) {
     if ([2, 3, 12].indexOf(after.diceSum) !== -1) {
       after.result = 'comeout loss'
@@ -24,6 +26,11 @@ function shoot (before, dice) {
       after.result = 'point set'
       after.isComeOut = false
       after.point = after.diceSum
+    }
+  } else {
+    if (before.point === after.diceSum) {
+      after.result = 'point win'
+      after.isComeOut = true
     }
   }
 
