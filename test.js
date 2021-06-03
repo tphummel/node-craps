@@ -199,6 +199,40 @@ tap.test('comeout', function (suite) {
 })
 
 tap.test('point set', (suite) => {
+  suite.test('point win 4', (t) => {
+    const handState = {
+      isComeOut: false,
+      point: 4
+    }
+
+    const result = lib.shoot(handState, [3, 1])
+    t.equal(result.result, 'point win')
+    t.notOk(result.point)
+    t.equal(result.die1, 1)
+    t.equal(result.die2, 3)
+    t.equal(result.diceSum, 4)
+    t.equal(result.isComeOut, true)
+
+    t.end()
+  })
+
+  suite.test('point win 5', (t) => {
+    const handState = {
+      isComeOut: false,
+      point: 5
+    }
+
+    const result = lib.shoot(handState, [3, 2])
+    t.equal(result.result, 'point win')
+    t.notOk(result.point)
+    t.equal(result.die1, 2)
+    t.equal(result.die2, 3)
+    t.equal(result.diceSum, 5)
+    t.equal(result.isComeOut, true)
+
+    t.end()
+  })
+
   suite.test('point win 6', (t) => {
     const handState = {
       isComeOut: false,
@@ -211,6 +245,57 @@ tap.test('point set', (suite) => {
     t.equal(result.die1, 3)
     t.equal(result.die2, 3)
     t.equal(result.diceSum, 6)
+    t.equal(result.isComeOut, true)
+
+    t.end()
+  })
+
+  suite.test('point win 8', (t) => {
+    const handState = {
+      isComeOut: false,
+      point: 8
+    }
+
+    const result = lib.shoot(handState, [3, 5])
+    t.equal(result.result, 'point win')
+    t.notOk(result.point)
+    t.equal(result.die1, 3)
+    t.equal(result.die2, 5)
+    t.equal(result.diceSum, 8)
+    t.equal(result.isComeOut, true)
+
+    t.end()
+  })
+
+  suite.test('point win 9', (t) => {
+    const handState = {
+      isComeOut: false,
+      point: 9
+    }
+
+    const result = lib.shoot(handState, [4, 5])
+    t.equal(result.result, 'point win')
+    t.notOk(result.point)
+    t.equal(result.die1, 4)
+    t.equal(result.die2, 5)
+    t.equal(result.diceSum, 9)
+    t.equal(result.isComeOut, true)
+
+    t.end()
+  })
+
+  suite.test('point win 10', (t) => {
+    const handState = {
+      isComeOut: false,
+      point: 10
+    }
+
+    const result = lib.shoot(handState, [4, 6])
+    t.equal(result.result, 'point win')
+    t.notOk(result.point)
+    t.equal(result.die1, 4)
+    t.equal(result.die2, 6)
+    t.equal(result.diceSum, 10)
     t.equal(result.isComeOut, true)
 
     t.end()
