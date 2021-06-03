@@ -199,6 +199,40 @@ tap.test('comeout', function (suite) {
 })
 
 tap.test('point set', (suite) => {
+  suite.test('neutral 2', (t) => {
+    const handState = {
+      isComeOut: false,
+      point: 5
+    }
+
+    const result = lib.shoot(handState, [1, 1])
+    t.equal(result.result, 'neutral')
+    t.equal(result.point, 5)
+    t.equal(result.die1, 1)
+    t.equal(result.die2, 1)
+    t.equal(result.diceSum, 2)
+    t.equal(result.isComeOut, false)
+
+    t.end()
+  })
+
+  suite.test('neutral 3', (t) => {
+    const handState = {
+      isComeOut: false,
+      point: 8
+    }
+
+    const result = lib.shoot(handState, [2, 1])
+    t.equal(result.result, 'neutral')
+    t.equal(result.point, 8)
+    t.equal(result.die1, 1)
+    t.equal(result.die2, 2)
+    t.equal(result.diceSum, 3)
+    t.equal(result.isComeOut, false)
+
+    t.end()
+  })
+
   suite.test('point win 4', (t) => {
     const handState = {
       isComeOut: false,
@@ -314,6 +348,40 @@ tap.test('point set', (suite) => {
     t.equal(result.die2, 6)
     t.equal(result.diceSum, 10)
     t.equal(result.isComeOut, true)
+
+    t.end()
+  })
+
+  suite.test('neutral yo 11', (t) => {
+    const handState = {
+      isComeOut: false,
+      point: 10
+    }
+
+    const result = lib.shoot(handState, [6, 5])
+    t.equal(result.result, 'neutral')
+    t.equal(result.point, 10)
+    t.equal(result.die1, 5)
+    t.equal(result.die2, 6)
+    t.equal(result.diceSum, 11)
+    t.equal(result.isComeOut, false)
+
+    t.end()
+  })
+
+  suite.test('neutral 12', (t) => {
+    const handState = {
+      isComeOut: false,
+      point: 9
+    }
+
+    const result = lib.shoot(handState, [6, 6])
+    t.equal(result.result, 'neutral')
+    t.equal(result.point, 9)
+    t.equal(result.die1, 6)
+    t.equal(result.die2, 6)
+    t.equal(result.diceSum, 12)
+    t.equal(result.isComeOut, false)
 
     t.end()
   })

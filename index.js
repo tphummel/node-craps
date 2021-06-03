@@ -34,6 +34,10 @@ function shoot (before, dice) {
     } else if (after.diceSum === 7) {
       after.result = 'seven out'
       after.isComeOut = true
+    } else {
+      after.result = 'neutral'
+      after.point = before.point
+      after.isComeOut = false
     }
   }
 
