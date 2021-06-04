@@ -4,7 +4,7 @@ const { playHand } = require('./index.js')
 
 const numHands = parseInt(process.argv.slice(2)[0], 10)
 
-console.log(`Simulating ${numHands} Craps Hand(s)`);
+console.log(`Simulating ${numHands} Craps Hand(s)`)
 
 const results = {
   handCount: 0,
