@@ -51,8 +51,6 @@ function playHand () {
     isComeOut: true
   }
 
-  history.push(hand)
-
   while (true) {
     hand = shoot(
       hand,
