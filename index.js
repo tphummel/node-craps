@@ -44,7 +44,31 @@ function shoot (before, dice) {
   return after
 }
 
+function playHand () {
+  const history = []
+
+  let hand = {
+    isComeOut: true
+  }
+
+  history.push(hand)
+
+  while (true) {
+    hand = shoot(
+      hand,
+      [roll(), roll()].sort()
+    )
+
+    history.push(hand)
+
+    if (hand.result === 'seven out') break
+  }
+
+  return history
+}
+
 module.exports = {
   roll,
-  shoot
+  shoot,
+  playHand
 }
