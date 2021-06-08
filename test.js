@@ -389,7 +389,7 @@ tap.test('point set', (suite) => {
   suite.end()
 })
 
-tap.test('point set', (suite) => {
+tap.test('playHand', (suite) => {
   const hand = lib.playHand()
   suite.ok(Array.isArray(hand))
 
