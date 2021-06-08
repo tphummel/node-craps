@@ -390,7 +390,34 @@ tap.test('point set', (suite) => {
 })
 
 tap.test('playHand', (suite) => {
-  const hand = lib.playHand()
+  const hand = lib.playHand({})
+  suite.ok(Array.isArray(hand))
+
+  suite.end()
+})
+
+tap.test('minPassLine betting', (suite) => {
+  const players = [
+    {
+      bet: () => { },
+      bets: [],
+      settle: () => { }
+    }
+  ]
+
+  const rules = {
+    minBet: 5,
+    maxOddsMultiple: {
+      4: 3,
+      5: 4,
+      6: 5,
+      8: 5,
+      9: 4,
+      10: 3
+    }
+  }
+
+  const hand = lib.playHand({ players, rules })
   suite.ok(Array.isArray(hand))
 
   suite.end()
