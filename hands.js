@@ -31,9 +31,20 @@ const results = {
 }
 
 const hands = []
+const rules = {
+  minBet: 5,
+  maxOddsMultiple: {
+    4: 3,
+    5: 4,
+    6: 5,
+    8: 5,
+    9: 4,
+    10: 3
+  }
+}
 
 for (let i = 0; i < numHands; i++) {
-  const hand = playHand()
+  const hand = playHand(rules)
   hands.push(hand)
 
   hand.reduce((memo, roll) => {
