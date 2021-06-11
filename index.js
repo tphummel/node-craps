@@ -54,7 +54,7 @@ function playHand ({ rules, players = [] }) {
   while (true) {
     hand = shoot(
       hand,
-      [roll(), roll()].sort()
+      [roll(), roll()]
     )
 
     history.push(hand)
