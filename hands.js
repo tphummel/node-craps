@@ -1,6 +1,7 @@
 'use strict'
 
 const { playHand } = require('./index.js')
+const { minPassLineOnly } = require('./betting.js')
 
 const numHands = parseInt(process.argv.slice(2)[0], 10)
 
@@ -44,7 +45,7 @@ const rules = {
 }
 
 for (let i = 0; i < numHands; i++) {
-  const hand = playHand(rules)
+  const hand = playHand({ rules, bettingStrategy: minPassLineOnly })
   hands.push(hand)
 
   hand.reduce((memo, roll) => {

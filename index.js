@@ -44,7 +44,7 @@ function shoot (before, dice) {
   return after
 }
 
-function playHand ({ rules, players = [] }) {
+function playHand ({ rules, bettingStrategy }) {
   const history = []
 
   let hand = {
