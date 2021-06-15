@@ -11,7 +11,7 @@ function minPassLineOnly (opts = {}) {
 
   if (hand.isComeOut && !bets.pass) bets.pass = newPassLineBet
 
-  return { bets }
+  return bets
 }
 
 module.exports = {
