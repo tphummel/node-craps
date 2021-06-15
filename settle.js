@@ -9,6 +9,15 @@ function passLine (bet = {}) {
   return payout
 }
 
+function all ({ bets, hand, rules }) {
+  if (bets?.pass?.line && hand.result === 'point win') {
+    bets.payout = passLine(bets.pass.line)
+  }
+
+  return bets
+}
+
 module.exports = {
-  passLine
+  passLine,
+  all
 }

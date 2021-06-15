@@ -1,5 +1,7 @@
 'use strict'
 
+const settle = require('./settle.js')
+
 function roll () {
   return 1 + Math.floor(Math.random() * 6)
 }
@@ -46,16 +48,31 @@ function shoot (before, dice) {
 
 function playHand ({ rules, bettingStrategy }) {
   const history = []
+  let balance = 0
 
   let hand = {
     isComeOut: true
   }
 
+  let bets
+
   while (true) {
+    bets = bettingStrategy({ rules, bets, hand })
+
+    // withdraw new bet total from balance. i don't have total bet amount here. get it
+
     hand = shoot(
       hand,
       [roll(), roll()]
     )
+
+    bets = settle.all({ rules, bets, hand })
+
+    if (bets?.payout) {
+      balance += bets.payout.total
+      console.log(`new payout: $${bets.payout.total} ($${balance})`)
+      delete bets.payout
+    }
 
     history.push(hand)
 
