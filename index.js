@@ -1,6 +1,6 @@
 'use strict'
 
-const settle = require('./settle.js')
+const settle = require('./settle')
 
 function roll () {
   return 1 + Math.floor(Math.random() * 6)
