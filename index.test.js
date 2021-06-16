@@ -390,13 +390,6 @@ tap.test('point set', (suite) => {
   suite.end()
 })
 
-tap.test('playHand', (suite) => {
-  const hand = lib.playHand({ bettingStrategy: () => {} })
-  suite.ok(Array.isArray(hand.history))
-
-  suite.end()
-})
-
 tap.test('minPassLine win', (suite) => {
   let rollCount = -1
   const fixedRolls = [
@@ -430,6 +423,7 @@ tap.test('minPassLine win', (suite) => {
 
   const hand = lib.playHand({ rules, roll: testRoll, bettingStrategy: betting.minPassLineOnly })
   suite.ok(Array.isArray(hand.history))
+  suite.equal(hand.balance, 0)
 
   suite.end()
 })

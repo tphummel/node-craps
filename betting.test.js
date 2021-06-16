@@ -22,7 +22,7 @@ tap.test('minPassLineOnly: no bets yet, coming out', function (t) {
 
   const updatedBets = lib.minPassLineOnly({ rules, hand })
   t.equal(updatedBets.pass.line.amount, rules.minBet)
-  t.ok(updatedBets.pass.line.isNew)
+  t.equal(updatedBets.new, 5)
 
   t.end()
 })
@@ -56,7 +56,7 @@ tap.test('minPassLineOnly: bet exists, coming out', (t) => {
   const updatedBets = lib.minPassLineOnly({ rules, bets, hand })
   t.equal(updatedBets.pass.line.amount, rules.minBet)
   t.notOk(updatedBets.pass.line.isContract)
-  t.notOk(updatedBets.pass.line.isNew)
+  t.notOk(updatedBets.new)
 
   t.end()
 })
@@ -91,7 +91,7 @@ tap.test('minPassLineOnly: bet exists, point set', (t) => {
   const updatedBets = lib.minPassLineOnly({ rules, bets, hand })
   t.equal(updatedBets.pass.line.amount, rules.minBet)
   t.ok(updatedBets.pass.line.isContract)
-  t.notOk(updatedBets.pass.line.isNew)
+  t.notOk(updatedBets.new)
 
   t.end()
 })

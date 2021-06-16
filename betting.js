@@ -1,15 +1,19 @@
 function minPassLineOnly (opts = {}) {
   const { rules, bets: existingBets, hand } = opts
-  const bets = Object.assign({}, existingBets)
+  const bets = Object.assign({ new: 0 }, existingBets)
 
-  const newPassLineBet = {
-    line: {
-      amount: rules.minBet,
-      isNew: true
+  if (process.env.DEBUG) console.log(`[decision] whether to make a new pass line bet: ${hand.isComeOut} && ${!bets?.pass?.line}`)
+
+  if (hand.isComeOut && !bets?.pass?.line) {
+    const newPassLineBet = {
+      line: {
+        amount: rules.minBet
+      }
     }
-  }
 
-  if (hand.isComeOut && !bets.pass) bets.pass = newPassLineBet
+    bets.pass = newPassLineBet
+    bets.new += bets.pass.line.amount
+  }
 
   return bets
 }

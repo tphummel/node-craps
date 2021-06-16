@@ -58,8 +58,9 @@ function playHand ({ rules, bettingStrategy, roll = rollD6 }) {
 
   while (hand.result !== 'seven out') {
     bets = bettingStrategy({ rules, bets, hand })
-
-    // withdraw new bet total from balance. i don't have total bet amount here. get it
+    balance -= bets.new
+    if (process.env.DEBUG && bets.new) console.log(`new bet $${bets.new} ($${balance})`)
+    delete bets.new
 
     hand = shoot(
       hand,
@@ -70,6 +71,7 @@ function playHand ({ rules, bettingStrategy, roll = rollD6 }) {
 
     if (bets?.payouts?.total) {
       balance += bets.payouts.total
+      if (process.env.DEBUG) console.log(`new payout $${bets.payouts.total} ($${balance})`)
       delete bets.payouts
     }
 
