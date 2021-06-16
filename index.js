@@ -68,10 +68,10 @@ function playHand ({ rules, bettingStrategy }) {
 
     bets = settle.all({ rules, bets, hand })
 
-    if (bets?.payout) {
-      balance += bets.payout.total
-      console.log(`new payout: $${bets.payout.total} ($${balance})`)
-      delete bets.payout
+    if (bets?.payouts?.total) {
+      balance += bets.payouts.total
+      console.log(`new payout: $${bets.payouts.total} ($${balance})`)
+      delete bets.payouts
     }
 
     history.push(hand)
