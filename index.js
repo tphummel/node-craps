@@ -56,7 +56,7 @@ function playHand ({ rules, bettingStrategy }) {
 
   let bets
 
-  while (true) {
+  while (hand.result !== 'seven out') {
     bets = bettingStrategy({ rules, bets, hand })
 
     // withdraw new bet total from balance. i don't have total bet amount here. get it
@@ -75,8 +75,6 @@ function playHand ({ rules, bettingStrategy }) {
     }
 
     history.push(hand)
-
-    if (hand.result === 'seven out') break
   }
 
   return history
