@@ -2,7 +2,7 @@
 
 const settle = require('./settle.js')
 
-function roll () {
+function rollD6 () {
   return 1 + Math.floor(Math.random() * 6)
 }
 
@@ -46,7 +46,7 @@ function shoot (before, dice) {
   return after
 }
 
-function playHand ({ rules, bettingStrategy }) {
+function playHand ({ rules, bettingStrategy, roll = rollD6 }) {
   const history = []
   let balance = 0
 
@@ -81,7 +81,7 @@ function playHand ({ rules, bettingStrategy }) {
 }
 
 module.exports = {
-  roll,
+  rollD6,
   shoot,
   playHand
 }
