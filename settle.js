@@ -1,19 +1,24 @@
 function passLine ({ bets, hand, rules }) {
-  if (!bets?.pass?.line) return false
-  if (hand.result !== 'point win') return false
+  if (!bets?.pass?.line) return { bets }
+  if (hand.result !== 'point win') return { bets }
 
   const payout = {
     principal: bets.pass.line.amount,
     profit: bets.pass.line.amount * 1
   }
 
-  return payout
+  delete bets.pass.line
+
+  return { payout, bets }
 }
 
 function all ({ bets = {}, hand, rules }) {
   const payouts = []
 
-  payouts.push(passLine({ bets, hand, rules }))
+  const passLineResult = passLine({ bets, hand, rules })
+
+  bets = passLineResult.bets
+  payouts.push(passLineResult.payout)
 
   bets.payouts = payouts.reduce((memo, payout) => {
     if (!payout) return memo

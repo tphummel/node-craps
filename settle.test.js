@@ -18,8 +18,9 @@ tap.test('passLine: win', function (t) {
   }
 
   const result = settle.passLine({ hand, bets })
-  t.equal(result.principal, 5)
-  t.equal(result.profit, 5)
+  t.equal(result.payout.principal, 5)
+  t.equal(result.payout.profit, 5)
+  t.notOk(result.bets.pass.line, 'pass line bet is cleared upon point win')
 
   t.end()
 })
@@ -32,7 +33,7 @@ tap.test('passLine: no bet', function (t) {
   }
 
   const result = settle.passLine({ hand, bets })
-  t.notOk(result)
+  t.notOk(result.payout)
   t.end()
 })
 
@@ -51,7 +52,7 @@ tap.test('passLine: bet, no win', function (t) {
   }
 
   const result = settle.passLine({ hand, bets })
-  t.notOk(result)
+  t.notOk(result.payout)
   t.end()
 })
 
