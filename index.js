@@ -70,7 +70,6 @@ function playHand ({ rules, bettingStrategy, roll = rollD6 }) {
 
     if (bets?.payouts?.total) {
       balance += bets.payouts.total
-      console.log(`new payout: $${bets.payouts.total} ($${balance})`)
       delete bets.payouts
     }
 
