@@ -2,6 +2,7 @@
 
 const tap = require('tap')
 const lib = require('./')
+const betting = require('./betting')
 
 tap.test('roll d6', function (t) {
   const result = lib.rollD6()
@@ -391,12 +392,30 @@ tap.test('point set', (suite) => {
 
 tap.test('playHand', (suite) => {
   const hand = lib.playHand({ bettingStrategy: () => {} })
-  suite.ok(Array.isArray(hand))
+  suite.ok(Array.isArray(hand.history))
 
   suite.end()
 })
 
-tap.test('minPassLine betting', (suite) => {
+tap.test('minPassLine win', (suite) => {
+  let rollCount = -1
+  const fixedRolls = [
+    3, 3, // point set
+    4, 1, // neutral
+    2, 4, // point win
+    4, 4, // point set
+    3, 4 // seven out
+  ]
+
+  function testRoll () {
+    rollCount++
+    if (!fixedRolls[rollCount]) {
+      console.log('falsy return from fixed dice')
+      process.exit(1)
+    }
+    return fixedRolls[rollCount]
+  }
+
   const rules = {
     minBet: 5,
     maxOddsMultiple: {
@@ -409,8 +428,8 @@ tap.test('minPassLine betting', (suite) => {
     }
   }
 
-  const hand = lib.playHand({ rules, roll: lib.rollD6, bettingStrategy: () => {} })
-  suite.ok(Array.isArray(hand))
+  const hand = lib.playHand({ rules, roll: testRoll, bettingStrategy: betting.minPassLineOnly })
+  suite.ok(Array.isArray(hand.history))
 
   suite.end()
 })

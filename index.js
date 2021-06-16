@@ -76,7 +76,7 @@ function playHand ({ rules, bettingStrategy, roll = rollD6 }) {
     history.push(hand)
   }
 
-  return history
+  return { history, balance }
 }
 
 module.exports = {

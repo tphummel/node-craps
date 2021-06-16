@@ -46,9 +46,9 @@ const rules = {
 
 for (let i = 0; i < numHands; i++) {
   const hand = playHand({ rules, bettingStrategy: minPassLineOnly })
-  hands.push(hand)
+  hands.push(hand.history)
 
-  hand.reduce((memo, roll) => {
+  hand.history.reduce((memo, roll) => {
     memo.rollCount++
     memo.dist[roll.diceSum]++
 
