@@ -1,8 +1,9 @@
 function passLine ({ bets, hand, rules }) {
   if (!bets?.pass?.line) return { bets }
-  if (hand.result !== 'point win') return { bets }
+  if (hand.result !== 'point win' && hand.result !== 'comeout win') return { bets }
 
   const payout = {
+    type: hand.result,
     principal: bets.pass.line.amount,
     profit: bets.pass.line.amount * 1
   }

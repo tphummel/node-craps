@@ -3,7 +3,30 @@
 const tap = require('tap')
 const settle = require('./settle.js')
 
-tap.test('passLine: win', function (t) {
+tap.test('passLine: comeout win', function (t) {
+  const bets = {
+    pass: {
+      line: {
+        amount: 5,
+        isContract: false
+      }
+    }
+  }
+
+  const hand = {
+    result: 'comeout win'
+  }
+
+  const result = settle.passLine({ hand, bets })
+  t.equal(result.payout.type, 'comeout win')
+  t.equal(result.payout.principal, 5)
+  t.equal(result.payout.profit, 5)
+  t.notOk(result.bets.pass.line, 'pass line bet is cleared upon comeout win')
+
+  t.end()
+})
+
+tap.test('passLine: point win', function (t) {
   const bets = {
     pass: {
       line: {
@@ -18,6 +41,7 @@ tap.test('passLine: win', function (t) {
   }
 
   const result = settle.passLine({ hand, bets })
+  t.equal(result.payout.type, 'point win')
   t.equal(result.payout.principal, 5)
   t.equal(result.payout.profit, 5)
   t.notOk(result.bets.pass.line, 'pass line bet is cleared upon point win')
