@@ -390,9 +390,14 @@ tap.test('point set', (suite) => {
   suite.end()
 })
 
-tap.test('minPassLine win', (suite) => {
+tap.test('integration: one hand with everything', (suite) => {
   let rollCount = -1
   const fixedRolls = [
+    4, 3, // comeout win
+    5, 6, // comeout win
+    1, 1, // comeout loss
+    1, 2, // comeout loss
+    6, 6, // comeout loss
     3, 3, // point set
     4, 1, // neutral
     2, 4, // point win
@@ -423,7 +428,7 @@ tap.test('minPassLine win', (suite) => {
 
   const hand = lib.playHand({ rules, roll: testRoll, bettingStrategy: betting.minPassLineOnly })
   suite.ok(Array.isArray(hand.history))
-  suite.equal(hand.balance, 0)
+  suite.equal(hand.balance, -5)
 
   suite.end()
 })
