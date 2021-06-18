@@ -26,6 +26,27 @@ tap.test('passLine: comeout win', function (t) {
   t.end()
 })
 
+tap.test('passLine: comeout loss', function (t) {
+  const bets = {
+    pass: {
+      line: {
+        amount: 5,
+        isContract: false
+      }
+    }
+  }
+
+  const hand = {
+    result: 'comeout loss'
+  }
+
+  const result = settle.passLine({ hand, bets })
+  t.notOk(result.payout, 'no payout on a comeout loss')
+  t.notOk(result.bets.pass.line, 'pass line bet is cleared upon comeout loss')
+
+  t.end()
+})
+
 tap.test('passLine: point win', function (t) {
   const bets = {
     pass: {
