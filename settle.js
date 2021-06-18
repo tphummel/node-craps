@@ -1,7 +1,7 @@
 function passLine ({ bets, hand, rules }) {
   if (!bets?.pass?.line) return { bets }
 
-  const actionResults = ['point win', 'comeout win', 'comeout loss']
+  const actionResults = ['seven out', 'point win', 'comeout win', 'comeout loss']
   const betHasAction = actionResults.includes(hand.result)
 
   if (!betHasAction) return { bets } // keep bets intact if no action
@@ -14,7 +14,7 @@ function passLine ({ bets, hand, rules }) {
 
   delete bets.pass.line // clear pass line bet on action
 
-  if (hand.result === 'comeout loss') return { bets }
+  if (hand.result === 'comeout loss' || hand.result === 'seven out') return { bets }
 
   return { payout, bets }
 }

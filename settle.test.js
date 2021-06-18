@@ -70,6 +70,27 @@ tap.test('passLine: point win', function (t) {
   t.end()
 })
 
+tap.test('passLine: point loss', function (t) {
+  const bets = {
+    pass: {
+      line: {
+        amount: 5,
+        isContract: true
+      }
+    }
+  }
+
+  const hand = {
+    result: 'seven out'
+  }
+
+  const result = settle.passLine({ hand, bets })
+  t.notOk(result.payout, 'no payout on seven out')
+  t.notOk(result.bets.pass.line, 'pass line bet is cleared upon seven out')
+
+  t.end()
+})
+
 tap.test('passLine: no bet', function (t) {
   const bets = {}
 
