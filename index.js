@@ -59,7 +59,7 @@ function playHand ({ rules, bettingStrategy, roll = rollD6 }) {
   while (hand.result !== 'seven out') {
     bets = bettingStrategy({ rules, bets, hand })
     balance -= bets.new
-    if (process.env.DEBUG && bets.new) console.log(`new bet $${bets.new} ($${balance})`)
+    if (process.env.DEBUG && bets.new) console.log(`[bet] new bet $${bets.new} ($${balance})`)
     delete bets.new
 
     hand = shoot(
@@ -67,11 +67,13 @@ function playHand ({ rules, bettingStrategy, roll = rollD6 }) {
       [roll(), roll()]
     )
 
+    if (process.env.DEBUG) console.log(`[roll] ${hand.result} (${hand.diceSum})`)
+
     bets = settle.all({ rules, bets, hand })
 
     if (bets?.payouts?.total) {
       balance += bets.payouts.total
-      if (process.env.DEBUG) console.log(`new payout $${bets.payouts.total} ($${balance})`)
+      if (process.env.DEBUG) console.log(`[payout] new payout $${bets.payouts.total} ($${balance})`)
       delete bets.payouts
     }
 
