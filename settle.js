@@ -37,9 +37,9 @@ function passOdds ({ bets, hand, rules }) {
   }
 
   const payout = {
-    type: 'pass odds',
+    type: 'pass odds win',
     principal: bets.pass.odds.amount,
-    profit: bets.pass.odds.amount * payouts[hand.point]
+    profit: bets.pass.odds.amount * payouts[hand.diceSum]
   }
 
   delete bets.pass.odds // clear pass odds bet on action

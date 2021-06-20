@@ -14,7 +14,8 @@ tap.test('passLine: comeout win', function (t) {
   }
 
   const hand = {
-    result: 'comeout win'
+    result: 'comeout win',
+    diceSum: 7
   }
 
   const result = settle.passLine({ hand, bets })
@@ -37,7 +38,8 @@ tap.test('passLine: comeout loss', function (t) {
   }
 
   const hand = {
-    result: 'comeout loss'
+    result: 'comeout loss',
+    diceSum: 3
   }
 
   const result = settle.passLine({ hand, bets })
@@ -58,7 +60,8 @@ tap.test('passLine: point win', function (t) {
   }
 
   const hand = {
-    result: 'point win'
+    result: 'point win',
+    diceSum: 10
   }
 
   const result = settle.passLine({ hand, bets })
@@ -81,7 +84,8 @@ tap.test('passLine: point loss', function (t) {
   }
 
   const hand = {
-    result: 'seven out'
+    result: 'seven out',
+    diceSum: 7
   }
 
   const result = settle.passLine({ hand, bets })
@@ -95,7 +99,8 @@ tap.test('passLine: no bet', function (t) {
   const bets = {}
 
   const hand = {
-    result: 'point win'
+    result: 'point win',
+    diceSum: 8
   }
 
   const result = settle.passLine({ hand, bets })
@@ -114,7 +119,9 @@ tap.test('passLine: bet, no win', function (t) {
   }
 
   const hand = {
-    result: 'neutral'
+    result: 'neutral',
+    diceSum: 11,
+    point: 5
   }
 
   const result = settle.passLine({ hand, bets })
@@ -171,7 +178,7 @@ tap.test('passOdds: odds bet, win', function (t) {
   }
 
   const result = settle.passOdds({ hand, bets })
-  t.equal(result.payout.type, 'pass odds')
+  t.equal(result.payout.type, 'pass odds win')
   t.equal(result.payout.principal, 25)
   t.equal(result.payout.profit, 30)
   t.notOk(result.bets.pass.odds, 'pass odds bet is cleared')
@@ -221,7 +228,8 @@ tap.test('all: pass line win', (t) => {
 
   const hand = {
     result: 'point win',
-    point: 6
+    point: 6,
+    diceSum: 6
   }
 
   const settled = settle.all({ bets, hand })
