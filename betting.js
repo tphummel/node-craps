@@ -18,6 +18,22 @@ function minPassLineOnly (opts = {}) {
   return bets
 }
 
+function minPassLineMaxOdds (opts = {}) {
+  const bets = minPassLineOnly(opts)
+  const { rules, hand } = opts
+
+  if (hand.isComeOut === false && !bets?.pass?.odds) {
+    const oddsAmount = rules.maxOddsMultiple[hand.point] * bets.pass.line.amount
+    bets.pass.odds = {
+      amount: oddsAmount
+    }
+    bets.new += oddsAmount
+  }
+
+  return bets
+}
+
 module.exports = {
-  minPassLineOnly
+  minPassLineOnly,
+  minPassLineMaxOdds
 }
