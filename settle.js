@@ -19,6 +19,36 @@ function passLine ({ bets, hand, rules }) {
   return { payout, bets }
 }
 
+function passOdds ({ bets, hand, rules }) {
+  if (!bets?.pass?.odds) return { bets }
+
+  const actionResults = ['seven out', 'point win']
+  const betHasAction = actionResults.includes(hand.result)
+
+  if (!betHasAction) return { bets } // keep bets intact if no action
+
+  const payouts = {
+    4: 2,
+    5: 3 / 2,
+    6: 6 / 5,
+    8: 6 / 5,
+    9: 3 / 2,
+    10: 2
+  }
+
+  const payout = {
+    type: 'pass odds',
+    principal: bets.pass.odds.amount,
+    profit: bets.pass.odds.amount * payouts[hand.point]
+  }
+
+  delete bets.pass.odds // clear pass odds bet on action
+
+  if (hand.result === 'seven out') return { bets }
+
+  return { payout, bets }
+}
+
 function all ({ bets = {}, hand, rules }) {
   const payouts = []
 
@@ -26,6 +56,11 @@ function all ({ bets = {}, hand, rules }) {
 
   bets = passLineResult.bets
   payouts.push(passLineResult.payout)
+
+  const passOddsResult = passOdds({ bets, hand, rules })
+
+  bets = passOddsResult.bets
+  payouts.push(passOddsResult.payout)
 
   bets.payouts = payouts.reduce((memo, payout) => {
     if (!payout) return memo
@@ -47,5 +82,6 @@ function all ({ bets = {}, hand, rules }) {
 
 module.exports = {
   passLine,
+  passOdds,
   all
 }
