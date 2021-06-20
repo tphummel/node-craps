@@ -390,7 +390,7 @@ tap.test('point set', (suite) => {
   suite.end()
 })
 
-tap.test('integration: one hand with everything', (suite) => {
+tap.test('integration: minPassLineOnly, one hand with everything', (suite) => {
   let rollCount = -1
   const fixedRolls = [
     4, 3, // comeout win
