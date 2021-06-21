@@ -1,4 +1,4 @@
-function minPassLineOnly (opts = {}) {
+function minPassLineOnly (opts) {
   const { rules, bets: existingBets, hand } = opts
   const bets = Object.assign({ new: 0 }, existingBets)
 
@@ -18,7 +18,7 @@ function minPassLineOnly (opts = {}) {
   return bets
 }
 
-function minPassLineMaxOdds (opts = {}) {
+function minPassLineMaxOdds (opts) {
   const bets = minPassLineOnly(opts)
   const { rules, hand } = opts
 
