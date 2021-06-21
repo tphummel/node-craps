@@ -49,7 +49,7 @@ function passOdds ({ bets, hand, rules }) {
   return { payout, bets }
 }
 
-function all ({ bets = {}, hand, rules }) {
+function all ({ bets, hand, rules }) {
   const payouts = []
 
   const passLineResult = passLine({ bets, hand, rules })
