@@ -18,17 +18,17 @@ const results = {
   netComeOutWins: 0,
   neutrals: 0,
   dist: {
-    2: 0,
-    3: 0,
-    4: 0,
-    5: 0,
-    6: 0,
-    7: 0,
-    8: 0,
-    9: 0,
-    10: 0,
-    11: 0,
-    12: 0
+    2: { ct: 0, prob: 1 / 36 },
+    3: { ct: 0, prob: 2 / 36 },
+    4: { ct: 0, prob: 3 / 36 },
+    5: { ct: 0, prob: 4 / 36 },
+    6: { ct: 0, prob: 5 / 36 },
+    7: { ct: 0, prob: 6 / 36 },
+    8: { ct: 0, prob: 5 / 36 },
+    9: { ct: 0, prob: 4 / 36 },
+    10: { ct: 0, prob: 3 / 36 },
+    11: { ct: 0, prob: 2 / 36 },
+    12: { ct: 0, prob: 1 / 36 }
   }
 }
 
@@ -48,11 +48,12 @@ const rules = {
 for (let i = 0; i < numHands; i++) {
   const hand = playHand({ rules, bettingStrategy: minPassLineMaxOdds })
   hands.push(hand)
+  results.handCount++
   results.balance += hand.balance
 
   hand.history.reduce((memo, roll) => {
     memo.rollCount++
-    memo.dist[roll.diceSum]++
+    memo.dist[roll.diceSum].ct++
 
     switch (roll.result) {
       case 'neutral':
@@ -78,8 +79,11 @@ for (let i = 0; i < numHands; i++) {
   }, results)
 }
 
-results.handCount = hands.length
-
+for (const k of Object.keys(results.dist)) {
+  results.dist[k].ref = Number((results.dist[k].prob * results.rollCount).toFixed(1))
+  results.dist[k].diff = Number((results.dist[k].ct - results.dist[k].ref).toFixed(1))
+  delete results.dist[k].prob
+}
 console.log('\nDice Roll Distribution')
 console.table(results.dist)
 delete results.dist
