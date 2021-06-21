@@ -46,7 +46,7 @@ function shoot (before, dice) {
   return after
 }
 
-function playHand ({ rules, bettingStrategy, roll = rollD6 }) {
+function playHand ({ rules, bettingStrategy, roll }) {
   const history = []
   let balance = 0
 
