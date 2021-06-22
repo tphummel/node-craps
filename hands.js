@@ -82,6 +82,7 @@ for (let i = 0; i < numHands; i++) {
 for (const k of Object.keys(results.dist)) {
   results.dist[k].ref = Number((results.dist[k].prob * results.rollCount).toFixed(1))
   results.dist[k].diff = Number((results.dist[k].ct - results.dist[k].ref).toFixed(1))
+  results.dist[k].diff_pct = Number((((results.dist[k].ct - results.dist[k].ref) / results.dist[k].ref) * 100).toFixed(1))
   delete results.dist[k].prob
 }
 console.log('\nDice Roll Distribution')
