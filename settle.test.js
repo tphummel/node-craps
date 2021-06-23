@@ -156,7 +156,94 @@ tap.test('passOdds: odds bet, no win', function (t) {
   t.end()
 })
 
-tap.test('passOdds: odds bet, win', function (t) {
+tap.test('passOdds (4): odds bet, win', function (t) {
+  const bets = {
+    pass: {
+      line: {
+        amount: 5,
+        isContract: true
+      },
+      odds: {
+        amount: 15,
+        isContract: false
+      }
+    }
+  }
+
+  const hand = {
+    result: 'point win',
+    isComeOut: true,
+    point: 4,
+    diceSum: 4
+  }
+
+  const result = settle.passOdds({ hand, bets })
+  t.equal(result.payout.type, 'pass odds win')
+  t.equal(result.payout.principal, 15)
+  t.equal(result.payout.profit, 30)
+  t.notOk(result.bets.pass.odds, 'pass odds bet is cleared')
+  t.end()
+})
+
+tap.test('passOdds (5): odds bet, win', function (t) {
+  const bets = {
+    pass: {
+      line: {
+        amount: 5,
+        isContract: true
+      },
+      odds: {
+        amount: 20,
+        isContract: false
+      }
+    }
+  }
+
+  const hand = {
+    result: 'point win',
+    isComeOut: true,
+    point: 5,
+    diceSum: 5
+  }
+
+  const result = settle.passOdds({ hand, bets })
+  t.equal(result.payout.type, 'pass odds win')
+  t.equal(result.payout.principal, 20)
+  t.equal(result.payout.profit, 30)
+  t.notOk(result.bets.pass.odds, 'pass odds bet is cleared')
+  t.end()
+})
+
+tap.test('passOdds (6): odds bet, win', function (t) {
+  const bets = {
+    pass: {
+      line: {
+        amount: 5,
+        isContract: true
+      },
+      odds: {
+        amount: 25,
+        isContract: false
+      }
+    }
+  }
+
+  const hand = {
+    result: 'point win',
+    isComeOut: true,
+    point: 6,
+    diceSum: 6
+  }
+
+  const result = settle.passOdds({ hand, bets })
+  t.equal(result.payout.type, 'pass odds win')
+  t.equal(result.payout.principal, 25)
+  t.equal(result.payout.profit, 30)
+  t.notOk(result.bets.pass.odds, 'pass odds bet is cleared')
+  t.end()
+})
+
+tap.test('passOdds (8): odds bet, win', function (t) {
   const bets = {
     pass: {
       line: {
@@ -180,6 +267,64 @@ tap.test('passOdds: odds bet, win', function (t) {
   const result = settle.passOdds({ hand, bets })
   t.equal(result.payout.type, 'pass odds win')
   t.equal(result.payout.principal, 25)
+  t.equal(result.payout.profit, 30)
+  t.notOk(result.bets.pass.odds, 'pass odds bet is cleared')
+  t.end()
+})
+
+tap.test('passOdds (9): odds bet, win', function (t) {
+  const bets = {
+    pass: {
+      line: {
+        amount: 5,
+        isContract: true
+      },
+      odds: {
+        amount: 20,
+        isContract: false
+      }
+    }
+  }
+
+  const hand = {
+    result: 'point win',
+    isComeOut: true,
+    point: 9,
+    diceSum: 9
+  }
+
+  const result = settle.passOdds({ hand, bets })
+  t.equal(result.payout.type, 'pass odds win')
+  t.equal(result.payout.principal, 20)
+  t.equal(result.payout.profit, 30)
+  t.notOk(result.bets.pass.odds, 'pass odds bet is cleared')
+  t.end()
+})
+
+tap.test('passOdds (10): odds bet, win', function (t) {
+  const bets = {
+    pass: {
+      line: {
+        amount: 5,
+        isContract: true
+      },
+      odds: {
+        amount: 15,
+        isContract: false
+      }
+    }
+  }
+
+  const hand = {
+    result: 'point win',
+    isComeOut: true,
+    point: 10,
+    diceSum: 10
+  }
+
+  const result = settle.passOdds({ hand, bets })
+  t.equal(result.payout.type, 'pass odds win')
+  t.equal(result.payout.principal, 15)
   t.equal(result.payout.profit, 30)
   t.notOk(result.bets.pass.odds, 'pass odds bet is cleared')
   t.end()
