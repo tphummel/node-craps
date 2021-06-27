@@ -8,8 +8,7 @@ const showDetail = process.argv.slice(2)[1]
 
 console.log(`Simulating ${numHands} Craps Hand(s)`)
 
-const results = {
-  handCount: 0,
+const summaryTemplate = {
   balance: 0,
   rollCount: 0,
   pointsSet: 0,
@@ -33,6 +32,8 @@ const results = {
   }
 }
 
+const sessionSummary = Object.assign({}, summaryTemplate)
+
 const hands = []
 const rules = {
   minBet: 5,
@@ -48,10 +49,10 @@ const rules = {
 
 for (let i = 0; i < numHands; i++) {
   const hand = playHand({ rules, bettingStrategy: minPassLineMaxOdds })
-  hands.push(hand)
-  results.handCount++
-  results.balance += hand.balance
+  hand.summary = Object.assign({}, summaryTemplate)
 
+  sessionSummary.balance += hand.balance
+  
   hand.history.reduce((memo, roll) => {
     memo.rollCount++
     memo.dist[roll.diceSum].ct++
@@ -77,20 +78,25 @@ for (let i = 0; i < numHands; i++) {
     }
 
     return memo
-  }, results)
+  }, sessionSummary)
+
+  hands.push(hand)
 }
 
-for (const k of Object.keys(results.dist)) {
-  results.dist[k].ref = Number((results.dist[k].prob * results.rollCount).toFixed(1))
-  results.dist[k].diff = Number((results.dist[k].ct - results.dist[k].ref).toFixed(1))
-  results.dist[k].diff_pct = Number((((results.dist[k].ct - results.dist[k].ref) / results.dist[k].ref) * 100).toFixed(1))
-  delete results.dist[k].prob
+sessionSummary.handCount = hands.length
+
+for (const k of Object.keys(sessionSummary.dist)) {
+  sessionSummary.dist[k].ref = Number((sessionSummary.dist[k].prob * sessionSummary.rollCount).toFixed(1))
+  sessionSummary.dist[k].diff = Number((sessionSummary.dist[k].ct - sessionSummary.dist[k].ref).toFixed(1))
+  sessionSummary.dist[k].diff_pct = Number((((sessionSummary.dist[k].ct - sessionSummary.dist[k].ref) / sessionSummary.dist[k].ref) * 100).toFixed(1))
+  delete sessionSummary.dist[k].prob
 }
 console.log('\nDice Roll Distribution')
-console.table(results.dist)
-delete results.dist
+console.table(sessionSummary.dist)
+delete sessionSummary.dist
+
 console.log('\nSession Summary')
-console.table(results)
+console.table(sessionSummary)
 
 if (showDetail) {
   console.log('\nHands')
