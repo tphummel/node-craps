@@ -4,6 +4,7 @@ const { playHand } = require('./index.js')
 const { minPassLineMaxOdds } = require('./betting.js')
 
 const numHands = parseInt(process.argv.slice(2)[0], 10)
+const showDetail = process.argv.slice(2)[1]
 
 console.log(`Simulating ${numHands} Craps Hand(s)`)
 
@@ -91,8 +92,10 @@ delete results.dist
 console.log('\nSession Summary')
 console.table(results)
 
-console.log('\nHands')
-hands.forEach((hand, handNum) => {
-  console.log(`\nHand: ${handNum + 1}, Balance: $${hand.balance}`)
-  console.table(hand.history)
-})
+if (showDetail) {
+  console.log('\nHands')
+  hands.forEach((hand, handNum) => {
+    console.log(`\nHand: ${handNum + 1}, Balance: $${hand.balance}`)
+    console.table(hand.history)
+  })
+}
