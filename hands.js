@@ -7,7 +7,7 @@ const numHands = parseInt(process.argv.slice(2)[0], 10)
 const showDetail = process.argv.slice(2)[1]
 
 console.log(`Simulating ${numHands} Craps Hand(s)`)
-console.log(`Using betting strategy: minPassLineMaxOdds`)
+console.log('Using betting strategy: minPassLineMaxOdds')
 
 const summaryTemplate = {
   balance: 0,
