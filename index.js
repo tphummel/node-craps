@@ -1,6 +1,7 @@
 'use strict'
 
 const settle = require('./settle.js')
+const betting = require('./betting.js')
 
 function rollD6 () {
   return 1 + Math.floor(Math.random() * 6)
@@ -86,5 +87,6 @@ function playHand ({ rules, bettingStrategy, roll = rollD6 }) {
 module.exports = {
   rollD6,
   shoot,
-  playHand
+  playHand,
+  betting
 }
