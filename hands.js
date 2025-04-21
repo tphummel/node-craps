@@ -2,6 +2,7 @@
 
 const { playHand } = require('./index.js')
 const { minPassLineMaxOdds } = require('./betting.js')
+const { HandResult } = require ('./consts.js')
 
 const numHands = parseInt(process.argv.slice(2)[0], 10)
 const showDetail = process.argv.slice(2)[1]
@@ -63,25 +64,25 @@ for (let i = 0; i < numHands; i++) {
     memo.dist[roll.diceSum].ct++
 
     switch (roll.result) {
-      case 'neutral':
+      case HandResult.NEUTRAL:
         memo.neutrals++
         hand.summary.neutrals++
         break
-      case 'point set':
+      case HandResult.POINT_SET:
         memo.pointsSet++
         hand.summary.pointsSet++
         break
-      case 'point win':
+      case HandResult.POINT_WIN:
         memo.pointsWon++
         hand.summary.pointsWon++
         break
-      case 'comeout win':
+      case HandResult.COMEOUT_WIN:
         memo.comeOutWins++
         hand.summary.comeOutWins++
         memo.netComeOutWins++
         hand.summary.netComeOutWins++
         break
-      case 'comeout loss':
+      case HandResult.COMEOUT_LOSS:
         memo.comeOutLosses++
         hand.summary.comeOutLosses++
         memo.netComeOutWins--

@@ -2,6 +2,7 @@
 
 const settle = require('./settle.js')
 const betting = require('./betting.js')
+const { HandResult } = require('./consts.js')
 
 function rollD6 () {
   return 1 + Math.floor(Math.random() * 6)
@@ -20,25 +21,25 @@ function shoot (before, dice) {
 
   if (before.isComeOut) {
     if ([2, 3, 12].indexOf(after.diceSum) !== -1) {
-      after.result = 'comeout loss'
+      after.result = HandResult.COMEOUT_LOSS
       after.isComeOut = true
     } else if ([7, 11].indexOf(after.diceSum) !== -1) {
-      after.result = 'comeout win'
+      after.result = HandResult.COMEOUT_WIN
       after.isComeOut = true
     } else {
-      after.result = 'point set'
+      after.result = HandResult.POINT_SET
       after.isComeOut = false
       after.point = after.diceSum
     }
   } else {
     if (before.point === after.diceSum) {
-      after.result = 'point win'
+      after.result = HandResult.POINT_WIN
       after.isComeOut = true
     } else if (after.diceSum === 7) {
-      after.result = 'seven out'
+      after.result = HandResult.SEVEN_OUT
       after.isComeOut = true
     } else {
-      after.result = 'neutral'
+      after.result = HandResult.NEUTRAL
       after.point = before.point
       after.isComeOut = false
     }

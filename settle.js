@@ -1,7 +1,9 @@
+const {HandResult} = require('./consts.js')
+
 function passLine ({ bets, hand, rules }) {
   if (!bets?.pass?.line) return { bets }
 
-  const actionResults = ['seven out', 'point win', 'comeout win', 'comeout loss']
+  const actionResults = [HandResult.SEVEN_OUT, HandResult.POINT_WIN, HandResult.COMEOUT_WIN, HandResult.COMEOUT_LOSS]
   const betHasAction = actionResults.includes(hand.result)
 
   if (!betHasAction) return { bets } // keep bets intact if no action
@@ -14,7 +16,7 @@ function passLine ({ bets, hand, rules }) {
 
   delete bets.pass.line // clear pass line bet on action
 
-  if (hand.result === 'comeout loss' || hand.result === 'seven out') return { bets }
+  if (hand.result === HandResult.COMEOUT_LOSS || hand.result === HandResult.SEVEN_OUT) return { bets }
 
   return { payout, bets }
 }
@@ -22,7 +24,7 @@ function passLine ({ bets, hand, rules }) {
 function passOdds ({ bets, hand, rules }) {
   if (!bets?.pass?.odds) return { bets }
 
-  const actionResults = ['seven out', 'point win']
+  const actionResults = [HandResult.SEVEN_OUT, HandResult.POINT_WIN]
   const betHasAction = actionResults.includes(hand.result)
 
   if (!betHasAction) return { bets } // keep bets intact if no action
@@ -44,7 +46,7 @@ function passOdds ({ bets, hand, rules }) {
 
   delete bets.pass.odds // clear pass odds bet on action
 
-  if (hand.result === 'seven out') return { bets }
+  if (hand.result === HandResult.SEVEN_OUT) return { bets }
 
   return { payout, bets }
 }
