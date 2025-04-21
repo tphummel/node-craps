@@ -26,6 +26,6 @@
   "homepage": "https://github.com/tphummel/node-craps#readme",
   "devDependencies": {
     "standard": "^16.0.3",
-    "tap": "^15.0.9"
+    "tap": "^21.1.0"
   }
 }
