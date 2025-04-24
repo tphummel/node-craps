@@ -1,8 +1,10 @@
 # node-craps
 
+```
 ░█▀▀░█▀█░█▀▄░█░█░█▀▀░█▀▄░░░
 ░█▀▀░█░█░█▀▄░█▀▄░█▀▀░█░█░░░
 ░▀░░░▀▀▀░▀░▀░▀░▀░▀▀▀░▀▀░░▀░
+```
 
 [![Github Workflow Status](https://github.com/tphummel/node-craps/actions/workflows/ci.yaml/badge.svg)](https://github.com/tphummel/node-craps/actions/workflows/ci.yaml)
 

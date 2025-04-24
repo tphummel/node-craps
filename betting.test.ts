@@ -1,10 +1,37 @@
-'use strict'
+import { test } from 'tap'
+import { DiceResult, DieResult, HandResult, Point } from './consts'
 
-const tap = require('tap')
-const lib = require('./betting.js')
+const { minPassLineOnly, minPassLineMaxOdds } = require('./betting')
 
-tap.test('minPassLineOnly: no bets yet, coming out', function (t) {
-  const rules = {
+interface Rules {
+  minBet: number
+  maxOddsMultiple: {
+    [key: number]: number
+  }
+}
+
+interface Hand {
+  isComeOut: boolean
+  result?: string
+  point?: number
+  diceSum?: number
+}
+
+interface Bet {
+  amount: number
+  isContract: boolean
+}
+
+interface Bets {
+  pass?: {
+    line?: Bet
+    odds?: Bet
+  }
+  new?: number
+}
+
+test('minPassLineOnly: no bets yet, coming out', function (t) {
+  const rules: Rules = {
     minBet: 5,
     maxOddsMultiple: {
       4: 3,
@@ -16,19 +43,19 @@ tap.test('minPassLineOnly: no bets yet, coming out', function (t) {
     }
   }
 
-  const hand = {
+  const hand: Hand = {
     isComeOut: true
   }
 
-  const updatedBets = lib.minPassLineOnly({ rules, hand })
+  const updatedBets = minPassLineOnly({ rules, hand })
   t.equal(updatedBets.pass.line.amount, rules.minBet)
   t.equal(updatedBets.new, 5)
 
   t.end()
 })
 
-tap.test('minPassLineOnly: bet exists, coming out', (t) => {
-  const rules = {
+test('minPassLineOnly: bet exists, coming out', (t) => {
+  const rules: Rules = {
     minBet: 5,
     maxOddsMultiple: {
       4: 3,
@@ -40,11 +67,11 @@ tap.test('minPassLineOnly: bet exists, coming out', (t) => {
     }
   }
 
-  const hand = {
+  const hand: Hand = {
     isComeOut: true
   }
 
-  const bets = {
+  const bets: Bets = {
     pass: {
       line: {
         amount: 5,
@@ -53,7 +80,7 @@ tap.test('minPassLineOnly: bet exists, coming out', (t) => {
     }
   }
 
-  const updatedBets = lib.minPassLineOnly({ rules, bets, hand })
+  const updatedBets = minPassLineOnly({ rules, bets, hand })
   t.equal(updatedBets.pass.line.amount, rules.minBet)
   t.notOk(updatedBets.pass.line.isContract)
   t.notOk(updatedBets.new)
@@ -61,8 +88,8 @@ tap.test('minPassLineOnly: bet exists, coming out', (t) => {
   t.end()
 })
 
-tap.test('minPassLineOnly: bet exists, point set', (t) => {
-  const rules = {
+test('minPassLineOnly: bet exists, point set', (t) => {
+  const rules: Rules = {
     minBet: 5,
     maxOddsMultiple: {
       4: 3,
@@ -74,12 +101,12 @@ tap.test('minPassLineOnly: bet exists, point set', (t) => {
     }
   }
 
-  const hand = {
+  const hand: Hand = {
     isComeOut: false,
     point: 6
   }
 
-  const bets = {
+  const bets: Bets = {
     pass: {
       line: {
         amount: 5,
@@ -88,7 +115,7 @@ tap.test('minPassLineOnly: bet exists, point set', (t) => {
     }
   }
 
-  const updatedBets = lib.minPassLineOnly({ rules, bets, hand })
+  const updatedBets = minPassLineOnly({ rules, bets, hand })
   t.equal(updatedBets.pass.line.amount, rules.minBet)
   t.ok(updatedBets.pass.line.isContract)
   t.notOk(updatedBets.new)
@@ -96,8 +123,8 @@ tap.test('minPassLineOnly: bet exists, point set', (t) => {
   t.end()
 })
 
-tap.test('minPassLineMaxOdds: make new bet upon establishing point', (t) => {
-  const rules = {
+test('minPassLineMaxOdds: make new bet upon establishing point', (t) => {
+  const rules: Rules = {
     minBet: 5,
     maxOddsMultiple: {
       4: 3,
@@ -109,13 +136,13 @@ tap.test('minPassLineMaxOdds: make new bet upon establishing point', (t) => {
     }
   }
 
-  const hand = {
+  const hand: Hand = {
     isComeOut: false,
     result: 'point set',
     point: 5
   }
 
-  const bets = {
+  const bets: Bets = {
     pass: {
       line: {
         amount: 5,
@@ -124,7 +151,7 @@ tap.test('minPassLineMaxOdds: make new bet upon establishing point', (t) => {
     }
   }
 
-  const updatedBets = lib.minPassLineMaxOdds({ rules, bets, hand })
+  const updatedBets = minPassLineMaxOdds({ rules, bets, hand })
   t.equal(updatedBets.pass.line.amount, rules.minBet, 'line bet is not changed')
   t.equal(updatedBets.pass.odds.amount, rules.maxOddsMultiple['5'] * rules.minBet, 'odds bet made properly')
   t.equal(updatedBets.new, updatedBets.pass.odds.amount)
@@ -132,8 +159,8 @@ tap.test('minPassLineMaxOdds: make new bet upon establishing point', (t) => {
   t.end()
 })
 
-tap.test('minPassLineMaxOdds: converge on odds bet after point set', (t) => {
-  const rules = {
+test('minPassLineMaxOdds: converge on odds bet after point set', (t) => {
+  const rules: Rules = {
     minBet: 5,
     maxOddsMultiple: {
       4: 3,
@@ -145,14 +172,14 @@ tap.test('minPassLineMaxOdds: converge on odds bet after point set', (t) => {
     }
   }
 
-  const hand = {
+  const hand: Hand = {
     isComeOut: false,
     result: 'neutral',
     point: 5,
     diceSum: 8
   }
 
-  const bets = {
+  const bets: Bets = {
     pass: {
       line: {
         amount: 5,
@@ -161,7 +188,7 @@ tap.test('minPassLineMaxOdds: converge on odds bet after point set', (t) => {
     }
   }
 
-  const updatedBets = lib.minPassLineMaxOdds({ rules, bets, hand })
+  const updatedBets = minPassLineMaxOdds({ rules, bets, hand })
   t.equal(updatedBets.pass.line.amount, rules.minBet, 'line bet is not changed')
   t.equal(updatedBets.pass.odds.amount, rules.maxOddsMultiple['5'] * rules.minBet, 'odds bet made properly')
   t.equal(updatedBets.new, updatedBets.pass.odds.amount)
@@ -169,8 +196,8 @@ tap.test('minPassLineMaxOdds: converge on odds bet after point set', (t) => {
   t.end()
 })
 
-tap.test('minPassLineMaxOdds: continue existing bet', (t) => {
-  const rules = {
+test('minPassLineMaxOdds: continue existing bet', (t) => {
+  const rules: Rules = {
     minBet: 5,
     maxOddsMultiple: {
       4: 3,
@@ -182,14 +209,14 @@ tap.test('minPassLineMaxOdds: continue existing bet', (t) => {
     }
   }
 
-  const hand = {
+  const hand: Hand = {
     isComeOut: false,
     result: 'neutral',
     point: 5,
     diceSum: 8
   }
 
-  const bets = {
+  const bets: Bets = {
     pass: {
       line: {
         amount: 5,
@@ -202,10 +229,14 @@ tap.test('minPassLineMaxOdds: continue existing bet', (t) => {
     }
   }
 
-  const updatedBets = lib.minPassLineMaxOdds({ rules, bets, hand })
-  t.equal(updatedBets.pass.line.amount, bets.pass.line.amount, 'line bet is not changed')
-  t.equal(updatedBets.pass.odds.amount, bets.pass.odds.amount, 'odds bet is not changed')
+  const updatedBets = minPassLineMaxOdds({ rules, bets, hand })
+  if (bets.pass?.line && updatedBets.pass?.line) {
+    t.equal(updatedBets.pass.line.amount, bets.pass.line.amount, 'line bet is not changed')
+  }
+  if (bets.pass?.odds && updatedBets.pass?.odds) {
+    t.equal(updatedBets.pass.odds.amount, bets.pass.odds.amount, 'odds bet is not changed')
+  }
   t.notOk(updatedBets.new, 'no new bets were made')
 
   t.end()
-})
+}) 

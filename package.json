@@ -2,11 +2,11 @@
   "name": "craps",
   "version": "1.0.0",
   "description": "craps simulator",
-  "main": "index.js",
+  "main": "index.ts",
   "scripts": {
-    "test": "standard && NODE_ENV=test tap *.test.js --coverage-report=text-summary",
-    "cov": "standard && NODE_ENV=test tap *.test.js  --coverage-report=html",
-    "tap-file": "standard && NODE_ENV=test tap *.test.js  --output-file=results.tap",
+    "test": "NODE_ENV=test tap *.test.ts --coverage-report=text-summary",
+    "cov": "NODE_ENV=test tap *.test.ts  --coverage-report=html",
+    "tap-file": "NODE_ENV=test tap *.test.ts  --output-file=results.tap",
     "fix": "standard --fix"
   },
   "repository": {
@@ -25,7 +25,13 @@
   },
   "homepage": "https://github.com/tphummel/node-craps#readme",
   "devDependencies": {
+    "@types/node": "^22.14.1",
+    "@typescript-eslint/eslint-plugin": "^8.31.0",
+    "@typescript-eslint/parser": "^8.31.0",
     "standard": "^16.0.3",
-    "tap": "^21.1.0"
+    "tap": "^21.1.0",
+    "ts-node": "^10.9.2",
+    "tsconfig-paths": "^4.2.0",
+    "typescript": "^5.8.3"
   }
 }
