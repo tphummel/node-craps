@@ -1,12 +1,9 @@
 import { test } from 'tap'
-import { DiceResult, DieResult, HandResult, Point } from './consts'
-const lib = require('./')
-const betting = require('./betting')
+import { DiceResult, DieResult, HandResult, Point, Result } from './consts'
+import * as lib from './index'
+//import * as betting from './betting'
 
-interface HandState {
-  isComeOut: boolean
-  point?: number
-}
+
 
 
 test('roll d6', function (t) {
@@ -20,8 +17,12 @@ test('roll d6', function (t) {
 
 test('comeout', function (suite) {
   suite.test('2', function (t) {
-    const handState: HandState = {
-      isComeOut: true
+    const handState: Result = {
+      isComeOut: true,
+      die1: DieResult.ONE,
+      die2: DieResult.ONE,
+      diceSum: DiceResult.TWO,
+      point: Point.OFF
     }
 
     const result = lib.shoot(handState, [1, 1])
@@ -36,8 +37,12 @@ test('comeout', function (suite) {
   })
 
   suite.test('3', function (t) {
-    const handState: HandState = {
-      isComeOut: true
+    const handState: Result = {
+      isComeOut: true,
+      die1: DieResult.ONE,
+      die2: DieResult.ONE,
+      diceSum: DiceResult.TWO,
+      point: Point.UNDEF
     }
 
     const result = lib.shoot(handState, [2, 1])
@@ -52,8 +57,12 @@ test('comeout', function (suite) {
   })
 
   suite.test('12', function (t) {
-    const handState: HandState = {
-      isComeOut: true
+    const handState: Result = {
+      isComeOut: true,
+      die1: DieResult.ONE,
+      die2: DieResult.ONE,
+      diceSum: DiceResult.TWO,
+      point: Point.UNDEF
     }
 
     const result = lib.shoot(handState, [6, 6])
@@ -68,8 +77,12 @@ test('comeout', function (suite) {
   })
 
   suite.test('7', function (t) {
-    const handState: HandState = {
-      isComeOut: true
+    const handState: Result = {
+      isComeOut: true,
+      die1: DieResult.ONE,
+      die2: DieResult.ONE,
+      diceSum: DiceResult.TWO,
+      point: Point.UNDEF
     }
 
     const result = lib.shoot(handState, [5, 2])
@@ -85,8 +98,12 @@ test('comeout', function (suite) {
 
   
   suite.test('4', function (t) {
-    const handState: HandState = {
-      isComeOut: true
+    const handState: Result = {
+      isComeOut: true,
+      die1: DieResult.ONE,
+      die2: DieResult.ONE,
+      diceSum: DiceResult.TWO,
+      point: Point.UNDEF
     }
 
     const result = lib.shoot(handState, [3, 1])
@@ -102,8 +119,12 @@ test('comeout', function (suite) {
   })
 
   suite.test('5', function (t) {
-    const handState: HandState = {
-      isComeOut: true
+    const handState: Result = {
+      isComeOut: true,
+      die1: DieResult.ONE,
+      die2: DieResult.ONE,
+      diceSum: DiceResult.TWO,
+      point: Point.UNDEF
     }
 
     const result = lib.shoot(handState, [3, 2])
@@ -119,8 +140,12 @@ test('comeout', function (suite) {
   })
 
   suite.test('6', function (t) {
-    const handState: HandState = {
-      isComeOut: true
+    const handState: Result = {
+      isComeOut: true,
+      die1: DieResult.ONE,
+      die2: DieResult.ONE,
+      diceSum: DiceResult.TWO,
+      point: Point.UNDEF
     }
 
     const result = lib.shoot(handState, [4, 2])
@@ -136,8 +161,12 @@ test('comeout', function (suite) {
   })
 
   suite.test('8', function (t) {
-    const handState: HandState = {
-      isComeOut: true
+    const handState: Result = {
+      isComeOut: true,
+      die1: DieResult.ONE,
+      die2: DieResult.ONE,
+      diceSum: DiceResult.TWO,
+      point: Point.UNDEF
     }
 
     const result = lib.shoot(handState, [6, 2])
@@ -153,8 +182,12 @@ test('comeout', function (suite) {
   })
 
   suite.test('9', function (t) {
-    const handState: HandState = {
-      isComeOut: true
+    const handState: Result = {
+      isComeOut: true,
+      die1: DieResult.ONE,
+      die2: DieResult.ONE,
+      diceSum: DiceResult.TWO,
+      point: Point.UNDEF
     }
 
     const result = lib.shoot(handState, [6, 3])
@@ -170,8 +203,12 @@ test('comeout', function (suite) {
   })
 
   suite.test('10', function (t) {
-    const handState: HandState = {
-      isComeOut: true
+    const handState: Result = {
+      isComeOut: true,
+      die1: DieResult.ONE,
+      die2: DieResult.ONE,
+      diceSum: DiceResult.TWO,
+      point: Point.UNDEF
     }
 
     const result = lib.shoot(handState, [6, 4])
@@ -191,9 +228,12 @@ test('comeout', function (suite) {
 
 test('point set', (suite) => {
   suite.test('neutral 2', (t) => {
-    const handState: HandState = {
+    const handState: Result = {
       isComeOut: false,
-      point: 5
+      point: Point.FIVE,
+      die1: DieResult.UNDEF,
+      die2: DieResult.UNDEF,
+      diceSum: DiceResult.UNDEF
     }
 
     const result = lib.shoot(handState, [1, 1])
@@ -208,9 +248,12 @@ test('point set', (suite) => {
   })
 
   suite.test('neutral 3', (t) => {
-    const handState: HandState = {
+    const handState: Result = {
       isComeOut: false,
-      point: 8
+      point: Point.EIGHT,
+      die1: DieResult.UNDEF,
+      die2: DieResult.UNDEF,
+      diceSum: DiceResult.UNDEF
     }
 
     const result = lib.shoot(handState, [2, 1])
@@ -225,9 +268,12 @@ test('point set', (suite) => {
   })
 
   suite.test('point win 4', (t) => {
-    const handState: HandState = {
+    const handState: Result = {
       isComeOut: false,
-      point: 4
+      point: Point.FOUR,
+      die1: DieResult.UNDEF,
+      die2: DieResult.UNDEF,
+      diceSum: DiceResult.UNDEF
     }
 
     const result = lib.shoot(handState, [3, 1])

@@ -1,18 +1,18 @@
+import { BetPoint, BetPointPayouts, DiceResult, HandResult, Memo, Rules, type Result, type Payout } from './consts'
+import { BetDictionary } from './bets'
 
-import { BetDictionary, BetPoint, BetPointPayouts, HandResult, Memo, type Result } from './consts'
+export function passLine(bets: BetDictionary, hand: Result, rules: Rules): { bets: BetDictionary, payout?: Payout } {
+  if (bets.getBet(BetPoint.Pass) === undefined) return { bets }
 
-function passLine ( bets: BetDictionary, hand: any, rules:any) {
-  if (bets.getBetAmount(BetPoint.Pass) === 0) return { bets }
+  const payoutActionResults = [HandResult.SEVEN_OUT, HandResult.POINT_WIN, HandResult.COMEOUT_WIN, HandResult.COMEOUT_LOSS]
+  const betHasPayoutAction = payoutActionResults.includes(hand.result ?? HandResult.NEUTRAL)
 
-  const actionResults = [HandResult.SEVEN_OUT, HandResult.POINT_WIN, HandResult.COMEOUT_WIN, HandResult.COMEOUT_LOSS]
-  const betHasAction = actionResults.includes(hand.result)
+  if (!betHasPayoutAction) return { bets } // keep bets intact if no action
 
-  if (!betHasAction) return { bets } // keep bets intact if no action
-
-  const payout = {
-    type: hand.result,
-    principal: bets.getBetAmount(BetPoint.Pass),
-    profit: bets.getBetAmount(BetPoint.Pass) * 1
+  const payout: Payout = {
+    type: hand.result ?? HandResult.NEUTRAL,
+    principal: bets.getBet(BetPoint.Pass)?.amount ?? 0,
+    profit: (bets.getBet(BetPoint.Pass)?.amount ?? 0) * 1
   }
 
   bets.clearBet(BetPoint.Pass) // clear pass line bet on action
@@ -22,8 +22,9 @@ function passLine ( bets: BetDictionary, hand: any, rules:any) {
   return { payout, bets }
 }
 
-function passOdds ( bets: BetDictionary, hand: Result, rules:any ) {
-  if (bets.getBetAmount(BetPoint.PassOdds) === 0) return { bets }
+export function passOdds(bets: BetDictionary, hand: Result, rules: Rules) {
+  const passOddsPoint = BetPoint.PassOdds
+  if (bets.getBet(passOddsPoint) === undefined) return { bets }
 
   if (!hand.result || !hand.diceSum) throw new Error("no hand result or dice sum")
 
@@ -31,17 +32,14 @@ function passOdds ( bets: BetDictionary, hand: Result, rules:any ) {
   const betHasAction = actionResults.includes(hand.result ?? HandResult.NEW_GAME)
 
   if (!betHasAction) return { bets } // keep bets intact if no action
-  
-  const payouts = BetPointPayouts[BetPoint.PassOdds]
-  if (!payouts || !payouts[hand.diceSum]) throw new Error("no payouts defined for pass odds")
 
   const payout = {
     type: 'pass odds win',
-    principal: bets.getBetAmount(BetPoint.PassOdds),
-    profit: bets.getBetAmount(BetPoint.PassOdds) * (payouts[hand.diceSum] ?? 1)
+    principal: bets.getBet(passOddsPoint)?.amount ?? 0,
+    profit: (bets.getBet(passOddsPoint)?.amount ?? 0) * getPayout(passOddsPoint, hand.diceSum)
   }
 
-  bets.clearBet(BetPoint.PassOdds) // clear pass line bet on action
+  bets.clearBet(passOddsPoint) // clear pass line bet on action
   
 
   if (hand.result === HandResult.SEVEN_OUT) return { bets }
@@ -49,10 +47,25 @@ function passOdds ( bets: BetDictionary, hand: Result, rules:any ) {
   return { payout, bets }
 }
 
+export function getPayout(betPoint: BetPoint, diceSum: DiceResult) {
+  const payouts = BetPointPayouts[betPoint]
+  if (!payouts || !payouts[diceSum]) throw new Error("no payouts defined for bet point")
 
+  return payouts[diceSum]
+}
 
 export function settleAllBets ( bets: BetDictionary, hand: Result, rules:any ) : any {
   const payouts = []
+
+  // when the hand establishes a point, set the pass and dont pass bets to contract
+  if (hand.result === HandResult.POINT_SET) {
+    bets.setContract([BetPoint.Pass, BetPoint.DontPass], true)
+  }
+
+  // when the hand is SEVEN_OUT or POINT_WIN, unset the contracts
+  if (hand.result === HandResult.SEVEN_OUT || hand.result === HandResult.POINT_WIN) {
+    bets.setContract([BetPoint.Pass, BetPoint.DontPass], false)
+  }
 
   const passLineResult = passLine( bets, hand, rules )
 
@@ -76,8 +89,16 @@ export function settleAllBets ( bets: BetDictionary, hand: Result, rules:any ) :
     principal: 0,
     profit: 0,
     total: 0,
-    ledger: []
-  })
+    ledger: [],
+    rollCount: 0,
+    neutrals: 0,
+    comeOutWins: 0,
+    comeOutLosses: 0,
+    netComeOutWins: 0,
+    pointsSet: 0,
+    pointsWon: 0,
+    dist: new Map()
+  } as Memo)
 
   return bets
 }

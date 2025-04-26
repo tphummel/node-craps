@@ -2,16 +2,14 @@ import { inspect } from 'node:util'
 
 import { settleAllBets } from './settle'
 import { HandOptions, minPassLineMaxOdds, minPassLineOnly} from './betting'
-import  { BetDictionary, HandResult, type Result, Point, diceResultAsPoint, DieResult, DiceResult } from "./consts"
+import { HandResult, type Result, Point, diceResultAsPoint, DieResult, DiceResult } from "./consts"
+import { BetDictionary } from "./bets"
 
-function rollD6 () {
+export function rollD6() {
   return 1 + Math.floor(Math.random() * 6)
 }
 
-
-
-
-function shoot (before: Result, dice: any) : Result {
+export function shoot(before: Result, dice: DieResult[]): Result {
   const sortedDice = dice.sort()
 
   const after: Result = {
@@ -20,7 +18,7 @@ function shoot (before: Result, dice: any) : Result {
     diceSum: dice.reduce((m: number, r: number) => { return m + r }, 0),
     result: undefined,
     isComeOut: undefined,
-    point: Point.UNDEF
+    point: before.point
   }
 
   // game logic based on: https://github.com/tphummel/dice-collector/blob/master/PyTom/Dice/logic.py
@@ -41,9 +39,11 @@ function shoot (before: Result, dice: any) : Result {
     if (before.point === diceResultAsPoint(after.diceSum)) {
       after.result = HandResult.POINT_WIN
       after.isComeOut = true
+      after.point = Point.OFF
     } else if (after.diceSum === 7) {
       after.result = HandResult.SEVEN_OUT
       after.isComeOut = true
+      after.point = Point.OFF
     } else {
       after.result = HandResult.NEUTRAL
       after.point = before.point

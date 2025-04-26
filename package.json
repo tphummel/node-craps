@@ -7,7 +7,9 @@
     "test": "NODE_ENV=test tap *.test.ts --coverage-report=text-summary",
     "cov": "NODE_ENV=test tap *.test.ts  --coverage-report=html",
     "tap-file": "NODE_ENV=test tap *.test.ts  --output-file=results.tap",
-    "fix": "standard --fix"
+    "fix": "standard --fix",
+    "format": "prettier --write \"**/*.{ts,js,json}\"",
+    "lint": "eslint \"**/*.{ts,js}\" --fix"
   },
   "repository": {
     "type": "git",
@@ -28,6 +30,9 @@
     "@types/node": "^22.14.1",
     "@typescript-eslint/eslint-plugin": "^8.31.0",
     "@typescript-eslint/parser": "^8.31.0",
+    "eslint-config-prettier": "^10.1.2",
+    "eslint-plugin-prettier": "^5.2.6",
+    "prettier": "^3.5.3",
     "standard": "^16.0.3",
     "tap": "^21.1.0",
     "ts-node": "^10.9.2",

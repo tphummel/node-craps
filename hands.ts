@@ -1,7 +1,6 @@
-
 import { playHand } from './index'
 import { minPassLineMaxOdds } from './betting'
-import { HandResult, DiceResult } from './consts'
+import { HandResult, DiceResult, Memo, Result, distObj } from './consts'
 
 const numHands = parseInt(process.argv.slice(2)[0], 10)
 const showDetail = process.argv.slice(2)[1]
@@ -9,18 +8,6 @@ const showDetail = process.argv.slice(2)[1]
 console.log(`Simulating ${numHands} Craps Hand(s)`)
 console.log('Using betting strategy: minPassLineMaxOdds')
 
-class distObj  {
-  ct: number;
-  prob: number;
-  ref?: number;
-  diff?: number;
-  diff_pct?: number;
-  ref_work?: string;
-  constructor(count: number, probability: number) {
-    this.ct = count;
-    this.prob = probability
-  }
-}
 
 
 class Summary  {
@@ -85,10 +72,11 @@ for (let i = 0; i < numHands; i++) {
   sessionSummary.balance += hand.balance
   hand.summary.balance = hand.balance
 
-  hand.history.reduce((memo: any, roll: any) => {
+  hand.history.reduce((memo: Memo, roll: Result) => {
     memo.rollCount++
     hand.summary.rollCount++
-    memo.dist[roll.diceSum].ct++
+    const distObj = memo.dist.get(roll.diceSum)
+    if (distObj) distObj.ct++
 
     switch (roll.result) {
       case HandResult.NEUTRAL:
