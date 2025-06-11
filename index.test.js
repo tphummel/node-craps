@@ -83,11 +83,11 @@ tap.test('comeout', function (suite) {
       isComeOut: true
     }
 
-    const result = lib.shoot(handState, [7, 4])
+    const result = lib.shoot(handState, [6, 5])
 
     t.equal(result.result, 'comeout win')
-    t.equal(result.die1, 4)
-    t.equal(result.die2, 7)
+    t.equal(result.die1, 5)
+    t.equal(result.die2, 6)
     t.equal(result.diceSum, 11)
     t.equal(result.isComeOut, true)
 
