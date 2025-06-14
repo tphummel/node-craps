@@ -199,6 +199,23 @@ tap.test('comeout', function (suite) {
   suite.end()
 })
 
+tap.test('comeout with custom rules', (t) => {
+  const handState = {
+    isComeOut: true
+  }
+
+  const rules = {
+    comeOutLoss: [2, 3],
+    comeOutWin: [7, 11, 12]
+  }
+
+  const result = lib.shoot(handState, [6, 6], rules)
+  t.equal(result.result, 'comeout win')
+  t.equal(result.isComeOut, true)
+
+  t.end()
+})
+
 tap.test('point set', (suite) => {
   suite.test('neutral 2', (t) => {
     const handState = {
