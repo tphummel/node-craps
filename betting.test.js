@@ -209,3 +209,57 @@ tap.test('minPassLineMaxOdds: continue existing bet', (t) => {
 
   t.end()
 })
+
+tap.test('minComeLineMaxOdds: place come bet after point set', (t) => {
+  const rules = {
+    minBet: 5,
+    maxOddsMultiple: {
+      4: 3,
+      5: 4,
+      6: 5,
+      8: 5,
+      9: 4,
+      10: 3
+    }
+  }
+
+  const hand = { isComeOut: false, point: 5 }
+  const bets = {
+    pass: { line: { amount: 5, isContract: true }, odds: { amount: 20 } },
+    new: 0
+  }
+
+  const updatedBets = lib.minComeLineMaxOdds({ rules, bets, hand })
+  t.equal(updatedBets.come.line.amount, rules.minBet)
+  t.ok(updatedBets.come.isComeOut)
+  t.equal(updatedBets.new, rules.minBet)
+
+  t.end()
+})
+
+tap.test('minComeLineMaxOdds: add odds after come point', (t) => {
+  const rules = {
+    minBet: 5,
+    maxOddsMultiple: {
+      4: 3,
+      5: 4,
+      6: 5,
+      8: 5,
+      9: 4,
+      10: 3
+    }
+  }
+
+  const hand = { isComeOut: false, point: 5 }
+  const bets = {
+    pass: { line: { amount: 5, isContract: true }, odds: { amount: 20 } },
+    come: { line: { amount: 5 }, isComeOut: false, point: 4 },
+    new: 0
+  }
+
+  const updatedBets = lib.minComeLineMaxOdds({ rules, bets, hand })
+  t.equal(updatedBets.come.odds.amount, rules.maxOddsMultiple['4'] * 5)
+  t.equal(updatedBets.new, rules.maxOddsMultiple['4'] * 5)
+
+  t.end()
+})

@@ -357,6 +357,174 @@ tap.test('passOdds: odds bet, seven out', function (t) {
   t.end()
 })
 
+tap.test('comeLine: come win on 7', function (t) {
+  const bets = {
+    come: {
+      line: { amount: 5 },
+      isComeOut: true
+    }
+  }
+
+  const hand = { diceSum: 7 }
+
+  const result = settle.comeLine({ hand, bets })
+  t.equal(result.payout.type, 'come win')
+  t.equal(result.payout.principal, 5)
+  t.equal(result.payout.profit, 5)
+  t.notOk(result.bets.come)
+
+  t.end()
+})
+
+tap.test('comeLine: craps 2', function (t) {
+  const bets = {
+    come: {
+      line: { amount: 5 },
+      isComeOut: true
+    }
+  }
+
+  const hand = { diceSum: 2 }
+
+  const result = settle.comeLine({ hand, bets })
+  t.notOk(result.payout)
+  t.notOk(result.bets.come)
+
+  t.end()
+})
+
+tap.test('comeLine: craps 3', function (t) {
+  const bets = {
+    come: {
+      line: { amount: 5 },
+      isComeOut: true
+    }
+  }
+
+  const hand = { diceSum: 3 }
+
+  const result = settle.comeLine({ hand, bets })
+  t.notOk(result.payout)
+  t.notOk(result.bets.come)
+
+  t.end()
+})
+
+tap.test('comeLine: craps 12', function (t) {
+  const bets = {
+    come: {
+      line: { amount: 5 },
+      isComeOut: true
+    }
+  }
+
+  const hand = { diceSum: 12 }
+
+  const result = settle.comeLine({ hand, bets })
+  t.notOk(result.payout)
+  t.notOk(result.bets.come)
+
+  t.end()
+})
+
+tap.test('comeLine: come win on 11', function (t) {
+  const bets = {
+    come: {
+      line: { amount: 5 },
+      isComeOut: true
+    }
+  }
+
+  const hand = { diceSum: 11 }
+
+  const result = settle.comeLine({ hand, bets })
+  t.equal(result.payout.type, 'come win')
+  t.equal(result.payout.principal, 5)
+  t.equal(result.payout.profit, 5)
+  t.notOk(result.bets.come)
+
+  t.end()
+})
+
+tap.test('comeLine: point win', function (t) {
+  const bets = {
+    come: {
+      line: { amount: 5 },
+      isComeOut: false,
+      point: 6
+    }
+  }
+
+  const hand = { diceSum: 6 }
+
+  const result = settle.comeLine({ hand, bets })
+  t.equal(result.payout.type, 'come win')
+  t.equal(result.payout.principal, 5)
+  t.equal(result.payout.profit, 5)
+  t.notOk(result.bets.come)
+
+  t.end()
+})
+
+tap.test('comeOdds: odds bet, win', function (t) {
+  const bets = {
+    come: {
+      line: { amount: 5 },
+      odds: { amount: 10 },
+      isComeOut: false,
+      point: 4
+    }
+  }
+
+  const hand = { diceSum: 4 }
+
+  const result = settle.comeOdds({ hand, bets })
+  t.equal(result.payout.type, 'come odds win')
+  t.equal(result.payout.principal, 10)
+  t.equal(result.payout.profit, 20)
+  t.notOk(result.bets.come.odds)
+
+  t.end()
+})
+
+tap.test('comeOdds: odds bet, seven out', function (t) {
+  const bets = {
+    come: {
+      line: { amount: 5 },
+      odds: { amount: 10 },
+      isComeOut: false,
+      point: 4
+    }
+  }
+
+  const hand = { diceSum: 7 }
+
+  const result = settle.comeOdds({ hand, bets })
+  t.notOk(result.payout)
+  t.notOk(result.bets.come.odds)
+
+  t.end()
+})
+
+tap.test('comeOdds: odds bet, no action', function (t) {
+  const bets = {
+    come: {
+      line: { amount: 5 },
+      odds: { amount: 10 },
+      isComeOut: false,
+      point: 4
+    }
+  }
+
+  const hand = { diceSum: 5 }
+
+  const result = settle.comeOdds({ hand, bets })
+  t.notOk(result.payout)
+  t.strictSame(result.bets, bets, 'bets unchanged')
+
+  t.end()
+})
+
 tap.test('all: pass line win', (t) => {
   const bets = {
     pass: {

@@ -479,3 +479,43 @@ tap.test('integration: minPassLineMaxOdds, one hand with everything', (suite) =>
 
   suite.end()
 })
+
+tap.test('integration: minComeLineMaxOdds, one hand with come bets', (suite) => {
+  let rollCount = -1
+  const fixedRolls = [
+    4, 3, // comeout win
+    5, 6, // comeout win
+    2, 2, // comeout loss
+    3, 3, // point set
+    5, 4, // come bet sets point
+    5, 4, // come bet point win
+    3, 4 // seven out
+  ]
+
+  function testRoll () {
+    rollCount++
+    if (!fixedRolls[rollCount]) {
+      console.log('falsy return from fixed dice')
+      process.exit(1)
+    }
+    return fixedRolls[rollCount]
+  }
+
+  const rules = {
+    minBet: 5,
+    maxOddsMultiple: {
+      4: 3,
+      5: 4,
+      6: 5,
+      8: 5,
+      9: 4,
+      10: 3
+    }
+  }
+
+  const hand = lib.playHand({ rules, roll: testRoll, bettingStrategy: betting.minComeLineMaxOdds })
+  suite.ok(Array.isArray(hand.history))
+  suite.type(hand.balance, 'number')
+
+  suite.end()
+})

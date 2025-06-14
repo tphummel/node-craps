@@ -65,6 +65,14 @@ Hand: 1
 └─────────┴──────┴──────┴─────────┴─────────────┴───────────┴───────┘
 ```
 
+## strategies
+
+The `betting` module exposes a few simple strategy helpers:
+
+- `minPassLineOnly` – always maintains a minimum pass line bet
+- `minPassLineMaxOdds` – adds maximum odds on the pass line point
+- `minComeLineMaxOdds` – once a point is set, places come bets with max odds
+
 ## what? why?
 
 I like to play craps sometimes. I have a handful of strategies I like to play. It is time consuming to play in an app. I'd like to play 5, 50, 500 hands very fast using various strategies. Which strategies are best is well understood, the variability comes in with how aggressive your strategies are and the level of risk you assume at any given moment. And of course the dice outcomes and their deviation from long term probabilities and how they interact with the strategies you employ is the fun part. This simulator lets me scratch my craps itch very quickly.  
