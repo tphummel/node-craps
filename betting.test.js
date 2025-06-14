@@ -209,3 +209,110 @@ tap.test('minPassLineMaxOdds: continue existing bet', (t) => {
 
   t.end()
 })
+
+tap.test('minPassLineMinOdds: point 5 requires even odds', (t) => {
+  const rules = {
+    minBet: 5,
+    maxOddsMultiple: {
+      4: 3,
+      5: 4,
+      6: 5,
+      8: 5,
+      9: 4,
+      10: 3
+    }
+  }
+
+  const hand = {
+    isComeOut: false,
+    result: 'point set',
+    point: 5
+  }
+
+  const bets = {
+    pass: {
+      line: {
+        amount: 5,
+        isContract: true
+      }
+    }
+  }
+
+  const updatedBets = lib.minPassLineMinOdds({ rules, bets, hand })
+  t.equal(updatedBets.pass.odds.amount, 6)
+  t.equal(updatedBets.new, 6)
+  t.end()
+})
+
+tap.test('minPassLineMinOdds: point 6 multiple of five', (t) => {
+  const rules = {
+    minBet: 5,
+    maxOddsMultiple: {
+      4: 3,
+      5: 4,
+      6: 5,
+      8: 5,
+      9: 4,
+      10: 3
+    }
+  }
+
+  const hand = {
+    isComeOut: false,
+    result: 'point set',
+    point: 6
+  }
+
+  const bets = {
+    pass: {
+      line: {
+        amount: 5,
+        isContract: true
+      }
+    }
+  }
+
+  const updatedBets = lib.minPassLineMinOdds({ rules, bets, hand })
+  t.equal(updatedBets.pass.odds.amount, 5)
+  t.equal(updatedBets.new, 5)
+  t.end()
+})
+
+tap.test('minPassLineMinOdds: continue existing bet', (t) => {
+  const rules = {
+    minBet: 5,
+    maxOddsMultiple: {
+      4: 3,
+      5: 4,
+      6: 5,
+      8: 5,
+      9: 4,
+      10: 3
+    }
+  }
+
+  const hand = {
+    isComeOut: false,
+    result: 'neutral',
+    point: 6,
+    diceSum: 4
+  }
+
+  const bets = {
+    pass: {
+      line: {
+        amount: 5,
+        isContract: true
+      },
+      odds: {
+        amount: 5,
+        isContract: false
+      }
+    }
+  }
+
+  const updatedBets = lib.minPassLineMinOdds({ rules, bets, hand })
+  t.equal(updatedBets.pass.odds.amount, bets.pass.odds.amount)
+  t.notOk(updatedBets.new)
+  t.end()
+})
