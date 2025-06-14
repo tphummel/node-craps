@@ -211,6 +211,10 @@ tap.test('comeout with custom rules', (t) => {
 
   const result = lib.shoot(handState, [6, 6], rules)
   t.equal(result.result, 'comeout win')
+  t.notOk(result.point)
+  t.equal(result.die1, 6)
+  t.equal(result.die2, 6)
+  t.equal(result.diceSum, 12)
   t.equal(result.isComeOut, true)
 
   t.end()
