@@ -1333,3 +1333,62 @@ tap.test('pressPlaceSixEight: come-out within hand does not trigger press', (t) 
   t.equal(bets.place.eight.amount, 6, 'eight not pressed after come-out cycle')
   t.end()
 })
+
+tap.test('minPassLineMinOdds: point 5 requires even odds amount', (t) => {
+  const rules = { minBet: 5, maxOddsMultiple: { 4: 3, 5: 4, 6: 5, 8: 5, 9: 4, 10: 3 } }
+  const hand = { isComeOut: false, result: 'point set', point: 5 }
+  const bets = { pass: { line: { amount: 5 } } }
+
+  const result = lib.minPassLineMinOdds({ rules, bets, hand })
+
+  t.ok(result.pass.odds, 'odds placed')
+  t.equal(result.pass.odds.amount % 2, 0, 'odds amount is even for point 5')
+  t.ok(result.pass.odds.amount >= rules.minBet, 'odds at least minBet')
+  t.end()
+})
+
+tap.test('minPassLineMinOdds: point 6 requires multiple of 5', (t) => {
+  const rules = { minBet: 5, maxOddsMultiple: { 4: 3, 5: 4, 6: 5, 8: 5, 9: 4, 10: 3 } }
+  const hand = { isComeOut: false, result: 'point set', point: 6 }
+  const bets = { pass: { line: { amount: 5 } } }
+
+  const result = lib.minPassLineMinOdds({ rules, bets, hand })
+
+  t.ok(result.pass.odds, 'odds placed')
+  t.equal(result.pass.odds.amount % 5, 0, 'odds amount is multiple of 5 for point 6')
+  t.end()
+})
+
+tap.test('minPassLineMinOdds: point 4 uses exact line amount', (t) => {
+  const rules = { minBet: 5, maxOddsMultiple: { 4: 3, 5: 4, 6: 5, 8: 5, 9: 4, 10: 3 } }
+  const hand = { isComeOut: false, result: 'point set', point: 4 }
+  const bets = { pass: { line: { amount: 5 } } }
+
+  const result = lib.minPassLineMinOdds({ rules, bets, hand })
+
+  t.equal(result.pass.odds.amount, 5, 'odds equal line amount for point 4')
+  t.end()
+})
+
+tap.test('minPassLineMinOdds: does not exceed maxOddsMultiple', (t) => {
+  const rules = { minBet: 25, maxOddsMultiple: { 4: 3, 5: 4, 6: 5, 8: 5, 9: 4, 10: 3 } }
+  const hand = { isComeOut: false, result: 'point set', point: 6 }
+  const bets = { pass: { line: { amount: 25 } } }
+
+  const result = lib.minPassLineMinOdds({ rules, bets, hand })
+  const max = rules.maxOddsMultiple[6] * 25
+
+  t.ok(result.pass.odds.amount <= max, 'odds do not exceed table max')
+  t.equal(result.pass.odds.amount % 5, 0, 'odds still multiple of 5')
+  t.end()
+})
+
+tap.test('minPassLineMinOdds: no odds on come-out', (t) => {
+  const rules = { minBet: 5, maxOddsMultiple: { 4: 3, 5: 4, 6: 5, 8: 5, 9: 4, 10: 3 } }
+  const hand = { isComeOut: true }
+
+  const result = lib.minPassLineMinOdds({ rules, hand })
+
+  t.notOk(result.pass?.odds, 'no odds on come-out')
+  t.end()
+})
