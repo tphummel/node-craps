@@ -43,13 +43,15 @@ function placeSixEight (opts) {
 
   bets.place = bets.place || {}
 
+  const placeAmount = Math.ceil(rules.minBet / 6) * 6
+
   if (!bets.place.six) {
-    bets.place.six = { amount: rules.minBet }
+    bets.place.six = { amount: placeAmount }
     bets.new += bets.place.six.amount
   }
 
   if (!bets.place.eight) {
-    bets.place.eight = { amount: rules.minBet }
+    bets.place.eight = { amount: placeAmount }
     bets.new += bets.place.eight.amount
   }
 
