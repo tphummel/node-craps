@@ -459,6 +459,24 @@ tap.test('place bets: no action on comeout roll', (t) => {
   t.end()
 })
 
+tap.test('place bets: no action on comeout win 11', (t) => {
+  const bets = { place: { six: { amount: 6 }, eight: { amount: 6 } } }
+
+  const hand = {
+    result: 'comeout win',
+    isComeOut: true,
+    diceSum: 11
+  }
+
+  const settled = settle.all({ bets, hand })
+
+  t.equal(settled.place.six.amount, 6)
+  t.equal(settled.place.eight.amount, 6)
+  t.equal(settled.payouts.total, 0)
+
+  t.end()
+})
+
 tap.test('place bet on 6 persists when point is 6', (t) => {
   const bets = { place: { six: { amount: 6 }, eight: { amount: 6 } } }
 
