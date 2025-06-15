@@ -1,7 +1,7 @@
 'use strict'
 
 const { playHand } = require('./index.js')
-const { placeSixEight, minPassLineMaxOddsPlaceSixEight } = require('./betting.js')
+const { minPassLineMaxOddsPlaceSixEight } = require('./betting.js')
 
 const numHands = parseInt(process.argv.slice(2)[0], 10)
 const showDetail = process.argv.slice(2)[1]

@@ -16,6 +16,10 @@ function passLine ({ bets, hand, rules }) {
 
   if (hand.result === 'comeout loss' || hand.result === 'seven out') return { bets }
 
+  if (process.env.DEBUG) {
+    console.log(`[payout] ${payout.type} $${payout.principal + payout.profit}`)
+  }
+
   return { payout, bets }
 }
 
@@ -46,6 +50,10 @@ function passOdds ({ bets, hand, rules }) {
 
   if (hand.result === 'seven out') return { bets }
 
+  if (process.env.DEBUG) {
+    console.log(`[payout] ${payout.type} $${payout.principal + payout.profit}`)
+  }
+
   return { payout, bets }
 }
 
@@ -59,6 +67,7 @@ function placeBet ({ bets, hand, placeNumber }) {
   if (hand.diceSum === 7) {
     delete bets.place[label]
     if (Object.keys(bets.place).length === 0) delete bets.place
+    if (process.env.DEBUG) console.log(`[decision] remove place ${placeNumber} bet due to seven out`)
     return { bets }
   }
 
@@ -68,6 +77,8 @@ function placeBet ({ bets, hand, placeNumber }) {
       principal: 0,
       profit: bets.place[label].amount * (7 / 6)
     }
+
+    if (process.env.DEBUG) console.log(`[payout] ${payout.type} $${payout.profit}`)
 
     return { payout, bets }
   }
@@ -108,6 +119,7 @@ function all ({ bets, hand, rules }) {
 
   bets.payouts = payouts.reduce((memo, payout) => {
     if (!payout) return memo
+    if (process.env.DEBUG) console.log(`[payout] ${payout.type} $${payout.principal + payout.profit}`)
 
     memo.principal += payout.principal
     memo.profit += payout.profit
