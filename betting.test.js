@@ -290,3 +290,56 @@ tap.test('placeSixEight: bet rounds up to multiple of six', (t) => {
 
   t.end()
 })
+
+tap.test('placeSixEightUnlessPoint: skip place bet matching point', (t) => {
+  const rules = { minBet: 6 }
+
+  const handSix = { isComeOut: false, point: 6 }
+  const betsSix = lib.placeSixEightUnlessPoint({ rules, hand: handSix })
+
+  t.notOk(betsSix.place?.six)
+  t.equal(betsSix.place.eight.amount, rules.minBet)
+  t.equal(betsSix.new, rules.minBet)
+
+  const handEight = { isComeOut: false, point: 8 }
+  const betsEight = lib.placeSixEightUnlessPoint({ rules, hand: handEight })
+
+  t.equal(betsEight.place.six.amount, rules.minBet)
+  t.notOk(betsEight.place?.eight)
+  t.equal(betsEight.new, rules.minBet)
+
+  t.end()
+})
+
+tap.test('minPassLineMaxOddsPlaceSixEight: odds and place bets adjusted', (t) => {
+  const rules = {
+    minBet: 5,
+    maxOddsMultiple: {
+      4: 3,
+      5: 4,
+      6: 5,
+      8: 5,
+      9: 4,
+      10: 3
+    }
+  }
+
+  const comeOut = { isComeOut: true }
+  const first = lib.minPassLineMaxOddsPlaceSixEight({ rules, hand: comeOut })
+
+  t.equal(first.pass.line.amount, rules.minBet)
+  t.notOk(first.place)
+  t.equal(first.new, rules.minBet)
+
+  delete first.new
+
+  const pointSix = { isComeOut: false, result: 'point set', point: 6 }
+  const second = lib.minPassLineMaxOddsPlaceSixEight({ rules, bets: first, hand: pointSix })
+
+  t.equal(second.pass.odds.amount, rules.maxOddsMultiple['6'] * rules.minBet)
+  t.notOk(second.place?.six)
+  t.equal(second.place.eight.amount, 6)
+  t.equal(second.new, second.pass.odds.amount + 6)
+
+  t.end()
+})

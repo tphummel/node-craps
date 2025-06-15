@@ -58,8 +58,40 @@ function placeSixEight (opts) {
   return bets
 }
 
+function placeSixEightUnlessPoint (opts) {
+  const { bets: existingBets = {}, hand } = opts
+
+  // Use the regular place bet logic first
+  const bets = placeSixEight(opts)
+
+  if (hand.isComeOut) return bets
+
+  // Remove any newly created bet that matches the point
+  if (hand.point === 6 && !existingBets?.place?.six && bets.place?.six) {
+    bets.new -= bets.place.six.amount
+    delete bets.place.six
+  }
+
+  if (hand.point === 8 && !existingBets?.place?.eight && bets.place?.eight) {
+    bets.new -= bets.place.eight.amount
+    delete bets.place.eight
+  }
+
+  if (bets.place && Object.keys(bets.place).length === 0) delete bets.place
+
+  return bets
+}
+
+function minPassLineMaxOddsPlaceSixEight (opts) {
+  let bets = minPassLineMaxOdds(opts)
+  bets = placeSixEightUnlessPoint({ ...opts, bets })
+  return bets
+}
+
 module.exports = {
   minPassLineOnly,
   minPassLineMaxOdds,
-  placeSixEight
+  placeSixEight,
+  placeSixEightUnlessPoint,
+  minPassLineMaxOddsPlaceSixEight
 }
