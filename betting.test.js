@@ -209,3 +209,81 @@ tap.test('minPassLineMaxOdds: continue existing bet', (t) => {
 
   t.end()
 })
+
+tap.test('minPassLineMidOdds: make new bet upon establishing point', (t) => {
+  const rules = {
+    minBet: 5,
+    maxOddsMultiple: {
+      4: 3,
+      5: 4,
+      6: 5,
+      8: 5,
+      9: 4,
+      10: 3
+    }
+  }
+
+  const hand = {
+    isComeOut: false,
+    result: 'point set',
+    point: 5
+  }
+
+  const bets = {
+    pass: {
+      line: {
+        amount: 5,
+        isContract: true
+      }
+    }
+  }
+
+  const expected = Math.ceil(rules.maxOddsMultiple['5'] / 2) * rules.minBet
+  const updatedBets = lib.minPassLineMidOdds({ rules, bets, hand })
+  t.equal(updatedBets.pass.line.amount, rules.minBet, 'line bet is not changed')
+  t.equal(updatedBets.pass.odds.amount, expected, 'odds bet made properly')
+  t.equal(updatedBets.new, updatedBets.pass.odds.amount)
+
+  t.end()
+})
+
+tap.test('minPassLineMidOdds: continue existing bet', (t) => {
+  const rules = {
+    minBet: 5,
+    maxOddsMultiple: {
+      4: 3,
+      5: 4,
+      6: 5,
+      8: 5,
+      9: 4,
+      10: 3
+    }
+  }
+
+  const hand = {
+    isComeOut: false,
+    result: 'neutral',
+    point: 5,
+    diceSum: 8
+  }
+
+  const bets = {
+    pass: {
+      line: {
+        amount: 5,
+        isContract: true
+      },
+      odds: {
+        amount: Math.ceil(rules.maxOddsMultiple['5'] / 2) * 5,
+        isContract: false
+      }
+    }
+  }
+
+  const updatedBets = lib.minPassLineMidOdds({ rules, bets, hand })
+  t.equal(updatedBets.pass.line.amount, bets.pass.line.amount, 'line bet is not changed')
+  t.equal(updatedBets.pass.odds.amount, bets.pass.odds.amount, 'odds bet is not changed')
+  t.notOk(updatedBets.new, 'no new bets were made')
+
+  t.end()
+})
