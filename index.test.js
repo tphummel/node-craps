@@ -500,3 +500,40 @@ tap.test('integration: minPassLineMaxOdds, one hand with everything', (suite) =>
 
   suite.end()
 })
+
+tap.test('integration: placeSixEight returns payout details', (t) => {
+  let rollCount = -1
+  const fixedRolls = [
+    2, 3, // point set to 5
+    3, 3, // place 6 win
+    4, 4, // place 8 win
+    3, 4 // seven out
+  ]
+
+  function testRoll () {
+    rollCount++
+    return fixedRolls[rollCount]
+  }
+
+  const rules = {
+    minBet: 5,
+    maxOddsMultiple: {
+      4: 3,
+      5: 4,
+      6: 5,
+      8: 5,
+      9: 4,
+      10: 3
+    }
+  }
+
+  const hand = lib.playHand({ rules, roll: testRoll, bettingStrategy: betting.placeSixEight })
+
+  t.equal(hand.history[1].payouts[0].type, 'place 6 win')
+  t.equal(hand.history[2].payouts[0].type, 'place 8 win')
+  t.equal(hand.history[3].result, 'seven out')
+  t.ok(hand.history[3].betsBefore.place.six)
+  t.ok(hand.history[3].betsBefore.place.eight)
+
+  t.end()
+})

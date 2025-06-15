@@ -67,6 +67,7 @@ function playHand ({ rules, bettingStrategy, roll = rollD6 }) {
     bets = bettingStrategy({ rules, bets, hand })
     balance -= bets.new
     if (process.env.DEBUG && bets.new) console.log(`[bet] new bet $${bets.new} ($${balance})`)
+    const betsBefore = JSON.parse(JSON.stringify(bets))
     delete bets.new
 
     hand = shoot(
@@ -79,12 +80,19 @@ function playHand ({ rules, bettingStrategy, roll = rollD6 }) {
 
     bets = settle.all({ rules, bets, hand })
 
-    if (bets?.payouts?.total) {
-      balance += bets.payouts.total
-      if (process.env.DEBUG) console.log(`[payout] new payout $${bets.payouts.total} ($${balance})`)
-      delete bets.payouts
+    const payouts = bets.payouts
+    if (payouts?.total) {
+      balance += payouts.total
+      if (process.env.DEBUG) console.log(`[payout] new payout $${payouts.total} ($${balance})`)
     }
 
+    if (payouts?.ledger?.length) {
+      hand.payouts = payouts.ledger
+    }
+
+    if (payouts) delete bets.payouts
+
+    hand.betsBefore = betsBefore
     history.push(hand)
   }
 

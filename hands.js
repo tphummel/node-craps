@@ -18,6 +18,10 @@ const summaryTemplate = {
   comeOutLosses: 0,
   netComeOutWins: 0,
   neutrals: 0,
+  placeSixWins: 0,
+  placeSixLosses: 0,
+  placeEightWins: 0,
+  placeEightLosses: 0,
   dist: {
     2: { ct: 0, prob: 1 / 36 },
     3: { ct: 0, prob: 2 / 36 },
@@ -87,6 +91,29 @@ for (let i = 0; i < numHands; i++) {
         memo.netComeOutWins--
         hand.summary.netComeOutWins--
         break
+    }
+
+    if (Array.isArray(roll.payouts)) {
+      roll.payouts.forEach(p => {
+        if (p.type === 'place 6 win') {
+          memo.placeSixWins++
+          hand.summary.placeSixWins++
+        } else if (p.type === 'place 8 win') {
+          memo.placeEightWins++
+          hand.summary.placeEightWins++
+        }
+      })
+    }
+
+    if (roll.result === 'seven out') {
+      if (roll.betsBefore?.place?.six) {
+        memo.placeSixLosses++
+        hand.summary.placeSixLosses++
+      }
+      if (roll.betsBefore?.place?.eight) {
+        memo.placeEightLosses++
+        hand.summary.placeEightLosses++
+      }
     }
 
     return memo

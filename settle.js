@@ -78,7 +78,7 @@ function placeBet ({ bets, hand, placeNumber }) {
       profit: bets.place[label].amount * (7 / 6)
     }
 
-    if (process.env.DEBUG) console.log(`[payout] ${payout.type} $${payout.profit}`)
+    if (process.env.DEBUG) console.log(`[payout] ${payout.type} $${payout.principal + payout.profit}`)
 
     return { payout, bets }
   }
