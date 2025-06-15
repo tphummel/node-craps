@@ -277,3 +277,16 @@ tap.test('placeSixEight: place bets even when point is 6 or 8', (t) => {
 
   t.end()
 })
+
+tap.test('placeSixEight: bet rounds up to multiple of six', (t) => {
+  const rules = { minBet: 5 }
+  const hand = { isComeOut: false, point: 5 }
+
+  const updatedBets = lib.placeSixEight({ rules, hand })
+
+  t.equal(updatedBets.place.six.amount, 6)
+  t.equal(updatedBets.place.eight.amount, 6)
+  t.equal(updatedBets.new, 12)
+
+  t.end()
+})
