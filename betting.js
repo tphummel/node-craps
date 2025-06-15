@@ -81,6 +81,21 @@ function minPassLineMaxOdds (opts) {
   })
 }
 
+function minPassLineMidOdds (opts) {
+  const bets = minPassLineOnly(opts)
+  const { rules, hand } = opts
+
+  if (hand.isComeOut === false && !bets?.pass?.odds) {
+    const maxMultiple = rules.maxOddsMultiple[hand.point]
+    const oddsMultiple = Math.ceil(maxMultiple / 2)
+    const oddsAmount = oddsMultiple * bets.pass.line.amount
+    bets.pass.odds = { amount: oddsAmount }
+    bets.new += oddsAmount
+  }
+
+  return bets
+}
+
 function minPassLineMinOdds (opts) {
   const bets = minPassLineOnly(opts)
   const { rules, hand } = opts
@@ -318,6 +333,7 @@ module.exports = {
   minPassLineOnly,
   lineMaxOdds,
   minPassLineMaxOdds,
+  minPassLineMidOdds,
   minPassLineMinOdds,
   placeSixEight,
   placeSixEightUnlessPoint,
