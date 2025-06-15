@@ -553,3 +553,114 @@ tap.test('all: pass line win', (t) => {
 
   t.end()
 })
+
+tap.test('placeSix: win', (t) => {
+  const bets = { place: { six: { amount: 6 } } }
+
+  const hand = {
+    result: 'neutral',
+    isComeOut: false,
+    diceSum: 6
+  }
+
+  const result = settle.placeSix({ bets, hand })
+
+  t.equal(result.payout.type, 'place 6 win')
+  t.equal(result.payout.profit, 7)
+  t.equal(result.payout.principal, 0)
+  t.equal(result.bets.place.six.amount, 6)
+
+  t.end()
+})
+
+tap.test('placeEight: win', (t) => {
+  const bets = { place: { eight: { amount: 6 } } }
+
+  const hand = {
+    result: 'neutral',
+    isComeOut: false,
+    diceSum: 8
+  }
+
+  const result = settle.placeEight({ bets, hand })
+
+  t.equal(result.payout.type, 'place 8 win')
+  t.equal(result.payout.profit, 7)
+  t.equal(result.payout.principal, 0)
+  t.equal(result.bets.place.eight.amount, 6)
+
+  t.end()
+})
+
+tap.test('place bets: seven out removes bets', (t) => {
+  const bets = { place: { six: { amount: 6 }, eight: { amount: 6 } } }
+
+  const hand = {
+    result: 'seven out',
+    isComeOut: true,
+    diceSum: 7
+  }
+
+  const settled = settle.all({ bets, hand })
+
+  t.notOk(settled.place)
+  t.equal(settled.payouts.total, 0)
+
+  t.end()
+})
+
+tap.test('place bets: no action on comeout roll', (t) => {
+  const bets = { place: { six: { amount: 6 }, eight: { amount: 6 } } }
+
+  const hand = {
+    result: 'comeout win',
+    isComeOut: true,
+    diceSum: 7
+  }
+
+  const settled = settle.all({ bets, hand })
+
+  t.equal(settled.place.six.amount, 6)
+  t.equal(settled.place.eight.amount, 6)
+  t.equal(settled.payouts.total, 0)
+
+  t.end()
+})
+
+tap.test('place bet on 6 persists when point is 6', (t) => {
+  const bets = { place: { six: { amount: 6 }, eight: { amount: 6 } } }
+
+  const hand = {
+    result: 'point set',
+    isComeOut: false,
+    diceSum: 6,
+    point: 6
+  }
+
+  const settled = settle.all({ bets, hand })
+
+  t.equal(settled.place.six.amount, 6)
+  t.equal(settled.place.eight.amount, 6)
+  t.equal(settled.payouts.total, 0)
+
+  t.end()
+})
+
+tap.test('place bet on 8 persists when point is 8', (t) => {
+  const bets = { place: { six: { amount: 6 }, eight: { amount: 6 } } }
+
+  const hand = {
+    result: 'point set',
+    isComeOut: false,
+    diceSum: 8,
+    point: 8
+  }
+
+  const settled = settle.all({ bets, hand })
+
+  t.equal(settled.place.six.amount, 6)
+  t.equal(settled.place.eight.amount, 6)
+  t.equal(settled.payouts.total, 0)
+
+  t.end()
+})

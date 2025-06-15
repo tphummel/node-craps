@@ -7,7 +7,13 @@ function rollD6 () {
   return 1 + Math.floor(Math.random() * 6)
 }
 
-function shoot (before, dice) {
+const defaultRules = {
+  comeOutLoss: [2, 3, 12],
+  comeOutWin: [7, 11]
+}
+
+function shoot (before, dice, rules = defaultRules) {
+  rules = Object.assign({}, defaultRules, rules)
   const sortedDice = dice.sort()
 
   const after = {
@@ -19,10 +25,10 @@ function shoot (before, dice) {
   // game logic based on: https://github.com/tphummel/dice-collector/blob/master/PyTom/Dice/logic.py
 
   if (before.isComeOut) {
-    if ([2, 3, 12].indexOf(after.diceSum) !== -1) {
+    if (rules.comeOutLoss.includes(after.diceSum)) {
       after.result = 'comeout loss'
       after.isComeOut = true
-    } else if ([7, 11].indexOf(after.diceSum) !== -1) {
+    } else if (rules.comeOutWin.includes(after.diceSum)) {
       after.result = 'comeout win'
       after.isComeOut = true
     } else {
@@ -65,7 +71,8 @@ function playHand ({ rules, bettingStrategy, roll = rollD6 }) {
 
     hand = shoot(
       hand,
-      [roll(), roll()]
+      [roll(), roll()],
+      rules
     )
 
     if (process.env.DEBUG) console.log(`[roll] ${hand.result} (${hand.diceSum})`)
@@ -88,5 +95,6 @@ module.exports = {
   rollD6,
   shoot,
   playHand,
-  betting
+  betting,
+  defaultRules
 }

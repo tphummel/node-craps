@@ -233,6 +233,24 @@ tap.test('minComeLineMaxOdds: place come bet after point set', (t) => {
   t.equal(updatedBets.come.line.amount, rules.minBet)
   t.ok(updatedBets.come.isComeOut)
   t.equal(updatedBets.new, rules.minBet)
+  t.end()
+})
+
+tap.test('placeSixEight: make new place bets after point set', (t) => {
+  const rules = {
+    minBet: 6
+  }
+
+  const hand = {
+    isComeOut: false,
+    point: 5
+  }
+
+  const updatedBets = lib.placeSixEight({ rules, hand })
+
+  t.equal(updatedBets.place.six.amount, rules.minBet)
+  t.equal(updatedBets.place.eight.amount, rules.minBet)
+  t.equal(updatedBets.new, rules.minBet * 2)
 
   t.end()
 })
@@ -260,6 +278,55 @@ tap.test('minComeLineMaxOdds: add odds after come point', (t) => {
   const updatedBets = lib.minComeLineMaxOdds({ rules, bets, hand })
   t.equal(updatedBets.come.odds.amount, rules.maxOddsMultiple['4'] * 5)
   t.equal(updatedBets.new, rules.maxOddsMultiple['4'] * 5)
+
+  t.end()
+})
+
+tap.test('placeSixEight: no new bets on comeout', (t) => {
+  const rules = { minBet: 6 }
+  const hand = { isComeOut: true }
+
+  const updatedBets = lib.placeSixEight({ rules, hand })
+
+  t.notOk(updatedBets.place)
+  t.notOk(updatedBets.new)
+
+  t.end()
+})
+
+tap.test('placeSixEight: existing bets remain', (t) => {
+  const rules = { minBet: 6 }
+  const hand = { isComeOut: false, point: 8 }
+
+  const bets = { place: { six: { amount: 6 }, eight: { amount: 6 } } }
+
+  const updatedBets = lib.placeSixEight({ rules, bets, hand })
+
+  t.equal(updatedBets.place.six.amount, 6)
+  t.equal(updatedBets.place.eight.amount, 6)
+  t.notOk(updatedBets.new)
+
+  t.end()
+})
+
+tap.test('placeSixEight: place bets even when point is 6 or 8', (t) => {
+  const rules = { minBet: 6 }
+  const handSix = { isComeOut: false, point: 6 }
+
+  const firstBets = lib.placeSixEight({ rules, hand: handSix })
+
+  t.equal(firstBets.place.six.amount, rules.minBet)
+  t.equal(firstBets.place.eight.amount, rules.minBet)
+  t.equal(firstBets.new, rules.minBet * 2)
+
+  delete firstBets.new
+
+  const handEight = { isComeOut: false, point: 8 }
+  const bets = lib.placeSixEight({ rules, bets: firstBets, hand: handEight })
+
+  t.equal(bets.place.six.amount, rules.minBet)
+  t.equal(bets.place.eight.amount, rules.minBet)
+  t.notOk(bets.new)
 
   t.end()
 })

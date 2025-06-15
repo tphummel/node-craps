@@ -56,8 +56,30 @@ function minComeLineMaxOdds (opts) {
   return bets
 }
 
+function placeSixEight (opts) {
+  const { rules, bets: existingBets = {}, hand } = opts
+  const bets = Object.assign({ new: 0 }, existingBets)
+
+  if (hand.isComeOut) return bets
+
+  bets.place = bets.place || {}
+
+  if (!bets.place.six) {
+    bets.place.six = { amount: rules.minBet }
+    bets.new += bets.place.six.amount
+  }
+
+  if (!bets.place.eight) {
+    bets.place.eight = { amount: rules.minBet }
+    bets.new += bets.place.eight.amount
+  }
+
+  return bets
+}
+
 module.exports = {
   minPassLineOnly,
   minPassLineMaxOdds,
-  minComeLineMaxOdds
+  minComeLineMaxOdds,
+  placeSixEight
 }
