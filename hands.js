@@ -1,7 +1,7 @@
 'use strict'
 
 const { playHand } = require('./index.js')
-const { placeSixEight } = require('./betting.js')
+const { placeSixEight, minPassLineMaxOddsPlaceSixEight } = require('./betting.js')
 
 const numHands = parseInt(process.argv.slice(2)[0], 10)
 const showDetail = process.argv.slice(2)[1]
@@ -51,7 +51,7 @@ const rules = {
 console.log(`[table rules] minimum bet: $${rules.minBet}`)
 
 for (let i = 0; i < numHands; i++) {
-  const hand = playHand({ rules, bettingStrategy: placeSixEight })
+  const hand = playHand({ rules, bettingStrategy: minPassLineMaxOddsPlaceSixEight })
   hand.summary = Object.assign({}, summaryTemplate)
 
   sessionSummary.balance += hand.balance
