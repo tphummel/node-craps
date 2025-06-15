@@ -4,6 +4,29 @@
 
 🎲🎲 craps simulator 💵
 
+## architecture overview
+
+```
+                        +-----------+
+                        | hands.js  | CLI entry point
+                        +-----------+
+                               |
+                               v
+  +-----------------------------------------------------+
+  | playHand() (index.js)                               |
+  |-----------------------------------------------------|
+  | • apply betting strategy from betting.js            |
+  | • roll dice via shoot()/rollD6                      |
+  | • settle bets with settle.all() from settle.js      |
+  +-----------------------------------------------------+
+           |                |                    |
+           v                v                    v
+      +---------+     +--------------+     +--------------+
+      | shoot()  |     | betting.js   |     |  settle.js   |
+      | rollD6   |     | strategies   |     | payout logic |
+      +---------+     +--------------+     +--------------+
+```
+
 ## simulate a hand
 
 ```
