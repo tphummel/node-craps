@@ -49,6 +49,40 @@ function passOdds ({ bets, hand, rules }) {
   return { payout, bets }
 }
 
+function placeBet ({ bets, hand, placeNumber }) {
+  const label = placeNumber === 6 ? 'six' : placeNumber === 8 ? 'eight' : String(placeNumber)
+
+  if (!bets?.place?.[label]) return { bets }
+  if (hand.isComeOut && hand.result !== 'seven out') return { bets }
+  if (hand.result === 'point set') return { bets }
+
+  if (hand.diceSum === 7) {
+    delete bets.place[label]
+    if (Object.keys(bets.place).length === 0) delete bets.place
+    return { bets }
+  }
+
+  if (hand.diceSum === placeNumber) {
+    const payout = {
+      type: `place ${placeNumber} win`,
+      principal: 0,
+      profit: bets.place[label].amount * (7 / 6)
+    }
+
+    return { payout, bets }
+  }
+
+  return { bets }
+}
+
+function placeSix (opts) {
+  return placeBet({ ...opts, placeNumber: 6 })
+}
+
+function placeEight (opts) {
+  return placeBet({ ...opts, placeNumber: 8 })
+}
+
 function all ({ bets, hand, rules }) {
   const payouts = []
 
@@ -61,6 +95,16 @@ function all ({ bets, hand, rules }) {
 
   bets = passOddsResult.bets
   payouts.push(passOddsResult.payout)
+
+  const placeSixResult = placeSix({ bets, hand })
+
+  bets = placeSixResult.bets
+  payouts.push(placeSixResult.payout)
+
+  const placeEightResult = placeEight({ bets, hand })
+
+  bets = placeEightResult.bets
+  payouts.push(placeEightResult.payout)
 
   bets.payouts = payouts.reduce((memo, payout) => {
     if (!payout) return memo
@@ -83,5 +127,8 @@ function all ({ bets, hand, rules }) {
 module.exports = {
   passLine,
   passOdds,
+  placeBet,
+  placeSix,
+  placeEight,
   all
 }
