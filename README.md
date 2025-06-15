@@ -79,6 +79,14 @@ const rules = {
 }
 ```
 
+## betting strategies
+
+Several betting strategies are included:
+
+* `minPassLineOnly` – always keep the table minimum on the pass line
+* `minPassLineMidOdds` – take about half of the allowed odds when a point is set
+* `minPassLineMaxOdds` – always take the maximum odds allowed
+
 ## what? why?
 
 I like to play craps sometimes. I have a handful of strategies I like to play. It is time consuming to play in an app. I'd like to play 5, 50, 500 hands very fast using various strategies. Which strategies are best is well understood, the variability comes in with how aggressive your strategies are and the level of risk you assume at any given moment. And of course the dice outcomes and their deviation from long term probabilities and how they interact with the strategies you employ is the fun part. This simulator lets me scratch my craps itch very quickly.  
