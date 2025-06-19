@@ -55,6 +55,9 @@ const rules = {
 console.log(`[table rules] minimum bet: $${rules.minBet}`)
 
 for (let i = 0; i < numHands; i++) {
+  if (process.env.DEBUG) {
+    console.log(`\n================ HAND ${i + 1} ================`)
+  }
   const hand = playHand({ rules, bettingStrategy: minPassLineMaxOddsPlaceSixEight })
   hand.summary = Object.assign({}, summaryTemplate)
 
