@@ -85,15 +85,14 @@ function playHand ({ rules, bettingStrategy, roll = rollD6, balance = 0 }) {
       rules
     )
 
-    if (process.env.DEBUG) console.log(`[roll] ${hand.result} (${hand.diceSum})`)
+    if (process.env.DEBUG) console.log(`[🎲] ${hand.result} (${hand.diceSum})`)
 
     if (process.env.DEBUG) console.log('--> Settling bets!')
     bets = settle.all({ rules, bets, hand })
-
     const payouts = bets.payouts
     if (payouts?.total) {
       balance += payouts.total
-      if (process.env.DEBUG) console.log(`[payout] new payout $${payouts.total} ($${balance})`)
+      if (process.env.DEBUG) console.log(`[💰] new payout $${payouts.total} ($${balance})`)
     } else if (process.env.DEBUG) {
       console.log('[payout] no payout')
     }
