@@ -66,6 +66,7 @@ function playHand ({ rules, bettingStrategy, roll = rollD6, balance = 0 }) {
     bets = bettingStrategy({ rules, bets, hand })
     balance -= bets.new
     if (process.env.DEBUG) {
+      console.log(`-----Beginning Roll ${history.length + 1}-----\n`)
       if (bets.new) {
         console.log(`[bet] new bet $${bets.new} ($${balance})`)
       } else {

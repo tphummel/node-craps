@@ -399,8 +399,8 @@ tap.test('placeSix: win', (t) => {
 
   t.equal(result.payout.type, 'place 6 win')
   t.equal(result.payout.profit, 7)
-  t.equal(result.payout.principal, 0)
-  t.equal(result.bets.place.six.amount, 6)
+  t.equal(result.payout.principal, 6)
+  t.notOk(result.bets.place.six)
 
   t.end()
 })
@@ -418,8 +418,8 @@ tap.test('placeEight: win', (t) => {
 
   t.equal(result.payout.type, 'place 8 win')
   t.equal(result.payout.profit, 7)
-  t.equal(result.payout.principal, 0)
-  t.equal(result.bets.place.eight.amount, 6)
+  t.equal(result.payout.principal, 6)
+  t.notOk(result.bets.place.eight)
 
   t.end()
 })

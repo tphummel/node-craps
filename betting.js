@@ -2,9 +2,10 @@ function minPassLineOnly (opts) {
   const { rules, bets: existingBets, hand } = opts
   const bets = Object.assign({ new: 0 }, existingBets)
 
-  if (process.env.DEBUG) console.log(`[decision] make a new pass line bet?: ${hand.isComeOut} && ${!bets?.pass?.line}`)
+  const makeNewPassLineBet = hand.isComeOut && !bets?.pass?.line
+  if (process.env.DEBUG) console.log(`[decision] make a new pass line bet?: ${makeNewPassLineBet}`)
 
-  if (hand.isComeOut && !bets?.pass?.line) {
+  if (makeNewPassLineBet) {
     const newPassLineBet = {
       line: {
         amount: rules.minBet
@@ -13,7 +14,7 @@ function minPassLineOnly (opts) {
 
     bets.pass = newPassLineBet
     bets.new += bets.pass.line.amount
-    if (process.env.DEBUG) console.log(`[action] placing pass line bet $${bets.pass.line.amount}`)
+    if (process.env.DEBUG) console.log(`[action] make pass line bet $${bets.pass.line.amount}`)
   } else {
     if (process.env.DEBUG) console.log('[action] pass line bet unchanged')
   }
@@ -24,18 +25,18 @@ function minPassLineOnly (opts) {
 function minPassLineMaxOdds (opts) {
   const bets = minPassLineOnly(opts)
   const { rules, hand } = opts
+  const makeNewPassOddsBet = hand.isComeOut === false && !bets?.pass?.odds
+  if (process.env.DEBUG) console.log(`[decision] make a new pass odds bet?: ${makeNewPassOddsBet}`)
 
-  if (process.env.DEBUG) console.log(`[decision] make a new pass odds bet?: !hand.isComeOut: ${!hand.isComeOut} && !bets?.pass?.odds: ${!bets?.pass?.odds}`)
-
-  if (hand.isComeOut === false && !bets?.pass?.odds) {
+  if (makeNewPassOddsBet) {
     const oddsAmount = rules.maxOddsMultiple[hand.point] * bets.pass.line.amount
+    if (process.env.DEBUG) console.log(`[action] make pass odds bet $${oddsAmount}`)
     bets.pass.odds = {
       amount: oddsAmount
     }
     bets.new += oddsAmount
-    if (process.env.DEBUG) console.log(`[action] placing pass odds bet $${oddsAmount}`)
   } else {
-    if (process.env.DEBUG) console.log('[action] pass odds bet unchanged')
+    if (process.env.DEBUG) console.log('[decision] skip new pass odds bet')
   }
 
   return bets
@@ -57,13 +58,13 @@ function placeSixEight (opts) {
   if (!bets.place.six) {
     bets.place.six = { amount: placeAmount }
     bets.new += bets.place.six.amount
-    if (process.env.DEBUG) console.log(`[action] placing place 6 bet $${placeAmount}`)
+    if (process.env.DEBUG) console.log(`[action] make place 6 bet $${placeAmount}`)
   }
 
   if (!bets.place.eight) {
     bets.place.eight = { amount: placeAmount }
     bets.new += bets.place.eight.amount
-    if (process.env.DEBUG) console.log(`[action] placing place 8 bet $${placeAmount}`)
+    if (process.env.DEBUG) console.log(`[action] make place 8 bet $${placeAmount}`)
   }
 
   return bets
@@ -96,7 +97,6 @@ function placeSixEightUnlessPoint (opts) {
 }
 
 function minPassLineMaxOddsPlaceSixEight (opts) {
-  if (process.env.DEBUG) console.log('[decision] executing combined strategy')
   let bets = minPassLineMaxOdds(opts)
   bets = placeSixEightUnlessPoint({ ...opts, bets })
   return bets

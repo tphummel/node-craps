@@ -65,6 +65,7 @@ function passOdds ({ bets, hand, rules }) {
 
   if (hand.result === 'seven out') {
     if (process.env.DEBUG) console.log(`[payout] pass odds loss -$${payout.principal}`)
+    // don't return the payout argument for a loss
     return { bets }
   }
 
@@ -99,11 +100,19 @@ function placeBet ({ bets, hand, placeNumber }) {
   }
 
   if (hand.diceSum === placeNumber) {
+    const payouts = {
+      6: 7 / 6,
+      8: 7 / 6
+    }
+
     const payout = {
       type: `place ${placeNumber} win`,
-      principal: 0,
-      profit: bets.place[label].amount * (7 / 6)
+      principal: bets.place[label].amount,
+      profit: bets.place[label].amount * payouts[placeNumber]
     }
+
+    // bet comes down on a win to give control to the betting module to put it back up if desired
+    delete bets.place[label]
 
     if (process.env.DEBUG) console.log(`[payout] ${payout.type} $${payout.principal + payout.profit}`)
 
