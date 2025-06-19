@@ -63,10 +63,13 @@ function playHand ({ rules, bettingStrategy, roll = rollD6, balance = 0 }) {
   let bets
 
   while (hand.result !== 'seven out') {
+    if (process.env.DEBUG) {
+      console.log(`\n-----Beginning Roll ${history.length + 1}-----\n`)
+      console.log(`--> Applying betting strategy`)
+    }
     bets = bettingStrategy({ rules, bets, hand })
     balance -= bets.new
     if (process.env.DEBUG) {
-      console.log(`-----Beginning Roll ${history.length + 1}-----\n`)
       if (bets.new) {
         console.log(`[bet] new bet $${bets.new} ($${balance})`)
       } else {
@@ -75,7 +78,7 @@ function playHand ({ rules, bettingStrategy, roll = rollD6, balance = 0 }) {
     }
     const betsBefore = JSON.parse(JSON.stringify(bets))
     delete bets.new
-
+    console.log(`--> Rolling the dice!`)
     hand = shoot(
       hand,
       [roll(), roll()],
@@ -83,7 +86,8 @@ function playHand ({ rules, bettingStrategy, roll = rollD6, balance = 0 }) {
     )
 
     if (process.env.DEBUG) console.log(`[roll] ${hand.result} (${hand.diceSum})`)
-
+    
+      console.log(`--> Settling bets!`)
     bets = settle.all({ rules, bets, hand })
 
     const payouts = bets.payouts

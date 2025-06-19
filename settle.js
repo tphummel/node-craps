@@ -93,9 +93,9 @@ function placeBet ({ bets, hand, placeNumber }) {
   }
 
   if (hand.diceSum === 7) {
+    if (process.env.DEBUG) console.log(`[decision] place ${placeNumber} loss -$${bets.place[label].amount}`)
     delete bets.place[label]
     if (Object.keys(bets.place).length === 0) delete bets.place
-    if (process.env.DEBUG) console.log(`[decision] remove place ${placeNumber} bet due to seven out`)
     return { bets }
   }
 
