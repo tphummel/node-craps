@@ -2,9 +2,9 @@
 'use strict'
 
 const { playHand } = require('./index.js')
-const { minPassLineMaxOddsPlaceSixEight } = require('./betting.js')
+const bettingStrategies = require('./betting.js')
 
-function simulateHands (numHands, showDetail) {
+function simulateHands ({numHands, bettingStrategy, showDetail}) {
   const summaryTemplate = {
     balance: 0,
     rollCount: 0,
@@ -51,7 +51,7 @@ function simulateHands (numHands, showDetail) {
     if (process.env.DEBUG) {
       console.log(`\n================ HAND ${i + 1} ================`)
     }
-    const hand = playHand({ rules, bettingStrategy: minPassLineMaxOddsPlaceSixEight })
+    const hand = playHand({ rules, bettingStrategy: bettingStrategies[bettingStrategy] })
     hand.summary = Object.assign({}, summaryTemplate)
 
     sessionSummary.balance += hand.balance
@@ -160,10 +160,11 @@ function printResults ({ sessionSummary, hands, showDetail, rules }) {
 
 if (require.main === module) {
   const numHands = parseInt(process.argv[2], 10)
-  const showDetail = process.argv[3]
+  const bettingStrategy = process.argv[3]
+  const showDetail = process.argv[4]
   console.log(`Simulating ${numHands} Craps Hand(s)`)
-  console.log('Using betting strategy: minPassLineMaxOddsPlaceSixEight')
-  const result = simulateHands(numHands, showDetail)
+  console.log(`Using betting strategy: ${bettingStrategy}`)
+  const result = simulateHands({numHands, showDetail, bettingStrategy})
   printResults({ ...result, showDetail })
 } else {
   module.exports = simulateHands

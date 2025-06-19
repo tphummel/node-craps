@@ -2,7 +2,7 @@
 'use strict'
 
 const { playHand } = require('./index.js')
-const { minPassLineMaxOddsPlaceSixEight } = require('./betting.js')
+const bettingStrategies = require('./betting.js')
 
 function parseOdds (str) {
   const parts = String(str).split('-').map(n => parseInt(n, 10))
@@ -80,13 +80,13 @@ function summaryTable (arr) {
   }
 }
 
-function simulateTrial ({ handsPerTrial, startingBankroll, rules }) {
+function simulateTrial ({ handsPerTrial, startingBankroll, rules, bettingStrategy }) {
   let balance = startingBankroll
   let rolls = 0
   for (let i = 0; i < handsPerTrial; i++) {
     const { history, balance: result } = playHand({
       rules,
-      bettingStrategy: minPassLineMaxOddsPlaceSixEight
+      bettingStrategy
     })
     balance += result
     rolls += history.length
@@ -94,10 +94,10 @@ function simulateTrial ({ handsPerTrial, startingBankroll, rules }) {
   return { balance, rolls }
 }
 
-function monteCarlo ({ trials, handsPerTrial, startingBankroll, rules }) {
+function monteCarlo ({ trials, handsPerTrial, startingBankroll, rules, bettingStrategy }) {
   const results = []
   for (let i = 0; i < trials; i++) {
-    results.push(simulateTrial({ handsPerTrial, startingBankroll, rules }))
+    results.push(simulateTrial({ handsPerTrial, startingBankroll, rules, bettingStrategy }))
   }
   return results
 }
@@ -130,6 +130,16 @@ if (require.main === module) {
   const minBet = parseInt(process.argv[5], 10)
   const oddsInput = process.argv[6] || '3-4-5'
 
+  // {
+  //   minPassLineOnly,
+  //   minPassLineMaxOdds,
+  //   placeSixEight,
+  //   placeSixEightUnlessPoint,
+  //   minPassLinePlaceSixEight,
+  //   minPassLineMaxOddsPlaceSixEight
+  // }
+  const bettingStrategy = process.argv[7] || 'minPassLineMaxOddsPlaceSixEight'
+
   const rules = {
     minBet,
     maxOddsMultiple: parseOdds(oddsInput)
@@ -137,7 +147,8 @@ if (require.main === module) {
 
   console.log(`Running ${trials} trials with ${handsPerTrial} hand(s) each`)
   console.log(`[table rules] minimum bet: $${minBet}, odds ${oddsInput}`)
-  const results = monteCarlo({ trials, handsPerTrial, startingBankroll, rules })
+  console.log(`betting strategy: ${bettingStrategy}`)
+  const results = monteCarlo({ trials, handsPerTrial, startingBankroll, rules, bettingStrategy: bettingStrategies[bettingStrategy] })
   printResults(results)
 } else {
   module.exports = { monteCarlo, simulateTrial, summary }

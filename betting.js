@@ -94,6 +94,12 @@ function placeSixEightUnlessPoint (opts) {
   return bets
 }
 
+function minPassLinePlaceSixEight (opts) {
+  let bets = minPassLineOnly(opts)
+  bets = placeSixEightUnlessPoint({ ...opts, bets })
+  return bets
+}
+
 function minPassLineMaxOddsPlaceSixEight (opts) {
   let bets = minPassLineMaxOdds(opts)
   bets = placeSixEightUnlessPoint({ ...opts, bets })
@@ -104,6 +110,6 @@ module.exports = {
   minPassLineOnly,
   minPassLineMaxOdds,
   placeSixEight,
-  placeSixEightUnlessPoint,
+  minPassLinePlaceSixEight,
   minPassLineMaxOddsPlaceSixEight
 }
