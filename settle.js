@@ -83,23 +83,20 @@ function placeBet ({ bets, hand, placeNumber }) {
     if (process.env.DEBUG) console.log(`[decision] no place ${placeNumber} bet`)
     return { bets }
   }
-  if (hand.isComeOut && hand.result !== 'seven out') {
-    if (process.env.DEBUG) console.log(`[decision] place ${placeNumber} bet no action on comeout`)
-    return { bets }
-  }
   if (hand.result === 'point set') {
     if (process.env.DEBUG) console.log(`[decision] place ${placeNumber} bet waits for next roll`)
     return { bets }
   }
 
-  if (hand.diceSum === 7) {
+  if (hand.diceSum === 7 && hand.result === 'seven out') {
     if (process.env.DEBUG) console.log(`[decision] place ${placeNumber} loss -$${bets.place[label].amount}`)
     delete bets.place[label]
     if (Object.keys(bets.place).length === 0) delete bets.place
     return { bets }
   }
 
-  if (hand.diceSum === placeNumber) {
+  // place bets are off on comeout. if a point is set matching the place number, the bet doesn't win
+  if (hand.diceSum === placeNumber && hand.result !== 'point set') {
     const payouts = {
       6: 7 / 6,
       8: 7 / 6
@@ -113,8 +110,6 @@ function placeBet ({ bets, hand, placeNumber }) {
 
     // bet comes down on a win to give control to the betting module to put it back up if desired
     delete bets.place[label]
-
-    if (process.env.DEBUG) console.log(`[payout] ${payout.type} $${payout.principal + payout.profit}`)
 
     return { payout, bets }
   }

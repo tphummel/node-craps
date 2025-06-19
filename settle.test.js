@@ -514,3 +514,37 @@ tap.test('place bet on 8 persists when point is 8', (t) => {
 
   t.end()
 })
+
+tap.test('place bet on 6 pays on point win of 6', (t) => {
+  const bets = { place: { six: { amount: 6 } } }
+
+  const hand = {
+    result: 'point win',
+    isComeOut: true,
+    diceSum: 6
+  }
+
+  const settled = settle.all({ bets, hand })
+
+  t.notOk(settled.place.six)
+  t.equal(settled.payouts.total, 13)
+
+  t.end()
+})
+
+tap.test('place bet on 8 pays on point win of 8', (t) => {
+  const bets = { place: { eight: { amount: 6 } } }
+
+  const hand = {
+    result: 'point win',
+    isComeOut: true,
+    diceSum: 8
+  }
+
+  const settled = settle.all({ bets, hand })
+
+  t.notOk(settled.place.eight)
+  t.equal(settled.payouts.total, 13)
+
+  t.end()
+})
