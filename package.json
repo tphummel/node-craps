@@ -29,6 +29,7 @@
     "tap": "^15.0.9"
   },
   "bin": {
-    "craps-monte": "./monte-carlo.js"
+    "craps-monte": "./monte-carlo.js",
+    "craps-hands": "./hands.js"
   }
 }

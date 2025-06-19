@@ -40,6 +40,12 @@ function summary (arr) {
   }
 }
 
+function summaryTable (arr) {
+  const obj = summary(arr)
+  const order = ['min', 'max', 'p1', 'p5', 'p10', 'p25', 'p50', 'p75', 'p90', 'p95', 'p99']
+  return order.map(k => ({ stat: k, value: obj[k] }))
+}
+
 function simulateTrial ({ handsPerTrial, startingBankroll, rules }) {
   let balance = startingBankroll
   let rolls = 0
@@ -67,10 +73,10 @@ function printResults (results) {
   console.table(results.map((r, i) => ({ trial: i + 1, balance: r.balance, rolls: r.rolls })))
 
   console.log('\nFinal Balance Summary')
-  console.table(summary(results.map(r => r.balance)))
+  console.table(summaryTable(results.map(r => r.balance)))
 
   console.log('\nRoll Count Summary')
-  console.table(summary(results.map(r => r.rolls)))
+  console.table(summaryTable(results.map(r => r.rolls)))
 }
 
 if (require.main === module) {
