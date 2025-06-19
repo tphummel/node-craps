@@ -96,6 +96,58 @@ const result = simulateHands(1)
 console.log(result.sessionSummary)
 ```
 
+## monte carlo simulation
+
+Run many trials to see how a strategy performs over time.
+
+```bash
+$ node monte-carlo.js 2 5 500 5 3-4-5
+Running 2 trials with 5 hand(s) each
+[table rules] minimum bet: $5, odds 3-4-5
+
+Trial Results
+┌─────────┬───────┬─────────┬───────┐
+│ (index) │ trial │ balance │ rolls │
+├─────────┼───────┼─────────┼───────┤
+│ 0       │ 1     │ 614     │ 65    │
+│ 1       │ 2     │ 416     │ 25    │
+└─────────┴───────┴─────────┴───────┘
+
+Final Balance Summary
+┌─────────┬────────┐
+│ (index) │ Values │
+├─────────┼────────┤
+│ min     │ 416    │
+│ max     │ 614    │
+│ p1      │ 416    │
+│ p5      │ 416    │
+│ p10     │ 416    │
+│ p25     │ 416    │
+│ p50     │ 416    │
+│ p75     │ 614    │
+│ p90     │ 614    │
+│ p95     │ 614    │
+│ p99     │ 614    │
+└─────────┴────────┘
+
+Roll Count Summary
+┌─────────┬────────┐
+│ (index) │ Values │
+├─────────┼────────┤
+│ min     │ 25     │
+│ max     │ 65     │
+│ p1      │ 25     │
+│ p5      │ 25     │
+│ p10     │ 25     │
+│ p25     │ 25     │
+│ p50     │ 25     │
+│ p75     │ 65     │
+│ p90     │ 65     │
+│ p95     │ 65     │
+│ p99     │ 65     │
+└─────────┴────────┘
+```
+
 ## table rules
 
 `playHand` accepts a `rules` object that controls minimum bets and odds limits.
