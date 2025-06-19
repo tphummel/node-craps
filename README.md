@@ -102,6 +102,9 @@ const rules = {
 }
 ```
 
+`playHand` also accepts a `balance` option to specify the starting amount for a
+hand. It defaults to `0`.
+
 For example, to make boxcars (12) a come out win instead of a loss:
 
 ```js
