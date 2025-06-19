@@ -537,3 +537,53 @@ tap.test('integration: placeSixEight returns payout details', (t) => {
 
   t.end()
 })
+
+tap.test('integration: starting balance is applied', (t) => {
+  let rollCount = -1
+  const fixedRolls = [
+    4, 3, // comeout win
+    5, 6, // comeout win
+    1, 1, // comeout loss
+    1, 2, // comeout loss
+    6, 6, // comeout loss
+    3, 3, // point set
+    4, 1, // neutral
+    2, 4, // point win
+    4, 4, // point set
+    3, 4 // seven out
+  ]
+
+  function testRoll () {
+    rollCount++
+    if (!fixedRolls[rollCount]) {
+      console.log('falsy return from fixed dice')
+      process.exit(1)
+    }
+    return fixedRolls[rollCount]
+  }
+
+  const rules = {
+    minBet: 5,
+    maxOddsMultiple: {
+      4: 3,
+      5: 4,
+      6: 5,
+      8: 5,
+      9: 4,
+      10: 3
+    }
+  }
+
+  const startingBalance = 50
+  const hand = lib.playHand({
+    rules,
+    roll: testRoll,
+    bettingStrategy: betting.minPassLineOnly,
+    balance: startingBalance
+  })
+
+  t.ok(Array.isArray(hand.history))
+  t.equal(hand.balance, startingBalance - 5)
+
+  t.end()
+})
