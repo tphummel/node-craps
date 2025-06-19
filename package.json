@@ -27,5 +27,9 @@
   "devDependencies": {
     "standard": "^16.0.3",
     "tap": "^15.0.9"
+  },
+  "bin": {
+    "craps-monte": "./monte-carlo.js",
+    "craps-hands": "./hands.js"
   }
 }
