@@ -71,19 +71,19 @@ function placeSixEight (opts) {
 }
 
 function placeSixEightUnlessPoint (opts) {
-  const { bets: existingBets = {}, hand } = opts
+  const { hand } = opts
 
   // Use the regular place bet logic first
   const bets = placeSixEight(opts)
 
   // Remove any newly created bet that matches the point
-  if (hand.point === 6 && !existingBets?.place?.six && bets.place?.six) {
+  if (hand.point === 6 && bets.place?.six) {
     bets.new -= bets.place.six.amount
     delete bets.place.six
     if (process.env.DEBUG) console.log('[decision] removed place 6 bet matching point')
   }
 
-  if (hand.point === 8 && !existingBets?.place?.eight && bets.place?.eight) {
+  if (hand.point === 8 && bets.place?.eight) {
     bets.new -= bets.place.eight.amount
     delete bets.place.eight
     if (process.env.DEBUG) console.log('[decision] removed place 8 bet matching point')

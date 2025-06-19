@@ -342,7 +342,7 @@ tap.test('minPassLineMaxOddsPlaceSixEight: odds and place bets adjusted', (t) =>
   t.equal(second.new, second.pass.odds.amount + 6)
 
   const pointSixAgain = { isComeOut: false, result: 'neutral', point: 6 }
-  const third = lib.minPassLineMaxOddsPlaceSixEight({ rules, bets: first, hand: pointSixAgain })
+  const third = lib.minPassLineMaxOddsPlaceSixEight({ rules, bets: second, hand: pointSixAgain })
 
   t.equal(third.pass.odds.amount, rules.maxOddsMultiple['6'] * rules.minBet)
   t.notOk(third.place?.six)
