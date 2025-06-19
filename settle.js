@@ -151,7 +151,7 @@ function all ({ bets, hand, rules }) {
 
   bets.payouts = payouts.reduce((memo, payout) => {
     if (!payout) return memo
-    if (process.env.DEBUG) console.log(`[payout] ${payout.type} $${payout.principal + payout.profit}`)
+    if (process.env.DEBUG) console.log(`[payout] ${payout.type} $${payout.principal + payout.profit} (principal: ${payout.principal}, profit: ${payout.profit})`)
 
     memo.principal += payout.principal
     memo.profit += payout.profit
