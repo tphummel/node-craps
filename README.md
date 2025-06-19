@@ -88,6 +88,14 @@ Hand: 1
 └─────────┴──────┴──────┴─────────┴─────────────┴───────────┴───────┘
 ```
 
+## use as a module
+
+```js
+const simulateHands = require('./hands.js')
+const result = simulateHands(1)
+console.log(result.sessionSummary)
+```
+
 ## table rules
 
 `playHand` accepts a `rules` object that controls minimum bets and odds limits.
