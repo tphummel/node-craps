@@ -103,8 +103,12 @@ function monteCarlo ({ trials, handsPerTrial, startingBankroll, rules }) {
 }
 
 function printResults (results) {
-  console.log('\nTrial Results')
-  console.table(results.map((r, i) => ({ trial: i + 1, balance: r.balance, rolls: r.rolls })))
+  if (results.length <= 100) {
+    console.log('\nTrial Results')
+    console.table(results.map((r, i) => ({ trial: i + 1, balance: r.balance, rolls: r.rolls })))
+  } else {
+    console.log(`\nTrial Results omitted (too many trials: ${results.length})`)
+  }
 
   console.log('\nFinal Balance Summary')
   const balanceSummary = summaryTable(results.map(r => r.balance))
