@@ -25,8 +25,21 @@ function percentile (sorted, p) {
 
 function summary (arr) {
   const sorted = [...arr].sort((a, b) => a - b)
+  const mean = arr.reduce((m, v) => m + v, 0) / arr.length
+  const variance = arr.length > 1
+    ? arr.reduce((m, v) => m + Math.pow(v - mean, 2), 0) / (arr.length - 1)
+    : 0
+  const stdDev = Math.sqrt(variance)
+  const stdErr = stdDev / Math.sqrt(arr.length)
+  const ci95Low = mean - (1.96 * stdErr)
+  const ci95High = mean + (1.96 * stdErr)
+
   return {
     min: sorted[0],
+    mean,
+    stdDev,
+    ci95Low,
+    ci95High,
     max: sorted[sorted.length - 1],
     p1: percentile(sorted, 1),
     p5: percentile(sorted, 5),
@@ -42,8 +55,29 @@ function summary (arr) {
 
 function summaryTable (arr) {
   const obj = summary(arr)
-  const order = ['min', 'p1', 'p5', 'p10', 'p25', 'p50', 'p75', 'p90', 'p95', 'p99', 'max']
-  return order.map(k => ({ stat: k, value: obj[k] }))
+  const order = [
+    'min',
+    'p1',
+    'p5',
+    'p10',
+    'p25',
+    'p50',
+    'mean',
+    'p75',
+    'p90',
+    'p95',
+    'p99',
+    'max'
+  ]
+  const table = order
+    .map(k => ({ stat: k, value: obj[k] }))
+    .sort((a, b) => a.value - b.value || order.indexOf(a.stat) - order.indexOf(b.stat))
+  return {
+    table,
+    stdDev: obj.stdDev,
+    ci95Low: obj.ci95Low,
+    ci95High: obj.ci95High
+  }
 }
 
 function simulateTrial ({ handsPerTrial, startingBankroll, rules }) {
@@ -73,10 +107,16 @@ function printResults (results) {
   console.table(results.map((r, i) => ({ trial: i + 1, balance: r.balance, rolls: r.rolls })))
 
   console.log('\nFinal Balance Summary')
-  console.table(summaryTable(results.map(r => r.balance)))
+  const balanceSummary = summaryTable(results.map(r => r.balance))
+  console.table(balanceSummary.table)
+  console.log(`stdDev: ${balanceSummary.stdDev.toFixed(2)}`)
+  console.log(`95% CI: [${balanceSummary.ci95Low.toFixed(2)}, ${balanceSummary.ci95High.toFixed(2)}]`)
 
   console.log('\nRoll Count Summary')
-  console.table(summaryTable(results.map(r => r.rolls)))
+  const rollSummary = summaryTable(results.map(r => r.rolls))
+  console.table(rollSummary.table)
+  console.log(`stdDev: ${rollSummary.stdDev.toFixed(2)}`)
+  console.log(`95% CI: [${rollSummary.ci95Low.toFixed(2)}, ${rollSummary.ci95High.toFixed(2)}]`)
 }
 
 if (require.main === module) {
