@@ -4,6 +4,21 @@
 const { playHand } = require('./index.js')
 const { minPassLineMaxOddsPlaceSixEight } = require('./betting.js')
 
+// approximate two-sided t statistic for 95% confidence
+// derived from a normal z score with adjustments for sample size
+function tCritical95 (df) {
+  if (df <= 0) return NaN
+  const z = 1.96 // 95% z-score under a normal distribution
+  const z2 = z * z
+  const z3 = z2 * z
+  const z5 = z3 * z2
+  const z7 = z5 * z2
+  let t = z + (z3 + z) / (4 * df)
+  t += (5 * z5 + 16 * z3 + 3 * z) / (96 * df * df)
+  t += (3 * z7 + 19 * z5 + 17 * z3 - 15 * z) / (384 * df * df * df)
+  return t
+}
+
 function parseOdds (str) {
   const parts = String(str).split('-').map(n => parseInt(n, 10))
   if (parts.length !== 3 || parts.some(n => isNaN(n))) return {}
@@ -24,8 +39,18 @@ function percentile (sorted, p) {
 }
 
 function summary (arr) {
+  const n = arr.length
   const sorted = [...arr].sort((a, b) => a - b)
+  const mean = arr.reduce((m, n) => m + n, 0) / n
+  const variance = arr.reduce((m, n) => m + Math.pow(n - mean, 2), 0) / n
+  const stDev = Math.sqrt(variance)
+  const z95 = tCritical95(n - 1)
   return {
+    mean,
+    stDev,
+    // z95 derives from the Student's t distribution for this sample size
+    ci95Low: mean - z95 * stDev / Math.sqrt(n),
+    ci95High: mean + z95 * stDev / Math.sqrt(n),
     min: sorted[0],
     max: sorted[sorted.length - 1],
     p1: percentile(sorted, 1),
