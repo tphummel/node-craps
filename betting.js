@@ -76,8 +76,6 @@ function placeSixEightUnlessPoint (opts) {
   // Use the regular place bet logic first
   const bets = placeSixEight(opts)
 
-  if (hand.isComeOut) return bets
-
   // Remove any newly created bet that matches the point
   if (hand.point === 6 && !existingBets?.place?.six && bets.place?.six) {
     bets.new -= bets.place.six.amount
