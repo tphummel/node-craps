@@ -114,39 +114,50 @@ Trial Results
 └─────────┴───────┴─────────┴───────┘
 
 Final Balance Summary
-┌─────────┬────────┐
-│ (index) │ Values │
-├─────────┼────────┤
-│ min     │ 416    │
-│ p1      │ 416    │
-│ p5      │ 416    │
-│ p10     │ 416    │
-│ p25     │ 416    │
-│ p50     │ 416    │
-│ p75     │ 614    │
-│ p90     │ 614    │
-│ p95     │ 614    │
-│ p99     │ 614    │
-│ max     │ 614    │
-└─────────┴────────┘
+┌─────────┬────────┬────────┐
+│ (index) │ stat   │ value  │
+├─────────┼────────┼────────┤
+│ 0       │ min    │ 416    │
+│ 1       │ p1     │ 416    │
+│ 2       │ p5     │ 416    │
+│ 3       │ p10    │ 416    │
+│ 4       │ p25    │ 416    │
+│ 5       │ p50    │ 416    │
+│ 6       │ mean   │ 515    │
+│ 7       │ p75    │ 614    │
+│ 8       │ p90    │ 614    │
+│ 9       │ p95    │ 614    │
+│ 10      │ p99    │ 614    │
+│ 11      │ max    │ 614    │
+└─────────┴────────┴────────┘
+stdDev: 140.01
+95% CI: [320.96, 709.04]
 
 Roll Count Summary
-┌─────────┬────────┐
-│ (index) │ Values │
-├─────────┼────────┤
-│ min     │ 25     │
-│ p1      │ 25     │
-│ p5      │ 25     │
-│ p10     │ 25     │
-│ p25     │ 25     │
-│ p50     │ 25     │
-│ p75     │ 65     │
-│ p90     │ 65     │
-│ p95     │ 65     │
-│ p99     │ 65     │
-│ max     │ 65     │
-└─────────┴────────┘
+┌─────────┬────────┬────────┐
+│ (index) │ stat   │ value  │
+├─────────┼────────┼────────┤
+│ 0       │ min    │ 25     │
+│ 1       │ p1     │ 25     │
+│ 2       │ p5     │ 25     │
+│ 3       │ p10    │ 25     │
+│ 4       │ p25    │ 25     │
+│ 5       │ p50    │ 25     │
+│ 6       │ mean   │ 45     │
+│ 7       │ p75    │ 65     │
+│ 8       │ p90    │ 65     │
+│ 9       │ p95    │ 65     │
+│ 10      │ p99    │ 65     │
+│ 11      │ max    │ 65     │
+└─────────┴────────┴────────┘
+stdDev: 28.28
+95% CI: [5.80, 84.20]
 ```
+
+The standard deviation shows how widely the trials vary around the mean.
+Roughly 68% of results will fall within one standard deviation, 95% within
+two, and 99.7% within three. The 95% confidence interval is a range that is
+expected to contain the true mean in 95% of repeated samples.
 
 ## table rules
 
