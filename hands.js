@@ -7,7 +7,7 @@ const numHands = parseInt(process.argv.slice(2)[0], 10)
 const showDetail = process.argv.slice(2)[1]
 
 console.log(`Simulating ${numHands} Craps Hand(s)`)
-console.log('Using betting strategy: placeSixEight')
+console.log('Using betting strategy: minPassLineMaxOddsPlaceSixEight')
 
 const summaryTemplate = {
   balance: 0,
@@ -41,7 +41,7 @@ const sessionSummary = Object.assign({}, summaryTemplate)
 
 const hands = []
 const rules = {
-  minBet: 5,
+  minBet: 10,
   maxOddsMultiple: {
     4: 3,
     5: 4,
