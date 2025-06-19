@@ -66,7 +66,13 @@ function playHand ({ rules, bettingStrategy, roll = rollD6 }) {
   while (hand.result !== 'seven out') {
     bets = bettingStrategy({ rules, bets, hand })
     balance -= bets.new
-    if (process.env.DEBUG && bets.new) console.log(`[bet] new bet $${bets.new} ($${balance})`)
+    if (process.env.DEBUG) {
+      if (bets.new) {
+        console.log(`[bet] new bet $${bets.new} ($${balance})`)
+      } else {
+        console.log('[bet] no new bet')
+      }
+    }
     const betsBefore = JSON.parse(JSON.stringify(bets))
     delete bets.new
 
@@ -84,6 +90,8 @@ function playHand ({ rules, bettingStrategy, roll = rollD6 }) {
     if (payouts?.total) {
       balance += payouts.total
       if (process.env.DEBUG) console.log(`[payout] new payout $${payouts.total} ($${balance})`)
+    } else if (process.env.DEBUG) {
+      console.log('[payout] no payout')
     }
 
     if (payouts?.ledger?.length) {
