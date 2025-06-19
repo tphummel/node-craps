@@ -14,7 +14,10 @@ function passLine ({ bets, hand, rules }) {
 
   delete bets.pass.line // clear pass line bet on action
 
-  if (hand.result === 'comeout loss' || hand.result === 'seven out') return { bets }
+  if (hand.result === 'comeout loss' || hand.result === 'seven out') {
+    if (process.env.DEBUG) console.log(`[payout] pass line loss -$${payout.principal}`)
+    return { bets }
+  }
 
   if (process.env.DEBUG) {
     console.log(`[payout] ${payout.type} $${payout.principal + payout.profit}`)
@@ -48,7 +51,10 @@ function passOdds ({ bets, hand, rules }) {
 
   delete bets.pass.odds // clear pass odds bet on action
 
-  if (hand.result === 'seven out') return { bets }
+  if (hand.result === 'seven out') {
+    if (process.env.DEBUG) console.log(`[payout] pass odds loss -$${payout.principal}`)
+    return { bets }
+  }
 
   if (process.env.DEBUG) {
     console.log(`[payout] ${payout.type} $${payout.principal + payout.profit}`)
@@ -61,8 +67,14 @@ function placeBet ({ bets, hand, placeNumber }) {
   const label = placeNumber === 6 ? 'six' : placeNumber === 8 ? 'eight' : String(placeNumber)
 
   if (!bets?.place?.[label]) return { bets }
-  if (hand.isComeOut && hand.result !== 'seven out') return { bets }
-  if (hand.result === 'point set') return { bets }
+  if (hand.isComeOut && hand.result !== 'seven out') {
+    if (process.env.DEBUG) console.log(`[decision] place ${placeNumber} bet no action on comeout`)
+    return { bets }
+  }
+  if (hand.result === 'point set') {
+    if (process.env.DEBUG) console.log(`[decision] place ${placeNumber} bet waits for next roll`)
+    return { bets }
+  }
 
   if (hand.diceSum === 7) {
     delete bets.place[label]
