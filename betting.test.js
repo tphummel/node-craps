@@ -350,3 +350,503 @@ tap.test('minPassLineMaxOddsPlaceSixEight: odds and place bets adjusted', (t) =>
 
   t.end()
 })
+
+tap.test('minPassLinePlaceSixEight: comeout establishes pass line', (t) => {
+  const rules = { minBet: 5 }
+  const comeOut = { isComeOut: true }
+
+  const bets = lib.minPassLinePlaceSixEight({ rules, hand: comeOut })
+
+  t.equal(bets.pass.line.amount, rules.minBet)
+  t.notOk(bets.place, 'no place bets on comeout')
+  t.equal(bets.new, rules.minBet)
+
+  t.end()
+})
+
+tap.test('minPassLinePlaceSixEight: point 6 adds only place 8', (t) => {
+  const rules = { minBet: 5 }
+
+  const comeOut = { isComeOut: true }
+  const first = lib.minPassLinePlaceSixEight({ rules, hand: comeOut })
+  delete first.new
+
+  const pointSix = { isComeOut: false, result: 'point set', point: 6 }
+  const second = lib.minPassLinePlaceSixEight({ rules, bets: first, hand: pointSix })
+
+  t.equal(second.pass.line.amount, rules.minBet)
+  t.notOk(second.place?.six, 'no place 6 when 6 is the point')
+  t.equal(second.place.eight.amount, 6)
+  t.equal(second.new, 6)
+
+  t.end()
+})
+
+tap.test('minPassLinePlaceSixEight: point 8 adds only place 6', (t) => {
+  const rules = { minBet: 5 }
+
+  const comeOut = { isComeOut: true }
+  const first = lib.minPassLinePlaceSixEight({ rules, hand: comeOut })
+  delete first.new
+
+  const pointEight = { isComeOut: false, result: 'point set', point: 8 }
+  const second = lib.minPassLinePlaceSixEight({ rules, bets: first, hand: pointEight })
+
+  t.equal(second.pass.line.amount, rules.minBet)
+  t.equal(second.place.six.amount, 6)
+  t.notOk(second.place?.eight, 'no place 8 when 8 is the point')
+  t.equal(second.new, 6)
+
+  t.end()
+})
+
+tap.test('minPassLinePlaceSixEight: point 5 adds both place bets', (t) => {
+  const rules = { minBet: 5 }
+
+  const comeOut = { isComeOut: true }
+  const first = lib.minPassLinePlaceSixEight({ rules, hand: comeOut })
+  delete first.new
+
+  const pointFive = { isComeOut: false, result: 'point set', point: 5 }
+  const second = lib.minPassLinePlaceSixEight({ rules, bets: first, hand: pointFive })
+
+  t.equal(second.pass.line.amount, rules.minBet)
+  t.equal(second.place.six.amount, 6)
+  t.equal(second.place.eight.amount, 6)
+  t.equal(second.new, 12)
+
+  t.end()
+})
+
+tap.test('minPassLinePlaceSixEight: existing bets remain unchanged', (t) => {
+  const rules = { minBet: 5 }
+
+  const hand = { isComeOut: false, point: 5 }
+  const bets = {
+    pass: { line: { amount: 5, isContract: true } },
+    place: { six: { amount: 6 }, eight: { amount: 6 } }
+  }
+
+  const updated = lib.minPassLinePlaceSixEight({ rules, bets, hand })
+
+  t.equal(updated.pass.line.amount, 5)
+  t.equal(updated.place.six.amount, 6)
+  t.equal(updated.place.eight.amount, 6)
+  t.notOk(updated.new, 'no new bets when all exist')
+
+  t.end()
+})
+
+// Priority 2: Test all points (4, 5, 6, 8, 9, 10) with odds calculations
+tap.test('minPassLineMaxOdds: all points have correct odds multiples', (t) => {
+  const rules = {
+    minBet: 5,
+    maxOddsMultiple: {
+      4: 3,
+      5: 4,
+      6: 5,
+      8: 5,
+      9: 4,
+      10: 3
+    }
+  }
+
+  const points = [4, 5, 6, 8, 9, 10]
+
+  points.forEach(point => {
+    const bets = {
+      pass: {
+        line: {
+          amount: 5,
+          isContract: true
+        }
+      }
+    }
+
+    const hand = {
+      isComeOut: false,
+      result: 'point set',
+      point
+    }
+
+    const updated = lib.minPassLineMaxOdds({ rules, bets, hand })
+
+    t.equal(updated.pass.odds.amount, rules.maxOddsMultiple[point] * rules.minBet,
+      `point ${point} should have ${rules.maxOddsMultiple[point]}x odds`)
+    t.equal(updated.new, rules.maxOddsMultiple[point] * rules.minBet,
+      `point ${point} new bet amount correct`)
+  })
+
+  t.end()
+})
+
+tap.test('minPassLineMaxOddsPlaceSixEight: all points work correctly', (t) => {
+  const rules = {
+    minBet: 5,
+    maxOddsMultiple: {
+      4: 3,
+      5: 4,
+      6: 5,
+      8: 5,
+      9: 4,
+      10: 3
+    }
+  }
+
+  // Point 4: both place bets should be added
+  const point4Hand = { isComeOut: false, result: 'point set', point: 4 }
+  const bets4 = { pass: { line: { amount: 5, isContract: true } } }
+  const result4 = lib.minPassLineMaxOddsPlaceSixEight({ rules, bets: bets4, hand: point4Hand })
+
+  t.equal(result4.pass.odds.amount, 15, 'point 4 has 3x odds')
+  t.equal(result4.place.six.amount, 6, 'place 6 added for point 4')
+  t.equal(result4.place.eight.amount, 6, 'place 8 added for point 4')
+  t.equal(result4.new, 27, 'total new bets for point 4')
+
+  // Point 5: both place bets should be added
+  const point5Hand = { isComeOut: false, result: 'point set', point: 5 }
+  const bets5 = { pass: { line: { amount: 5, isContract: true } } }
+  const result5 = lib.minPassLineMaxOddsPlaceSixEight({ rules, bets: bets5, hand: point5Hand })
+
+  t.equal(result5.pass.odds.amount, 20, 'point 5 has 4x odds')
+  t.equal(result5.place.six.amount, 6, 'place 6 added for point 5')
+  t.equal(result5.place.eight.amount, 6, 'place 8 added for point 5')
+  t.equal(result5.new, 32, 'total new bets for point 5')
+
+  // Point 6: only place 8 should be added
+  const point6Hand = { isComeOut: false, result: 'point set', point: 6 }
+  const bets6 = { pass: { line: { amount: 5, isContract: true } } }
+  const result6 = lib.minPassLineMaxOddsPlaceSixEight({ rules, bets: bets6, hand: point6Hand })
+
+  t.equal(result6.pass.odds.amount, 25, 'point 6 has 5x odds')
+  t.notOk(result6.place?.six, 'no place 6 when 6 is the point')
+  t.equal(result6.place.eight.amount, 6, 'place 8 added for point 6')
+  t.equal(result6.new, 31, 'total new bets for point 6')
+
+  // Point 8: only place 6 should be added
+  const point8Hand = { isComeOut: false, result: 'point set', point: 8 }
+  const bets8 = { pass: { line: { amount: 5, isContract: true } } }
+  const result8 = lib.minPassLineMaxOddsPlaceSixEight({ rules, bets: bets8, hand: point8Hand })
+
+  t.equal(result8.pass.odds.amount, 25, 'point 8 has 5x odds')
+  t.equal(result8.place.six.amount, 6, 'place 6 added for point 8')
+  t.notOk(result8.place?.eight, 'no place 8 when 8 is the point')
+  t.equal(result8.new, 31, 'total new bets for point 8')
+
+  // Point 9: both place bets should be added
+  const point9Hand = { isComeOut: false, result: 'point set', point: 9 }
+  const bets9 = { pass: { line: { amount: 5, isContract: true } } }
+  const result9 = lib.minPassLineMaxOddsPlaceSixEight({ rules, bets: bets9, hand: point9Hand })
+
+  t.equal(result9.pass.odds.amount, 20, 'point 9 has 4x odds')
+  t.equal(result9.place.six.amount, 6, 'place 6 added for point 9')
+  t.equal(result9.place.eight.amount, 6, 'place 8 added for point 9')
+  t.equal(result9.new, 32, 'total new bets for point 9')
+
+  // Point 10: both place bets should be added
+  const point10Hand = { isComeOut: false, result: 'point set', point: 10 }
+  const bets10 = { pass: { line: { amount: 5, isContract: true } } }
+  const result10 = lib.minPassLineMaxOddsPlaceSixEight({ rules, bets: bets10, hand: point10Hand })
+
+  t.equal(result10.pass.odds.amount, 15, 'point 10 has 3x odds')
+  t.equal(result10.place.six.amount, 6, 'place 6 added for point 10')
+  t.equal(result10.place.eight.amount, 6, 'place 8 added for point 10')
+  t.equal(result10.new, 27, 'total new bets for point 10')
+
+  t.end()
+})
+
+// Priority 2: Test state transitions
+tap.test('minPassLineMaxOddsPlaceSixEight: full roll cycle comeout to seven out', (t) => {
+  const rules = {
+    minBet: 5,
+    maxOddsMultiple: {
+      4: 3,
+      5: 4,
+      6: 5,
+      8: 5,
+      9: 4,
+      10: 3
+    }
+  }
+
+  // Roll 1: Comeout - establish pass line
+  const roll1Hand = { isComeOut: true }
+  const roll1Bets = lib.minPassLineMaxOddsPlaceSixEight({ rules, hand: roll1Hand })
+
+  t.equal(roll1Bets.pass.line.amount, 5, 'roll 1: pass line established')
+  t.notOk(roll1Bets.place, 'roll 1: no place bets on comeout')
+  t.equal(roll1Bets.new, 5, 'roll 1: only pass line bet')
+
+  delete roll1Bets.new
+
+  // Roll 2: Point set to 5 - add odds and place bets
+  const roll2Hand = { isComeOut: false, result: 'point set', point: 5 }
+  const roll2Bets = lib.minPassLineMaxOddsPlaceSixEight({ rules, bets: roll1Bets, hand: roll2Hand })
+
+  t.equal(roll2Bets.pass.line.amount, 5, 'roll 2: pass line remains')
+  t.equal(roll2Bets.pass.odds.amount, 20, 'roll 2: pass odds added')
+  t.equal(roll2Bets.place.six.amount, 6, 'roll 2: place 6 added')
+  t.equal(roll2Bets.place.eight.amount, 6, 'roll 2: place 8 added')
+  t.equal(roll2Bets.new, 32, 'roll 2: odds + both place bets')
+
+  delete roll2Bets.new
+
+  // Roll 3: Neutral roll (e.g., rolled 4) - no changes
+  const roll3Hand = { isComeOut: false, result: 'neutral', point: 5, diceSum: 4 }
+  const roll3Bets = lib.minPassLineMaxOddsPlaceSixEight({ rules, bets: roll2Bets, hand: roll3Hand })
+
+  t.equal(roll3Bets.pass.line.amount, 5, 'roll 3: pass line unchanged')
+  t.equal(roll3Bets.pass.odds.amount, 20, 'roll 3: odds unchanged')
+  t.equal(roll3Bets.place.six.amount, 6, 'roll 3: place 6 unchanged')
+  t.equal(roll3Bets.place.eight.amount, 6, 'roll 3: place 8 unchanged')
+  t.notOk(roll3Bets.new, 'roll 3: no new bets')
+
+  // Roll 4: Another neutral roll (e.g., rolled 9) - still no changes
+  const roll4Hand = { isComeOut: false, result: 'neutral', point: 5, diceSum: 9 }
+  const roll4Bets = lib.minPassLineMaxOddsPlaceSixEight({ rules, bets: roll3Bets, hand: roll4Hand })
+
+  t.equal(roll4Bets.pass.line.amount, 5, 'roll 4: pass line unchanged')
+  t.equal(roll4Bets.pass.odds.amount, 20, 'roll 4: odds unchanged')
+  t.notOk(roll4Bets.new, 'roll 4: no new bets')
+
+  t.end()
+})
+
+tap.test('minPassLinePlaceSixEight: full roll cycle with multiple neutral rolls', (t) => {
+  const rules = { minBet: 5 }
+
+  // Roll 1: Comeout
+  const roll1Hand = { isComeOut: true }
+  const roll1Bets = lib.minPassLinePlaceSixEight({ rules, hand: roll1Hand })
+
+  t.equal(roll1Bets.pass.line.amount, 5)
+  t.equal(roll1Bets.new, 5)
+
+  delete roll1Bets.new
+
+  // Roll 2: Point set to 4
+  const roll2Hand = { isComeOut: false, result: 'point set', point: 4 }
+  const roll2Bets = lib.minPassLinePlaceSixEight({ rules, bets: roll1Bets, hand: roll2Hand })
+
+  t.equal(roll2Bets.place.six.amount, 6)
+  t.equal(roll2Bets.place.eight.amount, 6)
+  t.equal(roll2Bets.new, 12)
+
+  delete roll2Bets.new
+
+  // Roll 3-5: Neutral rolls
+  let currentBets = roll2Bets
+  const neutralNumbers = [5, 9, 10]
+
+  neutralNumbers.forEach((num, idx) => {
+    const hand = { isComeOut: false, result: 'neutral', point: 4, diceSum: num }
+    const bets = lib.minPassLinePlaceSixEight({ rules, bets: currentBets, hand })
+
+    t.equal(bets.pass.line.amount, 5, `neutral roll ${idx + 1}: pass line unchanged`)
+    t.equal(bets.place.six.amount, 6, `neutral roll ${idx + 1}: place 6 unchanged`)
+    t.equal(bets.place.eight.amount, 6, `neutral roll ${idx + 1}: place 8 unchanged`)
+    t.notOk(bets.new, `neutral roll ${idx + 1}: no new bets`)
+
+    currentBets = bets
+  })
+
+  t.end()
+})
+
+// Priority 3: Invariant tests - properties that should always hold
+tap.test('invariant: bets.new always equals sum of new bet amounts', (t) => {
+  const rules = {
+    minBet: 5,
+    maxOddsMultiple: {
+      4: 3,
+      5: 4,
+      6: 5,
+      8: 5,
+      9: 4,
+      10: 3
+    }
+  }
+
+  // Test minPassLineOnly
+  const result1 = lib.minPassLineOnly({ rules, hand: { isComeOut: true } })
+  t.equal(result1.new, result1.pass.line.amount, 'minPassLineOnly: new equals pass line')
+
+  // Test minPassLineMaxOdds
+  const bets2 = { pass: { line: { amount: 5, isContract: true } } }
+  const result2 = lib.minPassLineMaxOdds({ rules, bets: bets2, hand: { isComeOut: false, point: 6 } })
+  t.equal(result2.new, result2.pass.odds.amount, 'minPassLineMaxOdds: new equals odds')
+
+  // Test placeSixEight
+  const result3 = lib.placeSixEight({ rules, hand: { isComeOut: false, point: 5 } })
+  t.equal(result3.new, result3.place.six.amount + result3.place.eight.amount,
+    'placeSixEight: new equals sum of place bets')
+
+  // Test minPassLineMaxOddsPlaceSixEight composition
+  const result4a = lib.minPassLineMaxOddsPlaceSixEight({ rules, hand: { isComeOut: true } })
+  t.equal(result4a.new, result4a.pass.line.amount, 'composition comeout: new equals pass line')
+
+  delete result4a.new
+  const result4b = lib.minPassLineMaxOddsPlaceSixEight({
+    rules,
+    bets: result4a,
+    hand: { isComeOut: false, result: 'point set', point: 4 }
+  })
+  const expectedNew = result4b.pass.odds.amount + result4b.place.six.amount + result4b.place.eight.amount
+  t.equal(result4b.new, expectedNew, 'composition point set: new equals odds + place bets')
+
+  t.end()
+})
+
+tap.test('invariant: existing bets never modified, only added or removed', (t) => {
+  const rules = { minBet: 5 }
+  const originalBets = {
+    pass: {
+      line: { amount: 5, isContract: true, customProp: 'test' }
+    }
+  }
+
+  const hand = { isComeOut: false, point: 5 }
+  const result = lib.minPassLineOnly({ rules, bets: originalBets, hand })
+
+  t.equal(result.pass.line.amount, originalBets.pass.line.amount, 'amount unchanged')
+  t.equal(result.pass.line.isContract, originalBets.pass.line.isContract, 'isContract unchanged')
+  t.equal(result.pass.line.customProp, originalBets.pass.line.customProp, 'custom props preserved')
+
+  t.end()
+})
+
+tap.test('invariant: strategies are idempotent when called with same state', (t) => {
+  const rules = {
+    minBet: 5,
+    maxOddsMultiple: { 4: 3, 5: 4, 6: 5, 8: 5, 9: 4, 10: 3 }
+  }
+
+  const hand = { isComeOut: false, point: 6 }
+  const bets = {
+    pass: {
+      line: { amount: 5, isContract: true },
+      odds: { amount: 25 }
+    },
+    place: { eight: { amount: 6 } }
+  }
+
+  // Call the strategy twice with the same input
+  const result1 = lib.minPassLineMaxOddsPlaceSixEight({ rules, bets, hand })
+  const result2 = lib.minPassLineMaxOddsPlaceSixEight({ rules, bets: result1, hand })
+
+  t.equal(result1.new, 0, 'first call produces no new bets when all bets exist')
+  t.equal(result2.new, 0, 'second call produces no new bets')
+
+  // Remove 'new' fields for comparison
+  delete result1.new
+  delete result2.new
+
+  t.same(result1, result2, 'results are identical when state unchanged')
+
+  t.end()
+})
+
+tap.test('invariant: place bets never created for point 6 or 8', (t) => {
+  const rules = { minBet: 5 }
+
+  // Point 6
+  const result6 = lib.placeSixEightUnlessPoint({ rules, hand: { isComeOut: false, point: 6 } })
+  t.notOk(result6.place?.six, 'no place 6 when 6 is point')
+  t.ok(result6.place?.eight, 'place 8 exists when 6 is point')
+
+  // Point 8
+  const result8 = lib.placeSixEightUnlessPoint({ rules, hand: { isComeOut: false, point: 8 } })
+  t.ok(result8.place?.six, 'place 6 exists when 8 is point')
+  t.notOk(result8.place?.eight, 'no place 8 when 8 is point')
+
+  t.end()
+})
+
+// Priority 3: Composition contract tests
+tap.test('composition: strategies compose without conflicts', (t) => {
+  const rules = {
+    minBet: 5,
+    maxOddsMultiple: { 4: 3, 5: 4, 6: 5, 8: 5, 9: 4, 10: 3 }
+  }
+
+  const hand = { isComeOut: false, result: 'point set', point: 5 }
+  const initialBets = { pass: { line: { amount: 5, isContract: true } } }
+
+  // Apply strategies separately
+  const afterOdds = lib.minPassLineMaxOdds({ rules, bets: initialBets, hand })
+  delete afterOdds.new
+  const afterPlace = lib.placeSixEightUnlessPoint({ rules, bets: afterOdds, hand })
+
+  // Apply composed strategy
+  const composed = lib.minPassLineMaxOddsPlaceSixEight({ rules, bets: initialBets, hand })
+
+  // Results should be the same (ignoring the 'new' field)
+  delete afterPlace.new
+  delete composed.new
+
+  t.same(composed, afterPlace, 'composed strategy produces same result as sequential application')
+
+  t.end()
+})
+
+tap.test('composition: order independence for independent bets', (t) => {
+  const rules = { minBet: 5 }
+  const hand = { isComeOut: false, point: 5 }
+
+  // Apply in order: pass line then place bets
+  const order1Step1 = lib.minPassLineOnly({ rules, hand: { isComeOut: true } })
+  delete order1Step1.new
+  const order1Step2 = lib.placeSixEightUnlessPoint({ rules, bets: order1Step1, hand })
+  delete order1Step2.new
+
+  // The minPassLinePlaceSixEight does the same thing
+  const combined1 = lib.minPassLinePlaceSixEight({ rules, hand: { isComeOut: true } })
+  delete combined1.new
+  const combined2 = lib.minPassLinePlaceSixEight({ rules, bets: combined1, hand })
+  delete combined2.new
+
+  t.same(combined2, order1Step2, 'composed function produces consistent results')
+
+  t.end()
+})
+
+tap.test('composition: all strategies handle missing bets parameter', (t) => {
+  const rules = { minBet: 5 }
+  const hand = { isComeOut: true }
+
+  t.doesNotThrow(() => lib.minPassLineOnly({ rules, hand }), 'minPassLineOnly handles missing bets')
+  t.doesNotThrow(() => lib.minPassLineMaxOdds({ rules, hand }), 'minPassLineMaxOdds handles missing bets')
+  t.doesNotThrow(() => lib.placeSixEight({ rules, hand }), 'placeSixEight handles missing bets')
+  t.doesNotThrow(() => lib.minPassLinePlaceSixEight({ rules, hand }), 'minPassLinePlaceSixEight handles missing bets')
+  t.doesNotThrow(() => lib.minPassLineMaxOddsPlaceSixEight({ rules, hand }), 'minPassLineMaxOddsPlaceSixEight handles missing bets')
+
+  t.end()
+})
+
+tap.test('composition: strategies preserve bet structure integrity', (t) => {
+  const rules = {
+    minBet: 5,
+    maxOddsMultiple: { 4: 3, 5: 4, 6: 5, 8: 5, 9: 4, 10: 3 }
+  }
+
+  const comeOut = { isComeOut: true }
+  const result1 = lib.minPassLineMaxOddsPlaceSixEight({ rules, hand: comeOut })
+
+  t.ok(result1.pass, 'pass object exists')
+  t.ok(result1.pass.line, 'pass.line exists')
+  t.type(result1.pass.line.amount, 'number', 'pass.line.amount is a number')
+
+  delete result1.new
+
+  const pointSet = { isComeOut: false, result: 'point set', point: 6 }
+  const result2 = lib.minPassLineMaxOddsPlaceSixEight({ rules, bets: result1, hand: pointSet })
+
+  t.ok(result2.pass.odds, 'pass.odds exists after point set')
+  t.type(result2.pass.odds.amount, 'number', 'pass.odds.amount is a number')
+  t.ok(result2.place, 'place object exists after point set')
+  t.ok(result2.place.eight, 'place.eight exists when point is 6')
+  t.type(result2.place.eight.amount, 'number', 'place.eight.amount is a number')
+
+  t.end()
+})

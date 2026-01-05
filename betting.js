@@ -110,6 +110,7 @@ module.exports = {
   minPassLineOnly,
   minPassLineMaxOdds,
   placeSixEight,
+  placeSixEightUnlessPoint,
   minPassLinePlaceSixEight,
   minPassLineMaxOddsPlaceSixEight
 }
