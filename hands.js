@@ -4,7 +4,7 @@
 const { playHand } = require('./index.js')
 const bettingStrategies = require('./betting.js')
 
-function simulateHands ({numHands, bettingStrategy, showDetail}) {
+function simulateHands ({ numHands, bettingStrategy, showDetail }) {
   const summaryTemplate = {
     balance: 0,
     rollCount: 0,
@@ -164,7 +164,7 @@ if (require.main === module) {
   const showDetail = process.argv[4]
   console.log(`Simulating ${numHands} Craps Hand(s)`)
   console.log(`Using betting strategy: ${bettingStrategy}`)
-  const result = simulateHands({numHands, showDetail, bettingStrategy})
+  const result = simulateHands({ numHands, showDetail, bettingStrategy })
   printResults({ ...result, showDetail })
 } else {
   module.exports = simulateHands
