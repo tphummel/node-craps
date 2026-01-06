@@ -22,24 +22,63 @@ function minPassLineOnly (opts) {
   return bets
 }
 
-function minPassLineMaxOdds (opts) {
-  const bets = minPassLineOnly(opts)
-  const { rules, hand } = opts
-  const makeNewPassOddsBet = hand.isComeOut === false && !bets?.pass?.odds
-  if (process.env.DEBUG) console.log(`[decision] make a new pass odds bet?: ${makeNewPassOddsBet}`)
+function lineMaxOdds ({
+  rules,
+  bets: existingBets,
+  point,
+  shouldMakeLineBet,
+  shouldMakeOddsBet,
+  betKey = 'pass'
+}) {
+  const bets = Object.assign({ new: 0 }, existingBets)
 
-  if (makeNewPassOddsBet) {
-    const oddsAmount = rules.maxOddsMultiple[hand.point] * bets.pass.line.amount
-    if (process.env.DEBUG) console.log(`[action] make pass odds bet $${oddsAmount}`)
-    bets.pass.odds = {
-      amount: oddsAmount
+  bets[betKey] = bets[betKey] || {}
+
+  const makeLineBet = shouldMakeLineBet && !bets[betKey].line
+  if (process.env.DEBUG) {
+    console.log(`[decision] make a new ${betKey} line bet?: ${makeLineBet}`)
+  }
+
+  if (makeLineBet) {
+    const newLineBet = { amount: rules.minBet }
+    bets[betKey].line = newLineBet
+    bets.new += newLineBet.amount
+    if (process.env.DEBUG) {
+      console.log(`[action] make ${betKey} line bet $${newLineBet.amount}`)
     }
+  } else if (process.env.DEBUG) {
+    console.log(`[action] ${betKey} line bet unchanged`)
+  }
+
+  const makeOddsBet = shouldMakeOddsBet && bets[betKey].line && !bets[betKey].odds
+  if (process.env.DEBUG) {
+    console.log(`[decision] make a new ${betKey} odds bet?: ${makeOddsBet}`)
+  }
+
+  if (makeOddsBet) {
+    const oddsAmount = rules.maxOddsMultiple[point] * bets[betKey].line.amount
+    bets[betKey].odds = { amount: oddsAmount }
     bets.new += oddsAmount
-  } else {
-    if (process.env.DEBUG) console.log('[decision] skip new pass odds bet')
+    if (process.env.DEBUG) {
+      console.log(`[action] make ${betKey} odds bet $${oddsAmount}`)
+    }
+  } else if (process.env.DEBUG) {
+    console.log(`[decision] skip new ${betKey} odds bet`)
   }
 
   return bets
+}
+
+function minPassLineMaxOdds (opts) {
+  const { rules, hand } = opts
+  return lineMaxOdds({
+    rules,
+    bets: opts.bets,
+    point: hand.point,
+    shouldMakeLineBet: hand.isComeOut,
+    shouldMakeOddsBet: hand.isComeOut === false,
+    betKey: 'pass'
+  })
 }
 
 function placeSixEight (opts) {
@@ -108,6 +147,7 @@ function minPassLineMaxOddsPlaceSixEight (opts) {
 
 module.exports = {
   minPassLineOnly,
+  lineMaxOdds,
   minPassLineMaxOdds,
   placeSixEight,
   placeSixEightUnlessPoint,
