@@ -96,6 +96,68 @@ tap.test('minPassLineOnly: bet exists, point set', (t) => {
   t.end()
 })
 
+tap.test('lineMaxOdds: new line bet only', (t) => {
+  const rules = {
+    minBet: 5,
+    maxOddsMultiple: {
+      4: 3,
+      5: 4,
+      6: 5,
+      8: 5,
+      9: 4,
+      10: 3
+    }
+  }
+
+  const hand = { isComeOut: true }
+
+  const updatedBets = lib.lineMaxOdds({
+    rules,
+    hand,
+    shouldMakeLineBet: true,
+    shouldMakeOddsBet: false,
+    point: 4,
+    betKey: 'pass'
+  })
+
+  t.equal(updatedBets.pass.line.amount, rules.minBet)
+  t.equal(updatedBets.new, rules.minBet)
+
+  t.end()
+})
+
+tap.test('lineMaxOdds: add odds to existing line bet', (t) => {
+  const rules = {
+    minBet: 5,
+    maxOddsMultiple: {
+      4: 3,
+      5: 4,
+      6: 5,
+      8: 5,
+      9: 4,
+      10: 3
+    }
+  }
+
+  const hand = { isComeOut: false, point: 6 }
+  const bets = { pass: { line: { amount: rules.minBet } } }
+
+  const updatedBets = lib.lineMaxOdds({
+    rules,
+    hand,
+    bets,
+    shouldMakeLineBet: false,
+    shouldMakeOddsBet: true,
+    point: hand.point,
+    betKey: 'pass'
+  })
+
+  t.equal(updatedBets.pass.odds.amount, rules.maxOddsMultiple['6'] * rules.minBet)
+  t.equal(updatedBets.new, updatedBets.pass.odds.amount)
+
+  t.end()
+})
+
 tap.test('minPassLineMaxOdds: make new bet upon establishing point', (t) => {
   const rules = {
     minBet: 5,
