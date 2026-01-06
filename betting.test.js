@@ -158,6 +158,25 @@ tap.test('lineMaxOdds: add odds to existing line bet', (t) => {
   t.end()
 })
 
+tap.test('comeLineMaxOdds: create pending come bet and add odds', (t) => {
+  const rules = {
+    minBet: 5,
+    maxOddsMultiple: { 4: 3, 5: 4, 6: 5, 8: 5, 9: 4, 10: 3 }
+  }
+
+  const hand = { isComeOut: false, point: 6 }
+  const bets = { come: { points: { 5: [{ line: { amount: 5 } }] } } }
+
+  const updated = lib.comeLineMaxOdds({ rules, bets, hand, maxComeBets: 2 })
+
+  t.equal(updated.come.pending.length, 1, 'adds a new pending come bet')
+  t.equal(updated.come.pending[0].amount, rules.minBet)
+  t.equal(updated.come.points[5][0].odds.amount, rules.maxOddsMultiple['5'] * rules.minBet, 'adds odds behind come point')
+  t.equal(updated.new, rules.minBet + updated.come.points[5][0].odds.amount, 'tracks new wagers')
+
+  t.end()
+})
+
 tap.test('minPassLineMaxOdds: make new bet upon establishing point', (t) => {
   const rules = {
     minBet: 5,

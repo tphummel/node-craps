@@ -145,6 +145,47 @@ function minPassLineMaxOddsPlaceSixEight (opts) {
   return bets
 }
 
+function comeLineMaxOdds (opts) {
+  const { rules, bets: existingBets = {}, hand, maxComeBets = 1 } = opts
+  const bets = Object.assign({ new: 0 }, existingBets)
+
+  if (hand.isComeOut) {
+    if (process.env.DEBUG) console.log('[decision] skip come bets on comeout')
+    return bets
+  }
+
+  bets.come = bets.come || {}
+  bets.come.pending = bets.come.pending || []
+  bets.come.points = bets.come.points || {}
+
+  let activeComeBets = bets.come.pending.length
+
+  activeComeBets += Object.values(bets.come.points).reduce((memo, pointBets) => {
+    return memo + pointBets.length
+  }, 0)
+
+  while (activeComeBets < maxComeBets) {
+    bets.come.pending.push({ amount: rules.minBet })
+    bets.new += rules.minBet
+    activeComeBets++
+    if (process.env.DEBUG) console.log(`[action] make come line bet $${rules.minBet}`)
+  }
+
+  Object.keys(bets.come.points).forEach(point => {
+    bets.come.points[point].forEach(bet => {
+      if (!bet.line || bet.odds) return
+      const oddsAmount = rules.maxOddsMultiple[point] * bet.line.amount
+      bet.odds = { amount: oddsAmount }
+      bets.new += oddsAmount
+      if (process.env.DEBUG) {
+        console.log(`[action] make come odds bet behind ${point} for $${oddsAmount}`)
+      }
+    })
+  })
+
+  return bets
+}
+
 module.exports = {
   minPassLineOnly,
   lineMaxOdds,
@@ -152,5 +193,6 @@ module.exports = {
   placeSixEight,
   placeSixEightUnlessPoint,
   minPassLinePlaceSixEight,
-  minPassLineMaxOddsPlaceSixEight
+  minPassLineMaxOddsPlaceSixEight,
+  comeLineMaxOdds
 }

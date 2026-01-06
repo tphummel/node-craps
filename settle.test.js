@@ -357,6 +357,50 @@ tap.test('passOdds: odds bet, seven out', function (t) {
   t.end()
 })
 
+tap.test('comeLine: pending come bet wins immediately', (t) => {
+  const bets = { come: { pending: [{ amount: 5 }] } }
+  const hand = { result: 'neutral', diceSum: 11 }
+
+  const result = settle.comeLine({ bets, hand })
+
+  t.equal(result.payouts[0].type, 'come line win')
+  t.equal(result.payouts[0].principal, 5)
+  t.equal(result.payouts[0].profit, 5)
+  t.notOk(result.bets.come)
+
+  t.end()
+})
+
+tap.test('comeLine: pending come bet moves to point', (t) => {
+  const bets = { come: { pending: [{ amount: 5 }] } }
+  const hand = { result: 'neutral', diceSum: 4, point: 6 }
+
+  const result = settle.comeLine({ bets, hand })
+
+  t.notOk(result.payouts?.length)
+  t.equal(result.bets.come.points[4][0].line.amount, 5)
+  t.notOk(result.bets.come.pending)
+
+  t.end()
+})
+
+tap.test('comeLine: come point win pays odds', (t) => {
+  const bets = { come: { points: { 5: [{ line: { amount: 5 }, odds: { amount: 20 } }] } } }
+  const hand = { result: 'neutral', diceSum: 5, point: 6 }
+
+  const result = settle.comeLine({ bets, hand })
+
+  const lineWin = result.payouts.find(p => p.type === 'come line win')
+  const oddsWin = result.payouts.find(p => p.type === 'come odds win')
+
+  t.equal(lineWin.profit, 5)
+  t.equal(oddsWin.principal, 20)
+  t.equal(oddsWin.profit, 30)
+  t.notOk(result.bets.come)
+
+  t.end()
+})
+
 tap.test('all: pass line win', (t) => {
   const bets = {
     pass: {
