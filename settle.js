@@ -126,6 +126,150 @@ function placeEight (opts) {
   return placeBet({ ...opts, placeNumber: 8 })
 }
 
+function comeFlat ({ bets, hand, rules }) {
+  if (!bets?.come?.new) {
+    if (process.env.DEBUG) console.log('[decision] no new come bet')
+    return { bets }
+  }
+
+  const diceSum = hand.diceSum
+
+  // New come bet wins on 7 or 11
+  if (diceSum === 7 || diceSum === 11) {
+    const payout = {
+      type: 'come win',
+      principal: bets.come.new.amount,
+      profit: bets.come.new.amount * 1
+    }
+
+    delete bets.come.new
+    if (Object.keys(bets.come).length === 0) delete bets.come
+
+    if (process.env.DEBUG) {
+      console.log(`[payout] come win $${payout.principal + payout.profit}`)
+    }
+
+    return { payout, bets }
+  }
+
+  // New come bet loses on 2, 3, or 12
+  if (diceSum === 2 || diceSum === 3 || diceSum === 12) {
+    if (process.env.DEBUG) console.log(`[payout] come loss -$${bets.come.new.amount}`)
+    delete bets.come.new
+    if (Object.keys(bets.come).length === 0) delete bets.come
+    return { bets }
+  }
+
+  // New come bet travels to point (4, 5, 6, 8, 9, or 10)
+  const pointNumbers = [4, 5, 6, 8, 9, 10]
+  if (pointNumbers.includes(diceSum)) {
+    if (process.env.DEBUG) console.log(`[decision] come bet travels to ${diceSum}`)
+    bets.come[diceSum] = {
+      line: {
+        amount: bets.come.new.amount
+      }
+    }
+    delete bets.come.new
+  }
+
+  return { bets }
+}
+
+function comeLine ({ bets, hand, rules }) {
+  if (!bets?.come) {
+    if (process.env.DEBUG) console.log('[decision] no come bets')
+    return { bets }
+  }
+
+  const diceSum = hand.diceSum
+  const payouts = []
+
+  // Check if any established come bet wins
+  if (bets.come[diceSum]?.line) {
+    const payout = {
+      type: `come ${diceSum} win`,
+      principal: bets.come[diceSum].line.amount,
+      profit: bets.come[diceSum].line.amount * 1
+    }
+
+    if (process.env.DEBUG) {
+      console.log(`[payout] come ${diceSum} win $${payout.principal + payout.profit}`)
+    }
+
+    payouts.push(payout)
+    delete bets.come[diceSum].line
+    if (!bets.come[diceSum].odds) delete bets.come[diceSum]
+  }
+
+  // All come bets lose on seven out
+  if (hand.result === 'seven out') {
+    const pointNumbers = [4, 5, 6, 8, 9, 10]
+    pointNumbers.forEach(num => {
+      if (bets.come[num]?.line) {
+        if (process.env.DEBUG) console.log(`[payout] come ${num} loss -$${bets.come[num].line.amount}`)
+        delete bets.come[num].line
+        if (!bets.come[num].odds) delete bets.come[num]
+      }
+    })
+  }
+
+  if (bets.come && Object.keys(bets.come).length === 0) delete bets.come
+
+  return { payouts, bets }
+}
+
+function comeOdds ({ bets, hand, rules }) {
+  if (!bets?.come) {
+    if (process.env.DEBUG) console.log('[decision] no come odds bets')
+    return { bets }
+  }
+
+  const diceSum = hand.diceSum
+  const payouts = []
+
+  const oddsPayouts = {
+    4: 2,
+    5: 3 / 2,
+    6: 6 / 5,
+    8: 6 / 5,
+    9: 3 / 2,
+    10: 2
+  }
+
+  // Check if any come bet with odds wins
+  if (bets.come[diceSum]?.odds) {
+    const payout = {
+      type: `come ${diceSum} odds win`,
+      principal: bets.come[diceSum].odds.amount,
+      profit: bets.come[diceSum].odds.amount * oddsPayouts[diceSum]
+    }
+
+    if (process.env.DEBUG) {
+      console.log(`[payout] come ${diceSum} odds win $${payout.principal + payout.profit}`)
+    }
+
+    payouts.push(payout)
+    delete bets.come[diceSum].odds
+    if (!bets.come[diceSum].line) delete bets.come[diceSum]
+  }
+
+  // All come odds lose on seven out
+  if (hand.result === 'seven out') {
+    const pointNumbers = [4, 5, 6, 8, 9, 10]
+    pointNumbers.forEach(num => {
+      if (bets.come[num]?.odds) {
+        if (process.env.DEBUG) console.log(`[payout] come ${num} odds loss -$${bets.come[num].odds.amount}`)
+        delete bets.come[num].odds
+        if (!bets.come[num].line) delete bets.come[num]
+      }
+    })
+  }
+
+  if (bets.come && Object.keys(bets.come).length === 0) delete bets.come
+
+  return { payouts, bets }
+}
+
 function all ({ bets, hand, rules }) {
   const payouts = []
 
@@ -138,6 +282,27 @@ function all ({ bets, hand, rules }) {
 
   bets = passOddsResult.bets
   payouts.push(passOddsResult.payout)
+
+  // Settle existing come bets before processing new ones
+  const comeLineResult = comeLine({ bets, hand, rules })
+
+  bets = comeLineResult.bets
+  if (comeLineResult.payouts) {
+    comeLineResult.payouts.forEach(p => payouts.push(p))
+  }
+
+  const comeOddsResult = comeOdds({ bets, hand, rules })
+
+  bets = comeOddsResult.bets
+  if (comeOddsResult.payouts) {
+    comeOddsResult.payouts.forEach(p => payouts.push(p))
+  }
+
+  // Process new come bets after settling existing ones
+  const comeFlatResult = comeFlat({ bets, hand, rules })
+
+  bets = comeFlatResult.bets
+  payouts.push(comeFlatResult.payout)
 
   const placeSixResult = placeSix({ bets, hand })
 
@@ -171,6 +336,9 @@ function all ({ bets, hand, rules }) {
 module.exports = {
   passLine,
   passOdds,
+  comeFlat,
+  comeLine,
+  comeOdds,
   placeBet,
   placeSix,
   placeEight,

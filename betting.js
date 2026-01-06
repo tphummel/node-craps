@@ -106,11 +106,115 @@ function minPassLineMaxOddsPlaceSixEight (opts) {
   return bets
 }
 
+function minPassLineWithSingleCome (opts) {
+  const { rules, hand } = opts
+  const bets = minPassLineOnly(opts)
+
+  // Don't place come bets on comeout
+  if (hand.isComeOut) {
+    if (process.env.DEBUG) console.log('[decision] skip come bet on comeout')
+    return bets
+  }
+
+  // Place a new come bet if we don't have any come bets established or pending
+  const hasComeBets = bets?.come?.new || (bets?.come && Object.keys(bets.come).some(key => key !== 'new'))
+  if (!hasComeBets) {
+    bets.come = bets.come || {}
+    bets.come.new = {
+      amount: rules.minBet
+    }
+    bets.new += rules.minBet
+    if (process.env.DEBUG) console.log(`[action] make come bet $${rules.minBet}`)
+  } else {
+    if (process.env.DEBUG) console.log('[decision] come bet already exists')
+  }
+
+  return bets
+}
+
+function minPassLineMaxOddsWithSingleCome (opts) {
+  const { rules, hand } = opts
+  const bets = minPassLineMaxOdds(opts)
+
+  // Don't place come bets on comeout
+  if (hand.isComeOut) {
+    if (process.env.DEBUG) console.log('[decision] skip come bet on comeout')
+    return bets
+  }
+
+  // Place a new come bet if we don't have any come bets established or pending
+  const hasComeBets = bets?.come?.new || (bets?.come && Object.keys(bets.come).some(key => key !== 'new'))
+  if (!hasComeBets) {
+    bets.come = bets.come || {}
+    bets.come.new = {
+      amount: rules.minBet
+    }
+    bets.new += rules.minBet
+    if (process.env.DEBUG) console.log(`[action] make come bet $${rules.minBet}`)
+  } else {
+    if (process.env.DEBUG) console.log('[decision] come bet already exists')
+  }
+
+  // Add odds to any established come bets that don't have odds yet
+  const pointNumbers = [4, 5, 6, 8, 9, 10]
+  pointNumbers.forEach(num => {
+    if (bets?.come?.[num]?.line && !bets.come[num].odds) {
+      const oddsAmount = rules.maxOddsMultiple[num] * bets.come[num].line.amount
+      if (process.env.DEBUG) console.log(`[action] make come ${num} odds bet $${oddsAmount}`)
+      bets.come[num].odds = {
+        amount: oddsAmount
+      }
+      bets.new += oddsAmount
+    }
+  })
+
+  return bets
+}
+
+function minPassLineMaxOddsWithMultipleCome (opts) {
+  const { rules, hand } = opts
+  const bets = minPassLineMaxOdds(opts)
+
+  // Don't place come bets on comeout
+  if (hand.isComeOut) {
+    if (process.env.DEBUG) console.log('[decision] skip come bet on comeout')
+    return bets
+  }
+
+  // Place a new come bet if we don't already have one pending
+  if (!bets?.come?.new) {
+    bets.come = bets.come || {}
+    bets.come.new = {
+      amount: rules.minBet
+    }
+    bets.new += rules.minBet
+    if (process.env.DEBUG) console.log(`[action] make come bet $${rules.minBet}`)
+  }
+
+  // Add odds to any established come bets that don't have odds yet
+  const pointNumbers = [4, 5, 6, 8, 9, 10]
+  pointNumbers.forEach(num => {
+    if (bets?.come?.[num]?.line && !bets.come[num].odds) {
+      const oddsAmount = rules.maxOddsMultiple[num] * bets.come[num].line.amount
+      if (process.env.DEBUG) console.log(`[action] make come ${num} odds bet $${oddsAmount}`)
+      bets.come[num].odds = {
+        amount: oddsAmount
+      }
+      bets.new += oddsAmount
+    }
+  })
+
+  return bets
+}
+
 module.exports = {
   minPassLineOnly,
   minPassLineMaxOdds,
   placeSixEight,
   placeSixEightUnlessPoint,
   minPassLinePlaceSixEight,
-  minPassLineMaxOddsPlaceSixEight
+  minPassLineMaxOddsPlaceSixEight,
+  minPassLineWithSingleCome,
+  minPassLineMaxOddsWithSingleCome,
+  minPassLineMaxOddsWithMultipleCome
 }
