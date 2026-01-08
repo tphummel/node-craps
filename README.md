@@ -154,6 +154,14 @@ stdDev: 28.28
 95% CI: [5.80, 84.20]
 ```
 
+## example: passCome68 strategy
+
+```
+$ node hands.js 1 passCome68
+Simulating 1 Craps Hand(s)
+Using betting strategy: passCome68
+```
+
 The standard deviation shows how widely the trials vary around the mean.
 Roughly 68% of results will fall within one standard deviation, 95% within
 two, and 99.7% within three. The 95% confidence interval is a range that is

@@ -158,7 +158,7 @@ tap.test('lineMaxOdds: add odds to existing line bet', (t) => {
   t.end()
 })
 
-tap.test('comeLineMaxOdds: create pending come bet and add odds', (t) => {
+tap.test('minComeLineMaxOdds: create pending come bet and add odds', (t) => {
   const rules = {
     minBet: 5,
     maxOddsMultiple: { 4: 3, 5: 4, 6: 5, 8: 5, 9: 4, 10: 3 }
@@ -167,12 +167,29 @@ tap.test('comeLineMaxOdds: create pending come bet and add odds', (t) => {
   const hand = { isComeOut: false, point: 6 }
   const bets = { come: { points: { 5: [{ line: { amount: 5 } }] } } }
 
-  const updated = lib.comeLineMaxOdds({ rules, bets, hand, maxComeBets: 2 })
+  const updated = lib.minComeLineMaxOdds({ rules, bets, hand, maxComeBets: 2 })
 
   t.equal(updated.come.pending.length, 1, 'adds a new pending come bet')
   t.equal(updated.come.pending[0].amount, rules.minBet)
   t.equal(updated.come.points[5][0].odds.amount, rules.maxOddsMultiple['5'] * rules.minBet, 'adds odds behind come point')
   t.equal(updated.new, rules.minBet + updated.come.points[5][0].odds.amount, 'tracks new wagers')
+
+  t.end()
+})
+
+tap.test('minComeLineMaxOdds: only one pending come bet at a time', (t) => {
+  const rules = {
+    minBet: 5,
+    maxOddsMultiple: { 4: 3, 5: 4, 6: 5, 8: 5, 9: 4, 10: 3 }
+  }
+
+  const hand = { isComeOut: false, point: 6 }
+  const bets = { come: { pending: [{ amount: 5 }], points: {} } }
+
+  const updated = lib.minComeLineMaxOdds({ rules, bets, hand, maxComeBets: 3 })
+
+  t.equal(updated.come.pending.length, 1, 'does not stack pending come bets')
+  t.notOk(updated.new, 'no additional come bet added')
 
   t.end()
 })
@@ -514,6 +531,102 @@ tap.test('minPassLinePlaceSixEight: existing bets remain unchanged', (t) => {
   t.equal(updated.place.six.amount, 6)
   t.equal(updated.place.eight.amount, 6)
   t.notOk(updated.new, 'no new bets when all exist')
+
+  t.end()
+})
+
+tap.test('minPassLineMaxOddsMinComeLineMaxOdds: adds come bet after point set', (t) => {
+  const rules = {
+    minBet: 5,
+    maxOddsMultiple: {
+      4: 3,
+      5: 4,
+      6: 5,
+      8: 5,
+      9: 4,
+      10: 3
+    }
+  }
+
+  const comeOut = { isComeOut: true }
+  const first = lib.minPassLineMaxOddsMinComeLineMaxOdds({ rules, hand: comeOut })
+
+  t.equal(first.pass.line.amount, rules.minBet)
+  t.notOk(first.come, 'no come bet on comeout')
+  t.equal(first.new, rules.minBet)
+
+  delete first.new
+
+  const pointSix = { isComeOut: false, result: 'point set', point: 6 }
+  const second = lib.minPassLineMaxOddsMinComeLineMaxOdds({ rules, bets: first, hand: pointSix })
+
+  t.equal(second.pass.odds.amount, rules.maxOddsMultiple['6'] * rules.minBet)
+  t.equal(second.come.pending.length, 1, 'adds one pending come bet after point set')
+  t.equal(second.come.pending[0].amount, rules.minBet)
+  t.equal(second.new, rules.maxOddsMultiple['6'] * rules.minBet + rules.minBet)
+
+  t.end()
+})
+
+tap.test('passCome68: adds pass odds, come bet, and place bets not on pass point', (t) => {
+  const rules = {
+    minBet: 5,
+    maxOddsMultiple: {
+      4: 3,
+      5: 4,
+      6: 5,
+      8: 5,
+      9: 4,
+      10: 3
+    }
+  }
+
+  const comeOut = { isComeOut: true }
+  const first = lib.passCome68({ rules, hand: comeOut })
+
+  t.equal(first.pass.line.amount, rules.minBet)
+  t.notOk(first.come, 'no come bet on comeout')
+  t.notOk(first.place, 'no place bets on comeout')
+  t.equal(first.new, rules.minBet)
+
+  delete first.new
+
+  const pointSix = { isComeOut: false, result: 'point set', point: 6 }
+  const second = lib.passCome68({ rules, bets: first, hand: pointSix })
+
+  t.equal(second.pass.odds.amount, rules.maxOddsMultiple['6'] * rules.minBet)
+  t.equal(second.come.pending.length, 1, 'adds one pending come bet after point set')
+  t.notOk(second.place?.six, 'skip place 6 when 6 is the pass point')
+  t.equal(second.place.eight.amount, 6)
+  t.equal(second.new, second.pass.odds.amount + rules.minBet + 6)
+
+  t.end()
+})
+
+tap.test('passCome68: skips place bets covered by come points', (t) => {
+  const rules = {
+    minBet: 5,
+    maxOddsMultiple: {
+      4: 3,
+      5: 4,
+      6: 5,
+      8: 5,
+      9: 4,
+      10: 3
+    }
+  }
+
+  const hand = { isComeOut: false, result: 'neutral', point: 5 }
+  const bets = {
+    pass: { line: { amount: 5, isContract: true }, odds: { amount: 20 } },
+    come: { points: { 6: [{ line: { amount: 5 } }] } }
+  }
+
+  const updated = lib.passCome68({ rules, bets, hand })
+
+  t.notOk(updated.place?.six, 'skip place 6 when come point is 6')
+  t.equal(updated.place.eight.amount, 6)
+  t.equal(updated.new, rules.maxOddsMultiple['6'] * rules.minBet + 6)
 
   t.end()
 })
