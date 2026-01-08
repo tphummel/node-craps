@@ -133,6 +133,30 @@ function placeSixEightUnlessPoint (opts) {
   return bets
 }
 
+function placeSixEightUnlessPassOrCome (opts) {
+  const { hand, bets: existingBets } = opts
+
+  const bets = placeSixEight(opts)
+  const comePoints = Object.keys(existingBets?.come?.points || {})
+  const coveredPoints = new Set([hand.point, ...comePoints.map(Number)])
+
+  if (coveredPoints.has(6) && bets.place?.six) {
+    bets.new -= bets.place.six.amount
+    delete bets.place.six
+    if (process.env.DEBUG) console.log('[decision] removed place 6 bet matching pass or come point')
+  }
+
+  if (coveredPoints.has(8) && bets.place?.eight) {
+    bets.new -= bets.place.eight.amount
+    delete bets.place.eight
+    if (process.env.DEBUG) console.log('[decision] removed place 8 bet matching pass or come point')
+  }
+
+  if (bets.place && Object.keys(bets.place).length === 0) delete bets.place
+
+  return bets
+}
+
 function minPassLinePlaceSixEight (opts) {
   let bets = minPassLineOnly(opts)
   bets = placeSixEightUnlessPoint({ ...opts, bets })
@@ -145,7 +169,20 @@ function minPassLineMaxOddsPlaceSixEight (opts) {
   return bets
 }
 
-function comeLineMaxOdds (opts) {
+function minPassLineMaxOddsMinComeLineMaxOdds (opts) {
+  let bets = minPassLineMaxOdds(opts)
+  bets = minComeLineMaxOdds({ ...opts, bets })
+  return bets
+}
+
+function passCome68 (opts) {
+  let bets = minPassLineMaxOdds(opts)
+  bets = minComeLineMaxOdds({ ...opts, bets })
+  bets = placeSixEightUnlessPassOrCome({ ...opts, bets })
+  return bets
+}
+
+function minComeLineMaxOdds (opts) {
   const { rules, bets: existingBets = {}, hand, maxComeBets = 1 } = opts
   const bets = Object.assign({ new: 0 }, existingBets)
 
@@ -158,16 +195,14 @@ function comeLineMaxOdds (opts) {
   bets.come.pending = bets.come.pending || []
   bets.come.points = bets.come.points || {}
 
-  let activeComeBets = bets.come.pending.length
-
-  activeComeBets += Object.values(bets.come.points).reduce((memo, pointBets) => {
+  const pendingCount = bets.come.pending.length
+  const pointCount = Object.values(bets.come.points).reduce((memo, pointBets) => {
     return memo + pointBets.length
   }, 0)
 
-  while (activeComeBets < maxComeBets) {
+  if (pendingCount === 0 && pointCount < maxComeBets) {
     bets.come.pending.push({ amount: rules.minBet })
     bets.new += rules.minBet
-    activeComeBets++
     if (process.env.DEBUG) console.log(`[action] make come line bet $${rules.minBet}`)
   }
 
@@ -192,7 +227,10 @@ module.exports = {
   minPassLineMaxOdds,
   placeSixEight,
   placeSixEightUnlessPoint,
+  placeSixEightUnlessPassOrCome,
   minPassLinePlaceSixEight,
   minPassLineMaxOddsPlaceSixEight,
-  comeLineMaxOdds
+  minPassLineMaxOddsMinComeLineMaxOdds,
+  minComeLineMaxOdds,
+  passCome68
 }
