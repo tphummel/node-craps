@@ -61,13 +61,14 @@ function playHand ({ rules, bettingStrategy, roll = rollD6, balance = 0 }) {
   }
 
   let bets
+  const playerMind = {}
 
   while (hand.result !== 'seven out') {
     if (process.env.DEBUG) {
       console.log(`\n-----Beginning Roll ${history.length + 1}-----\n`)
       console.log('--> Applying betting strategy')
     }
-    bets = bettingStrategy({ rules, bets, hand })
+    bets = bettingStrategy({ rules, bets, hand, playerMind })
     balance -= bets.new
     if (process.env.DEBUG) {
       if (bets.new) {
