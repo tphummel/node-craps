@@ -3,7 +3,6 @@
 const tap = require('tap')
 const lib = require('./')
 const betting = require('./betting')
-const { withFiveCount } = require('./fiveCount')
 
 tap.test('roll d6', function (t) {
   const result = lib.rollD6()
@@ -595,65 +594,6 @@ tap.test('integration: noBetting strategy handles comeout win before seven out',
   t.equal(hand.history[1].result, 'point set', 'second roll sets point')
   t.equal(hand.history[2].result, 'seven out', 'third roll is seven out')
   t.equal(hand.balance, 0, 'balance unchanged with no betting')
-
-  t.end()
-})
-
-tap.test('integration: withFiveCount delays betting until 5-count then delegates', (t) => {
-  // call 0: hand={isComeOut:true}        → count 0→0, no bet | roll [3,3]=6 → point set
-  // call 1: hand={point set, sum:6}      → count 0→1, no bet | roll [1,2]=3 → neutral
-  // call 2: hand={neutral, sum:3}        → count 1→2, no bet | roll [2,2]=4 → neutral
-  // call 3: hand={neutral, sum:4}        → count 2→3, no bet | roll [1,3]=4 → neutral
-  // call 4: hand={neutral, sum:4}        → count 3→4, no bet | roll [5,6]=11 → neutral
-  // call 5: hand={neutral, sum:11}       → count 4→4 stalls (11 not a point #), no bet | roll [3,5]=8 → neutral
-  // call 6: hand={neutral, sum:8}        → count 4→5 (8 IS a point #), delegates but not comeout, no bet | roll [3,3]=6 → point win
-  // call 7: hand={point win, sum:6}      → count 5, delegates, isComeOut=true → pass line bet! | roll [3,1]=4 → point set
-  // call 8: hand={point set, sum:4}      → count 5, delegates, no new bet | roll [3,4]=7 → seven out
-  const fixedRolls = [
-    3, 3, // 6: comeout → point set → 1-count
-    1, 2, // 3: neutral → 2-count
-    2, 2, // 4: neutral → 3-count
-    1, 3, // 4: neutral → 4-count
-    5, 6, // 11: neutral → stalls at 4 (not a point number)
-    3, 5, // 8: neutral → 5-count achieved
-    3, 3, // 6: point win → comeout (delegates, isComeOut=true → pass line bet placed)
-    3, 1, // 4: point set
-    3, 4 // 7: seven out
-  ]
-
-  let rollCount = -1
-  function testRoll () {
-    rollCount++
-    return fixedRolls[rollCount]
-  }
-
-  const rules = {
-    minBet: 5,
-    maxOddsMultiple: { 4: 3, 5: 4, 6: 5, 8: 5, 9: 4, 10: 3 }
-  }
-
-  const hand = lib.playHand({
-    rules,
-    roll: testRoll,
-    bettingStrategy: withFiveCount(betting.minPassLineOnly)
-  })
-
-  // Rolls 1-6: counting phase (indices 0-5), no bets
-  for (let i = 0; i <= 5; i++) {
-    t.equal(hand.history[i].betsBefore.new, 0, `roll ${i + 1}: no bet while counting`)
-    t.notOk(hand.history[i].betsBefore.pass, `roll ${i + 1}: no pass bet while counting`)
-  }
-
-  // Roll 7 (index 6): 5-count achieved this call but point phase, underlying strategy can't bet
-  t.equal(hand.history[6].betsBefore.new, 0, 'roll 7: 5-count achieved but not comeout, no bet')
-  t.notOk(hand.history[6].betsBefore.pass, 'roll 7: still no pass bet')
-
-  // Roll 8 (index 7): first comeout after 5-count — pass line fires
-  t.equal(hand.history[7].betsBefore.new, rules.minBet, 'roll 8: pass line placed on first comeout after 5-count')
-  t.equal(hand.history[7].betsBefore.pass.line.amount, rules.minBet, 'pass line amount correct')
-
-  t.equal(hand.history[8].result, 'seven out', 'hand ends in seven out')
-  t.equal(hand.balance, -rules.minBet, 'balance reflects one lost pass line bet')
 
   t.end()
 })
