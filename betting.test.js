@@ -1213,3 +1213,13 @@ tap.test('composition: strategies preserve bet structure integrity', (t) => {
 
   t.end()
 })
+
+tap.test('fiveCountMinPassLineMaxOddsPlaceSixEight: is exported and callable', (t) => {
+  const rules = { minBet: 5, maxOddsMultiple: { 4: 3, 5: 4, 6: 5, 8: 5, 9: 4, 10: 3 } }
+
+  t.doesNotThrow(() => {
+    lib.fiveCountMinPassLineMaxOddsPlaceSixEight({ rules, hand: { isComeOut: true }, playerMind: {} })
+  })
+
+  t.end()
+})
