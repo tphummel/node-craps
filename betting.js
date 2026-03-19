@@ -228,12 +228,15 @@ function minComeLineMaxOdds (opts) {
   return bets
 }
 
+const { withFiveCount } = require('./fiveCount.js')
+
 function noBetting () {
   return { new: 0 }
 }
 
 module.exports = {
   noBetting,
+  withFiveCount,
   minPassLineOnly,
   lineMaxOdds,
   minPassLineMaxOdds,
