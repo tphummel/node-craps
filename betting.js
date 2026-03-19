@@ -182,6 +182,13 @@ function passCome68 (opts) {
   return bets
 }
 
+function passcome2place68 (opts) {
+  let bets = minPassLineMaxOdds(opts)
+  bets = minComeLineMaxOdds({ ...opts, bets, maxComeBets: 2 })
+  bets = placeSixEightUnlessPassOrCome({ ...opts, bets })
+  return bets
+}
+
 function minComeLineMaxOdds (opts) {
   const { rules, bets: existingBets = {}, hand, maxComeBets = 1 } = opts
   const bets = Object.assign({ new: 0 }, existingBets)
@@ -221,7 +228,12 @@ function minComeLineMaxOdds (opts) {
   return bets
 }
 
+function noBetting () {
+  return { new: 0 }
+}
+
 module.exports = {
+  noBetting,
   minPassLineOnly,
   lineMaxOdds,
   minPassLineMaxOdds,
@@ -232,5 +244,6 @@ module.exports = {
   minPassLineMaxOddsPlaceSixEight,
   minPassLineMaxOddsMinComeLineMaxOdds,
   minComeLineMaxOdds,
-  passCome68
+  passCome68,
+  passcome2place68
 }
