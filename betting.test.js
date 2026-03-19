@@ -631,6 +631,145 @@ tap.test('passCome68: skips place bets covered by come points', (t) => {
   t.end()
 })
 
+tap.test('passcome2place68: adds pass odds, two come bets, and place bets', (t) => {
+  const rules = {
+    minBet: 5,
+    maxOddsMultiple: {
+      4: 3,
+      5: 4,
+      6: 5,
+      8: 5,
+      9: 4,
+      10: 3
+    }
+  }
+
+  const comeOut = { isComeOut: true }
+  const first = lib.passcome2place68({ rules, hand: comeOut })
+
+  t.equal(first.pass.line.amount, rules.minBet)
+  t.notOk(first.come, 'no come bet on comeout')
+  t.notOk(first.place, 'no place bets on comeout')
+  t.equal(first.new, rules.minBet)
+
+  delete first.new
+
+  const pointSix = { isComeOut: false, result: 'point set', point: 6 }
+  const second = lib.passcome2place68({ rules, bets: first, hand: pointSix })
+
+  t.equal(second.pass.odds.amount, rules.maxOddsMultiple['6'] * rules.minBet)
+  t.equal(second.come.pending.length, 1, 'adds one pending come bet after point set')
+  t.notOk(second.place?.six, 'skip place 6 when 6 is the pass point')
+  t.equal(second.place.eight.amount, 6)
+  t.equal(second.new, second.pass.odds.amount + rules.minBet + 6)
+
+  t.end()
+})
+
+tap.test('passcome2place68: maintains two come bets with odds', (t) => {
+  const rules = {
+    minBet: 5,
+    maxOddsMultiple: {
+      4: 3,
+      5: 4,
+      6: 5,
+      8: 5,
+      9: 4,
+      10: 3
+    }
+  }
+
+  const hand = { isComeOut: false, result: 'neutral', point: 6 }
+  const bets = {
+    pass: { line: { amount: 5, isContract: true }, odds: { amount: 25 } },
+    come: {
+      points: {
+        4: [{ line: { amount: 5 } }],
+        5: [{ line: { amount: 5 } }]
+      }
+    },
+    place: { eight: { amount: 6 } }
+  }
+
+  const updated = lib.passcome2place68({ rules, bets, hand })
+
+  // Should add odds to both come points
+  t.equal(updated.come.points[4][0].odds.amount, rules.maxOddsMultiple['4'] * rules.minBet, 'adds odds to come point 4')
+  t.equal(updated.come.points[5][0].odds.amount, rules.maxOddsMultiple['5'] * rules.minBet, 'adds odds to come point 5')
+  t.equal(updated.new, rules.maxOddsMultiple['4'] * rules.minBet + rules.maxOddsMultiple['5'] * rules.minBet)
+
+  t.end()
+})
+
+tap.test('passcome2place68: adds second come bet when only one exists', (t) => {
+  const rules = {
+    minBet: 5,
+    maxOddsMultiple: {
+      4: 3,
+      5: 4,
+      6: 5,
+      8: 5,
+      9: 4,
+      10: 3
+    }
+  }
+
+  const hand = { isComeOut: false, result: 'neutral', point: 6 }
+  const bets = {
+    pass: { line: { amount: 5, isContract: true }, odds: { amount: 25 } },
+    come: {
+      points: {
+        4: [{ line: { amount: 5 }, odds: { amount: 15 } }]
+      }
+    },
+    place: { eight: { amount: 6 } }
+  }
+
+  const updated = lib.passcome2place68({ rules, bets, hand })
+
+  t.equal(updated.come.pending.length, 1, 'adds second pending come bet')
+  t.equal(updated.come.pending[0].amount, rules.minBet)
+  t.equal(updated.new, rules.minBet)
+
+  t.end()
+})
+
+tap.test('passcome2place68: skips place bets covered by two come points', (t) => {
+  const rules = {
+    minBet: 5,
+    maxOddsMultiple: {
+      4: 3,
+      5: 4,
+      6: 5,
+      8: 5,
+      9: 4,
+      10: 3
+    }
+  }
+
+  const hand = { isComeOut: false, result: 'neutral', point: 5 }
+  const bets = {
+    pass: { line: { amount: 5, isContract: true }, odds: { amount: 20 } },
+    come: {
+      points: {
+        6: [{ line: { amount: 5 }, odds: { amount: 25 } }],
+        8: [{ line: { amount: 5 } }]
+      }
+    }
+  }
+
+  const updated = lib.passcome2place68({ rules, bets, hand })
+
+  // Should add odds to come point 8
+  t.equal(updated.come.points[8][0].odds.amount, rules.maxOddsMultiple['8'] * rules.minBet)
+  // Should not create place bets for 6 or 8 since they're covered by come points
+  t.notOk(updated.place?.six, 'skip place 6 when come point is 6')
+  t.notOk(updated.place?.eight, 'skip place 8 when come point is 8')
+  t.equal(updated.new, rules.maxOddsMultiple['8'] * rules.minBet)
+
+  t.end()
+})
+
 // Priority 2: Test all points (4, 5, 6, 8, 9, 10) with odds calculations
 tap.test('minPassLineMaxOdds: all points have correct odds multiples', (t) => {
   const rules = {
@@ -1014,6 +1153,36 @@ tap.test('composition: all strategies handle missing bets parameter', (t) => {
   t.doesNotThrow(() => lib.placeSixEight({ rules, hand }), 'placeSixEight handles missing bets')
   t.doesNotThrow(() => lib.minPassLinePlaceSixEight({ rules, hand }), 'minPassLinePlaceSixEight handles missing bets')
   t.doesNotThrow(() => lib.minPassLineMaxOddsPlaceSixEight({ rules, hand }), 'minPassLineMaxOddsPlaceSixEight handles missing bets')
+
+  t.end()
+})
+
+tap.test('noBetting: returns no bets on comeout', (t) => {
+  const result = lib.noBetting({ hand: { isComeOut: true } })
+
+  t.equal(result.new, 0, 'no new wager')
+  t.notOk(result.pass, 'no pass bet')
+  t.notOk(result.come, 'no come bet')
+  t.notOk(result.place, 'no place bet')
+
+  t.end()
+})
+
+tap.test('noBetting: returns no bets with point established', (t) => {
+  const result = lib.noBetting({ hand: { isComeOut: false, point: 8 } })
+
+  t.equal(result.new, 0, 'no new wager')
+  t.notOk(result.pass, 'no pass bet')
+  t.notOk(result.come, 'no come bet')
+  t.notOk(result.place, 'no place bet')
+
+  t.end()
+})
+
+tap.test('noBetting: works with no arguments', (t) => {
+  t.doesNotThrow(() => lib.noBetting(), 'noBetting handles no arguments')
+  const result = lib.noBetting()
+  t.equal(result.new, 0, 'no new wager')
 
   t.end()
 })

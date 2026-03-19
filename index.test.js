@@ -538,6 +538,66 @@ tap.test('integration: placeSixEight returns payout details', (t) => {
   t.end()
 })
 
+tap.test('integration: noBetting strategy, hand plays out with no balance change', (t) => {
+  let rollCount = -1
+  const fixedRolls = [
+    3, 3, // point set to 6
+    4, 1, // neutral
+    3, 4 // seven out
+  ]
+
+  function testRoll () {
+    rollCount++
+    return fixedRolls[rollCount]
+  }
+
+  const rules = {
+    minBet: 5,
+    maxOddsMultiple: { 4: 3, 5: 4, 6: 5, 8: 5, 9: 4, 10: 3 }
+  }
+
+  const hand = lib.playHand({ rules, roll: testRoll, bettingStrategy: betting.noBetting })
+
+  t.ok(Array.isArray(hand.history), 'has roll history')
+  t.equal(hand.history.length, 3, 'three rolls recorded')
+  t.equal(hand.history[0].result, 'point set', 'first roll sets point')
+  t.equal(hand.history[1].result, 'neutral', 'second roll is neutral')
+  t.equal(hand.history[2].result, 'seven out', 'third roll is seven out')
+  t.equal(hand.balance, 0, 'balance unchanged with no betting')
+  t.notOk(hand.history[2].payouts, 'no payouts when not betting')
+
+  t.end()
+})
+
+tap.test('integration: noBetting strategy handles comeout win before seven out', (t) => {
+  const fixedRolls = [
+    4, 3, // 7: comeout win
+    3, 3, // 6: point set
+    3, 4 // 7: seven out
+  ]
+
+  let rollCount = -1
+  function testRoll () {
+    rollCount++
+    return fixedRolls[rollCount]
+  }
+
+  const rules = {
+    minBet: 5,
+    maxOddsMultiple: { 4: 3, 5: 4, 6: 5, 8: 5, 9: 4, 10: 3 }
+  }
+
+  const hand = lib.playHand({ rules, roll: testRoll, bettingStrategy: betting.noBetting })
+
+  t.ok(Array.isArray(hand.history), 'has roll history')
+  t.equal(hand.history[0].result, 'comeout win', 'first roll is comeout win')
+  t.equal(hand.history[1].result, 'point set', 'second roll sets point')
+  t.equal(hand.history[2].result, 'seven out', 'third roll is seven out')
+  t.equal(hand.balance, 0, 'balance unchanged with no betting')
+
+  t.end()
+})
+
 tap.test('integration: starting balance is applied', (t) => {
   let rollCount = -1
   const fixedRolls = [
