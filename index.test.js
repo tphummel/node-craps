@@ -3,6 +3,7 @@
 const tap = require('tap')
 const lib = require('./')
 const betting = require('./betting')
+const { withFiveCount } = require('./fiveCount')
 
 tap.test('roll d6', function (t) {
   const result = lib.rollD6()
@@ -634,7 +635,7 @@ tap.test('integration: withFiveCount delays betting until 5-count then delegates
   const hand = lib.playHand({
     rules,
     roll: testRoll,
-    bettingStrategy: betting.withFiveCount(betting.minPassLineOnly)
+    bettingStrategy: withFiveCount(betting.minPassLineOnly)
   })
 
   // Rolls 1-6: counting phase (indices 0-5), no bets

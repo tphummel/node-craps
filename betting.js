@@ -240,7 +240,6 @@ function fiveCountMinPassLineMaxOddsPlaceSixEight (opts) {
 
 module.exports = {
   noBetting,
-  withFiveCount,
   fiveCountMinPassLineMaxOddsPlaceSixEight,
   minPassLineOnly,
   lineMaxOdds,
