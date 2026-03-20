@@ -76,16 +76,24 @@ function passOdds ({ bets, hand, rules }) {
   return { payout, bets }
 }
 
-function placeBet ({ bets, hand, placeNumber }) {
+function placeBet ({ rules, bets, hand, placeNumber }) {
   const label = placeNumber === 6 ? 'six' : placeNumber === 8 ? 'eight' : String(placeNumber)
 
   if (!bets?.place?.[label]) {
     if (process.env.DEBUG) console.log(`[decision] no place ${placeNumber} bet`)
     return { bets }
   }
-  if (hand.result === 'point set') {
-    if (process.env.DEBUG) console.log(`[decision] place ${placeNumber} bet waits for next roll`)
-    return { bets }
+
+  const comeOutResults = ['comeout win', 'comeout loss', 'point set']
+  if (comeOutResults.includes(hand.result)) {
+    const bet = bets.place[label]
+    const betWorking = bet.working !== undefined
+      ? bet.working
+      : !(rules?.placeBetsOffOnComeOut)
+    if (!betWorking) {
+      if (process.env.DEBUG) console.log(`[decision] place ${placeNumber} bet is off on come-out`)
+      return { bets }
+    }
   }
 
   if (hand.diceSum === 7 && hand.result === 'seven out') {
@@ -238,12 +246,12 @@ function all ({ bets, hand, rules }) {
   bets = comeLineResult.bets
   payouts.push(...(comeLineResult.payouts || []))
 
-  const placeSixResult = placeSix({ bets, hand })
+  const placeSixResult = placeSix({ rules, bets, hand })
 
   bets = placeSixResult.bets
   payouts.push(placeSixResult.payout)
 
-  const placeEightResult = placeEight({ bets, hand })
+  const placeEightResult = placeEight({ rules, bets, hand })
 
   bets = placeEightResult.bets
   payouts.push(placeEightResult.payout)

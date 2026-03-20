@@ -592,3 +592,66 @@ tap.test('place bet on 8 pays on point win of 8', (t) => {
 
   t.end()
 })
+
+// placeBetsOffOnComeOut rule and per-bet working flag
+
+tap.test('place bet: table placeBetsOffOnComeOut:true blocks pay on custom come-out match', (t) => {
+  const rules = { placeBetsOffOnComeOut: true, comeOutWin: [7, 11, 6] }
+  const bets = { place: { six: { amount: 6 } } }
+  const hand = { result: 'comeout win', isComeOut: true, diceSum: 6 }
+
+  const settled = settle.all({ rules, bets, hand })
+
+  t.equal(settled.place.six.amount, 6, 'place six carries over (not paid)')
+  t.equal(settled.payouts.total, 0)
+  t.end()
+})
+
+tap.test('place bet: table placeBetsOffOnComeOut:true carries over on come-out 7', (t) => {
+  const rules = { placeBetsOffOnComeOut: true }
+  const bets = { place: { six: { amount: 6 }, eight: { amount: 6 } } }
+  const hand = { result: 'comeout win', isComeOut: true, diceSum: 7 }
+
+  const settled = settle.all({ rules, bets, hand })
+
+  t.equal(settled.place.six.amount, 6)
+  t.equal(settled.place.eight.amount, 6)
+  t.equal(settled.payouts.total, 0)
+  t.end()
+})
+
+tap.test('place bet: table placeBetsOffOnComeOut:false allows pay on custom come-out match', (t) => {
+  const rules = { placeBetsOffOnComeOut: false, comeOutWin: [7, 11, 6] }
+  const bets = { place: { six: { amount: 6 } } }
+  const hand = { result: 'comeout win', isComeOut: true, diceSum: 6 }
+
+  const settled = settle.all({ rules, bets, hand })
+
+  t.notOk(settled.place?.six, 'place six removed after win')
+  t.equal(settled.payouts.total, 13)
+  t.end()
+})
+
+tap.test('place bet: working:true on bet overrides table placeBetsOffOnComeOut:true', (t) => {
+  const rules = { placeBetsOffOnComeOut: true, comeOutWin: [7, 11, 6] }
+  const bets = { place: { six: { amount: 6, working: true } } }
+  const hand = { result: 'comeout win', isComeOut: true, diceSum: 6 }
+
+  const settled = settle.all({ rules, bets, hand })
+
+  t.notOk(settled.place?.six, 'place six removed after win')
+  t.equal(settled.payouts.total, 13)
+  t.end()
+})
+
+tap.test('place bet: working:false on bet overrides table placeBetsOffOnComeOut:false', (t) => {
+  const rules = { placeBetsOffOnComeOut: false, comeOutWin: [7, 11, 6] }
+  const bets = { place: { six: { amount: 6, working: false } } }
+  const hand = { result: 'comeout win', isComeOut: true, diceSum: 6 }
+
+  const settled = settle.all({ rules, bets, hand })
+
+  t.equal(settled.place.six.amount, 6, 'place six carries over (bet opted off)')
+  t.equal(settled.payouts.total, 0)
+  t.end()
+})
