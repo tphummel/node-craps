@@ -45,6 +45,7 @@ function myStrategy ({ rules, bets, hand, playerMind }) { ... }
 | `noBetting` | Makes no bets. Useful as a baseline or placeholder. |
 | `minPassLineOnly` | Pass line bet at `minBet` on each come-out. No odds. |
 | `minPassLineMaxOdds` | Pass line at `minBet` + maximum odds behind the line once a point is set. |
+| `minPassLineMinOdds` | Pass line at `minBet` + minimum payable odds once a point is set. Rounds up to nearest $5 for points 6/8, nearest even number for points 5/9, exact `minBet` for points 4/10. |
 | `placeSixEight` | Place the 6 and 8 at the nearest multiple of $6 ≥ `minBet`. No pass line. Bets come down on a win and are re-placed next turn. |
 | `minComeLineMaxOdds` | One come bet at `minBet` with max odds once it travels to a point. |
 
