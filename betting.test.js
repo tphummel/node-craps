@@ -1223,3 +1223,113 @@ tap.test('fiveCountMinPassLineMaxOddsPlaceSixEight: is exported and callable', (
 
   t.end()
 })
+
+tap.test('pressPlaceSixEight: no bets on come-out', (t) => {
+  const rules = { minBet: 5 }
+  const playerMind = {}
+
+  const bets = lib.pressPlaceSixEight({ rules, hand: { isComeOut: true }, playerMind })
+
+  t.notOk(bets.place, 'no place bets on come-out')
+  t.equal(bets.new, 0)
+  t.end()
+})
+
+tap.test('pressPlaceSixEight: places six and eight at initial amount on first point-phase call', (t) => {
+  const rules = { minBet: 5 }
+  const playerMind = {}
+
+  const bets = lib.pressPlaceSixEight({ rules, hand: { isComeOut: false, result: 'point set', point: 5 }, playerMind })
+
+  t.equal(bets.place.six.amount, 6, 'six placed at $6 (nearest multiple of 6 >= minBet)')
+  t.equal(bets.place.eight.amount, 6, 'eight placed at $6')
+  t.equal(bets.new, 12)
+  t.end()
+})
+
+tap.test('pressPlaceSixEight: presses six by $6 after a six win', (t) => {
+  const rules = { minBet: 5 }
+  const playerMind = {}
+
+  let bets = lib.pressPlaceSixEight({ rules, hand: { isComeOut: false, result: 'point set', point: 5 }, playerMind })
+  delete bets.new
+
+  // simulate six winning: settle removes place.six
+  delete bets.place.six
+
+  bets = lib.pressPlaceSixEight({ rules, bets, hand: { isComeOut: false, result: 'neutral', point: 5 }, playerMind })
+
+  t.equal(bets.place.six.amount, 12, 'six pressed to $12 after win')
+  t.equal(bets.place.eight.amount, 6, 'eight unchanged')
+  t.end()
+})
+
+tap.test('pressPlaceSixEight: presses eight by $6 after an eight win', (t) => {
+  const rules = { minBet: 5 }
+  const playerMind = {}
+
+  let bets = lib.pressPlaceSixEight({ rules, hand: { isComeOut: false, result: 'point set', point: 5 }, playerMind })
+  delete bets.new
+
+  // simulate eight winning
+  delete bets.place.eight
+
+  bets = lib.pressPlaceSixEight({ rules, bets, hand: { isComeOut: false, result: 'neutral', point: 5 }, playerMind })
+
+  t.equal(bets.place.six.amount, 6, 'six unchanged')
+  t.equal(bets.place.eight.amount, 12, 'eight pressed to $12 after win')
+  t.end()
+})
+
+tap.test('pressPlaceSixEight: press accumulates across multiple wins on same number', (t) => {
+  const rules = { minBet: 5 }
+  const playerMind = {}
+  const pointHand = { isComeOut: false, result: 'neutral', point: 5 }
+
+  let bets = lib.pressPlaceSixEight({ rules, hand: { isComeOut: false, result: 'point set', point: 5 }, playerMind })
+  delete bets.new
+
+  delete bets.place.six
+  bets = lib.pressPlaceSixEight({ rules, bets, hand: pointHand, playerMind })
+  t.equal(bets.place.six.amount, 12, 'six at $12 after first win')
+  delete bets.new
+
+  delete bets.place.six
+  bets = lib.pressPlaceSixEight({ rules, bets, hand: pointHand, playerMind })
+  t.equal(bets.place.six.amount, 18, 'six at $18 after second win')
+  t.end()
+})
+
+tap.test('pressPlaceSixEight: no press and no new wager when bets stay on table', (t) => {
+  const rules = { minBet: 5 }
+  const playerMind = {}
+
+  let bets = lib.pressPlaceSixEight({ rules, hand: { isComeOut: false, result: 'point set', point: 5 }, playerMind })
+  delete bets.new
+
+  bets = lib.pressPlaceSixEight({ rules, bets, hand: { isComeOut: false, result: 'neutral', point: 5 }, playerMind })
+
+  t.equal(bets.place.six.amount, 6, 'six stays at $6')
+  t.equal(bets.place.eight.amount, 6, 'eight stays at $6')
+  t.equal(bets.new, 0, 'no new wager when bets already on table')
+  t.end()
+})
+
+tap.test('pressPlaceSixEight: come-out within hand does not trigger press', (t) => {
+  const rules = { minBet: 5 }
+  const playerMind = {}
+
+  // first point phase: place both
+  let bets = lib.pressPlaceSixEight({ rules, hand: { isComeOut: false, result: 'point set', point: 5 }, playerMind })
+  delete bets.new
+
+  // point wins, back to come-out (place bets carry over per settle.js)
+  bets = lib.pressPlaceSixEight({ rules, bets, hand: { isComeOut: true }, playerMind })
+  t.equal(bets.new, 0, 'no new wager on come-out')
+
+  // second point phase — bets still on table, no press
+  bets = lib.pressPlaceSixEight({ rules, bets, hand: { isComeOut: false, result: 'point set', point: 9 }, playerMind })
+  t.equal(bets.place.six.amount, 6, 'six not pressed after come-out cycle')
+  t.equal(bets.place.eight.amount, 6, 'eight not pressed after come-out cycle')
+  t.end()
+})

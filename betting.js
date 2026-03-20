@@ -228,6 +228,47 @@ function minComeLineMaxOdds (opts) {
   return bets
 }
 
+function pressPlaceSixEight ({ rules, bets: existingBets, hand, playerMind }) {
+  const initialAmount = Math.ceil(rules.minBet / 6) * 6
+
+  if (!playerMind.press68) {
+    playerMind.press68 = {
+      sixAmount: initialAmount,
+      eightAmount: initialAmount,
+      prevPlacedSix: false,
+      prevPlacedEight: false
+    }
+  }
+
+  const state = playerMind.press68
+  const bets = Object.assign({ new: 0 }, existingBets)
+
+  if (state.prevPlacedSix && !bets.place?.six) state.sixAmount += 6
+  if (state.prevPlacedEight && !bets.place?.eight) state.eightAmount += 6
+
+  if (hand.isComeOut) {
+    state.prevPlacedSix = !!(bets.place?.six)
+    state.prevPlacedEight = !!(bets.place?.eight)
+    return bets
+  }
+
+  bets.place = bets.place || {}
+
+  if (!bets.place.six) {
+    bets.place.six = { amount: state.sixAmount }
+    bets.new += state.sixAmount
+  }
+  if (!bets.place.eight) {
+    bets.place.eight = { amount: state.eightAmount }
+    bets.new += state.eightAmount
+  }
+
+  state.prevPlacedSix = true
+  state.prevPlacedEight = true
+
+  return bets
+}
+
 const { withFiveCount } = require('./fiveCount.js')
 
 function noBetting () {
@@ -240,6 +281,7 @@ function fiveCountMinPassLineMaxOddsPlaceSixEight (opts) {
 
 module.exports = {
   noBetting,
+  pressPlaceSixEight,
   fiveCountMinPassLineMaxOddsPlaceSixEight,
   minPassLineOnly,
   lineMaxOdds,
