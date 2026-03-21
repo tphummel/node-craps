@@ -1392,3 +1392,26 @@ tap.test('minPassLineMinOdds: no odds on come-out', (t) => {
   t.notOk(result.pass?.odds, 'no odds on come-out')
   t.end()
 })
+
+tap.test('minPassLineMidOdds: places roughly half of max odds on point set', (t) => {
+  const rules = { minBet: 5, maxOddsMultiple: { 4: 3, 5: 4, 6: 5, 8: 5, 9: 4, 10: 3 } }
+  const hand = { isComeOut: false, result: 'point set', point: 5 }
+  const bets = { pass: { line: { amount: 5 } } }
+
+  const result = lib.minPassLineMidOdds({ rules, bets, hand })
+  const expectedMultiple = Math.ceil(rules.maxOddsMultiple[5] / 2)
+
+  t.ok(result.pass.odds, 'odds placed')
+  t.equal(result.pass.odds.amount, expectedMultiple * rules.minBet, 'odds at ceil(maxMultiple/2) * minBet')
+  t.end()
+})
+
+tap.test('minPassLineMidOdds: no odds on come-out', (t) => {
+  const rules = { minBet: 5, maxOddsMultiple: { 4: 3, 5: 4, 6: 5, 8: 5, 9: 4, 10: 3 } }
+  const hand = { isComeOut: true }
+
+  const result = lib.minPassLineMidOdds({ rules, hand })
+
+  t.notOk(result.pass?.odds, 'no odds on come-out')
+  t.end()
+})
