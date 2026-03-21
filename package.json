@@ -25,8 +25,8 @@
   },
   "homepage": "https://github.com/tphummel/node-craps#readme",
   "devDependencies": {
-    "standard": "^16.0.3",
-    "tap": "^15.0.9"
+    "standard": "^17.0.0",
+    "tap": "^16.3.10"
   },
   "bin": {
     "craps-monte": "./monte-carlo.js",
