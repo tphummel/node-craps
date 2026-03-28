@@ -27,7 +27,7 @@
   },
   "homepage": "https://github.com/tphummel/node-craps#readme",
   "devDependencies": {
-    "standard": "^16.0.3",
+    "standard": "^17.1.2",
     "tap": "^15.0.9"
   },
   "bin": {
