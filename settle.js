@@ -283,6 +283,110 @@ function dontPassLine ({ bets, hand, rules }) {
   return { bets }
 }
 
+function dontComeLine ({ bets, hand }) {
+  if (!bets?.dontCome) {
+    if (process.env.DEBUG) console.log('[decision] no dont come bets')
+    return { bets }
+  }
+
+  const payouts = []
+  bets.dontCome.points = bets.dontCome.points || {}
+
+  // Settle established don't come bets at points
+  if (bets.dontCome.points) {
+    Object.keys(bets.dontCome.points).forEach(point => {
+      const remainingBets = []
+      bets.dontCome.points[point].forEach(bet => {
+        // Seven out: don't come WINS (7 before point)
+        if (hand.result === 'seven out') {
+          const linePayout = {
+            type: 'dont come line win',
+            principal: bet.line.amount,
+            profit: bet.line.amount
+          }
+          payouts.push(linePayout)
+
+          if (bet.odds) {
+            const oddsPayouts = {
+              4: 1 / 2,
+              5: 2 / 3,
+              6: 5 / 6,
+              8: 5 / 6,
+              9: 2 / 3,
+              10: 1 / 2
+            }
+            payouts.push({
+              type: 'dont come odds win',
+              principal: bet.odds.amount,
+              profit: bet.odds.amount * oddsPayouts[point]
+            })
+          }
+          return
+        }
+
+        // Point number rolled: don't come LOSES
+        if (hand.diceSum === Number(point)) {
+          if (process.env.DEBUG) console.log(`[decision] dont come ${point} loss -$${bet.line.amount}`)
+          return
+        }
+
+        remainingBets.push(bet)
+      })
+
+      if (remainingBets.length) {
+        bets.dontCome.points[point] = remainingBets
+      } else {
+        delete bets.dontCome.points[point]
+      }
+    })
+
+    if (Object.keys(bets.dontCome.points).length === 0) {
+      delete bets.dontCome.points
+    }
+  }
+
+  // Settle pending don't come bets (first roll after placing)
+  const pending = bets.dontCome.pending || []
+
+  if (pending.length) {
+    const immediateWins = [2, 3]
+    const immediateLosses = [7, 11]
+    const barNumbers = [12] // push
+
+    pending.forEach(bet => {
+      if (immediateWins.includes(hand.diceSum)) {
+        payouts.push({
+          type: 'dont come line win',
+          principal: bet.amount,
+          profit: bet.amount
+        })
+      } else if (immediateLosses.includes(hand.diceSum)) {
+        if (process.env.DEBUG) console.log(`[decision] dont come line loss -$${bet.amount}`)
+      } else if (barNumbers.includes(hand.diceSum)) {
+        if (process.env.DEBUG) console.log(`[decision] dont come line push (bar 12) $${bet.amount}`)
+        payouts.push({
+          type: 'dont come line push',
+          principal: bet.amount,
+          profit: 0
+        })
+      } else {
+        bets.dontCome.points = bets.dontCome.points || {}
+        bets.dontCome.points[hand.diceSum] = bets.dontCome.points[hand.diceSum] || []
+        bets.dontCome.points[hand.diceSum].push({ line: { amount: bet.amount } })
+        if (process.env.DEBUG) console.log(`[decision] dont come line moves to ${hand.diceSum}`)
+      }
+    })
+
+    delete bets.dontCome.pending
+  }
+
+  if (bets.dontCome && Object.keys(bets.dontCome).length === 0) {
+    delete bets.dontCome
+  }
+
+  return { bets, payouts }
+}
+
 function all ({ bets, hand, rules }) {
   const payouts = []
 
@@ -305,6 +409,11 @@ function all ({ bets, hand, rules }) {
 
   bets = comeLineResult.bets
   payouts.push(...(comeLineResult.payouts || []))
+
+  const dontComeLineResult = dontComeLine({ bets, hand })
+
+  bets = dontComeLineResult.bets
+  payouts.push(...(dontComeLineResult.payouts || []))
 
   const placeSixResult = placeSix({ rules, bets, hand })
 
@@ -335,4 +444,4 @@ function all ({ bets, hand, rules }) {
   return bets
 }
 
-export { passLine, passOdds, dontPassLine, placeBet, placeSix, placeEight, comeLine, all }
+export { passLine, passOdds, dontPassLine, placeBet, placeSix, placeEight, comeLine, dontComeLine, all }
