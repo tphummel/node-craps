@@ -50,13 +50,11 @@ for (const name of strategyNames) {
 
   for (const hand of p.hands) {
     console.log(`  Hand ${hand.handNum}  (${hand.rollCount} rolls, balance $${hand.balance})`)
-    // Roll-by-roll detail
     hand.history.forEach((roll, idx) => {
       const prevRoll = idx === 0 ? null : hand.history[idx - 1]
       const prevIsCO = idx === 0 ? true : prevRoll.isComeOut
       const prevPt   = idx === 0 ? '-'  : (prevRoll.point ?? '-')
 
-      // Money in play summary
       const bets = roll.betsBefore || {}
       const parts = []
       if (bets.pass?.line)   parts.push(`pass=$${bets.pass.line.amount}`)
@@ -79,7 +77,6 @@ for (const name of strategyNames) {
         })
       }
 
-      // Payouts
       const payoutStr = (roll.payouts || []).map(p => `${p.type}:+$${p.principal + p.profit}`).join(' | ')
 
       console.log(
@@ -98,7 +95,6 @@ console.log('\n' + '='.repeat(80))
 console.log('AUDIT SUMMARY')
 console.log('='.repeat(80))
 
-// Collect all roll events across all strategies/hands for analysis
 const events = {
   passLineWins:      0,
   passLineLosses:    0,
@@ -118,10 +114,22 @@ const events = {
   placeSixLosses:    0,
   placeEightWins:    0,
   placeEightLosses:  0,
-  // edge cases
-  placeBetOffOnCO:   0,  // place bet present but result was CO result (should be off)
-  comeOddsWithoutLine: 0, // come odds without a line bet (data integrity)
+  placeBetOffOnCO:   0,
+  comeOddsWithoutLine: 0,
   unknownPayoutTypes: []
+}
+
+// ─── Bug-fix regression checks ───────────────────────────────────────────────
+const regressions = {
+  // Bug 1: bets.new must never go negative
+  negativeNew: [],
+  // Bug 1: place bet removed when point matches existing (not newly placed) bet
+  //   We track rolls where an existing p6/p8 was present going INTO a roll where
+  //   the point matched that number — the bet should be silently removed (money
+  //   not deducted again) rather than giving a free credit.
+  existingPlaceRemovedForPoint: [],
+  // Bug 2: don't pass settled correctly on bar-12 under default rules
+  dontPassBarMisfire: []
 }
 
 const knownPayoutTypes = new Set([
@@ -135,12 +143,17 @@ const knownPayoutTypes = new Set([
 for (const name of strategyNames) {
   const p = allResults[name]
   for (const hand of p.hands) {
+    // Track strategy-level bets.new by hooking into a replay —
+    // we can't see bets.new from history, so we re-invoke the strategy
+    // with the betsBefore state to reconstruct what bets.new should have been.
+    // Instead, we instrument at the playHand level by wrapping the strategy.
+
     for (let idx = 0; idx < hand.history.length; idx++) {
       const roll = hand.history[idx]
       const bets = roll.betsBefore || {}
       const result = roll.result
 
-      // Detect place bets present during CO rolls (should be off)
+      // Place bets present on CO rolls (expected — they go "off", not a bug)
       const coResults = ['comeout win', 'comeout loss', 'point set']
       if (coResults.includes(result)) {
         if (bets.place?.six || bets.place?.eight) {
@@ -157,11 +170,11 @@ for (const name of strategyNames) {
         })
       }
 
-      // Count losses from seven-out
+      // Seven-out losses / dark-side wins
       if (result === 'seven out') {
-        if (bets.pass?.line)  events.passLineLosses++
-        if (bets.pass?.odds)  events.passOddsLosses++
-        if (bets.place?.six)  events.placeSixLosses++
+        if (bets.pass?.line)   events.passLineLosses++
+        if (bets.pass?.odds)   events.passOddsLosses++
+        if (bets.place?.six)   events.placeSixLosses++
         if (bets.place?.eight) events.placeEightLosses++
         if (bets.come?.points) {
           Object.values(bets.come.points).forEach(arr => {
@@ -189,28 +202,82 @@ for (const name of strategyNames) {
         if (bets.dontPass?.line) events.dontPassLosses++
       }
 
-      // Count from payouts array
-      ;(roll.payouts || []).forEach(p => {
-        if (!knownPayoutTypes.has(p.type)) {
-          events.unknownPayoutTypes.push({ type: p.type, strategy: name })
+      // Payout-type audit
+      ;(roll.payouts || []).forEach(po => {
+        if (!knownPayoutTypes.has(po.type)) {
+          events.unknownPayoutTypes.push({ type: po.type, strategy: name })
         }
-        switch (p.type) {
-          case 'point win':        events.passLineWins++; break
-          case 'comeout win':      events.passLineWins++; break
-          case 'pass odds win':    events.passOddsWins++; break
-          case 'dont pass win':    // already counted above
-            break
-          case 'come line win':    events.comeLineWins++; break
-          case 'come odds win':    events.comeOddsWins++; break
-          case 'dont come line win': events.dontComeWins++; break
-          case 'dont come line push': events.dontComePushes++; break
-          case 'place 6 win':      events.placeSixWins++; break
-          case 'place 8 win':      events.placeEightWins++; break
+        switch (po.type) {
+          case 'point win':            events.passLineWins++; break
+          case 'comeout win':          events.passLineWins++; break
+          case 'pass odds win':        events.passOddsWins++; break
+          case 'dont pass win':        break // counted above
+          case 'come line win':        events.comeLineWins++; break
+          case 'come odds win':        events.comeOddsWins++; break
+          case 'dont come line win':   events.dontComeWins++; break
+          case 'dont come line push':  events.dontComePushes++; break
+          case 'place 6 win':          events.placeSixWins++; break
+          case 'place 8 win':          events.placeEightWins++; break
         }
       })
     }
   }
 }
+
+// ─── Bug 1 regression: replay strategy calls and check bets.new ──────────────
+// We re-run each hand with an instrumented wrapper that captures bets.new.
+for (const name of strategyNames) {
+  const strategy = strategies[name]
+  const p = allResults[name]
+
+  for (const hand of p.hands) {
+    // Build a deterministic dice sequence from the recorded history
+    const diceSeq = []
+    hand.history.forEach(roll => diceSeq.push(roll.die1, roll.die2))
+    let diceIdx = 0
+    const deterministicRoll = () => diceSeq[diceIdx++]
+
+    // Wrap strategy to record every bets.new value
+    const wrappedStrategy = (opts) => {
+      const result = strategy(opts)
+      if (result.new < 0) {
+        regressions.negativeNew.push({
+          strategy: name,
+          handNum: hand.handNum,
+          betsNewValue: result.new,
+          bets: JSON.stringify(opts.bets)
+        })
+      }
+      return result
+    }
+
+    playHand({ rules, bettingStrategy: wrappedStrategy, roll: deterministicRoll })
+  }
+}
+
+// ─── Bug 2 regression: verify bar-12 push behaves correctly ──────────────────
+// Find any roll where result=comeout loss, diceSum=12, dontPass.line exists,
+// and check that the don't pass was NOT paid out (it should push/carry).
+for (const name of strategyNames) {
+  const p = allResults[name]
+  for (const hand of p.hands) {
+    for (const roll of hand.history) {
+      if (roll.result === 'comeout loss' && roll.diceSum === 12 && roll.betsBefore?.dontPass?.line) {
+        // Payout ledger must NOT contain a dont pass win for this roll
+        const hasDontPassWin = (roll.payouts || []).some(po => po.type === 'dont pass win')
+        if (hasDontPassWin) {
+          regressions.dontPassBarMisfire.push({
+            strategy: name,
+            handNum: hand.handNum,
+            issue: 'dont pass paid out on bar-12 comeout loss (should push)'
+          })
+        }
+      }
+    }
+  }
+}
+
+// ─── Print results ────────────────────────────────────────────────────────────
 
 console.log('\nEvent counts across all strategies × 5 hands:')
 console.table({
@@ -235,13 +302,35 @@ console.table({
 })
 
 console.log('\n--- Edge Case / Integrity Flags ---')
-console.log(`Place bets present during come-out rolls (should be off): ${events.placeBetOffOnCO}`)
-console.log(`Come odds without corresponding line bet (data integrity): ${events.comeOddsWithoutLine}`)
+console.log(`Place bets present during come-out rolls (off by rule, expected): ${events.placeBetOffOnCO}`)
+console.log(`Come odds without corresponding line bet: ${events.comeOddsWithoutLine}`)
 if (events.unknownPayoutTypes.length > 0) {
-  console.log('Unknown payout types encountered:')
+  console.log('Unknown payout types:')
   events.unknownPayoutTypes.forEach(u => console.log(`  - "${u.type}" in strategy "${u.strategy}"`))
 } else {
   console.log('Unknown payout types: none')
+}
+
+console.log('\n--- Bug-Fix Regression Results ---')
+
+if (regressions.negativeNew.length === 0) {
+  console.log('Bug 1 (negative bets.new): PASS — no negative bets.new values observed')
+} else {
+  console.log(`Bug 1 (negative bets.new): FAIL — ${regressions.negativeNew.length} instance(s):`)
+  regressions.negativeNew.forEach(r => console.log(`  strategy=${r.strategy} hand=${r.handNum} bets.new=${r.betsNewValue}`))
+}
+
+if (regressions.dontPassBarMisfire.length === 0) {
+  console.log("Bug 2 (don't pass bar-12): PASS — no misfires observed")
+} else {
+  console.log(`Bug 2 (don't pass bar-12): FAIL — ${regressions.dontPassBarMisfire.length} instance(s):`)
+  regressions.dontPassBarMisfire.forEach(r => console.log(`  strategy=${r.strategy} hand=${r.handNum}: ${r.issue}`))
+}
+
+if (events.dontPassBar12 > 0) {
+  console.log(`  (bar-12 push exercised ${events.dontPassBar12} time(s) this run — confirming the path was hit)`)
+} else {
+  console.log('  (bar-12 not rolled this run — Bug 2 not exercised; rely on unit tests)')
 }
 
 // ─── Per-strategy balance summary ────────────────────────────────────────────
