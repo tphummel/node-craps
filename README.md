@@ -44,9 +44,9 @@ function myStrategy ({ rules, bets, hand, playerMind }) { ... }
 |---|---|
 | `noBetting` | Makes no bets. Useful as a baseline or placeholder. |
 | `minPassLineOnly` | Pass line bet at `minBet` on each come-out. No odds. |
-| `minPassLineMaxOdds` | Pass line at `minBet` + maximum odds behind the line once a point is set. |
-| `minPassLineMidOdds` | Pass line at `minBet` + approximately half of maximum odds once a point is set. Odds multiple is `Math.ceil(maxOddsMultiple / 2)`. |
-| `minPassLineMinOdds` | Pass line at `minBet` + minimum payable odds once a point is set. Rounds up to nearest $5 for points 6/8, nearest even number for points 5/9, exact `minBet` for points 4/10. |
+| `minPassLineMaxOdds` | Pass line at `minBet` + max odds behind the line once a point is set. |
+| `minPassLineMidOdds` | Pass line at `minBet` + mid odds behind the line once a point is set. Odds multiple is `Math.ceil(maxOddsMultiple / 2)`. |
+| `minPassLineMinOdds` | Pass line at `minBet` + min odds behind the line once a point is set. Rounds up to nearest $5 for points 6/8, nearest even number for points 5/9, exact `minBet` for points 4/10. |
 | `placeSixEight` | Place the 6 and 8 at the nearest multiple of $6 ≥ `minBet`. No pass line. Bets come down on a win and are re-placed next turn. |
 | `minComeLineMaxOdds` | One come bet at `minBet` with max odds once it travels to a point. |
 
@@ -63,9 +63,9 @@ function myStrategy ({ rules, bets, hand, playerMind }) { ... }
 |---|---|
 | `minPassLinePlaceSixEight` | Pass line + place 6 and 8 (skips whichever is the point). |
 | `minPassLineMaxOddsPlaceSixEight` | Pass line + max odds + place 6 and 8 (skips point). |
-| `minPassLineMaxOddsMinComeLineMaxOdds` | Pass line + max odds + one come bet with max odds. |
-| `passCome68` | Pass line + max odds + one come bet + place 6/8 (skips numbers covered by pass or come). |
-| `passcome2place68` | Pass line + max odds + up to two come bets + place 6/8 (skips covered numbers). |
+| `minPassLineMaxOddsMinComeLineMaxOdds` | Pass line + max odds + one come bet with max odds behind each. |
+| `passCome68` | Pass line + max odds + one come bet with max odds + place 6/8 (skips numbers covered by pass or come). |
+| `passcome2place68` | Pass line + max odds + up to two come bets with max odds + place 6/8 (skips covered numbers). |
 
 ### stateful strategies
 

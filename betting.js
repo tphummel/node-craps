@@ -336,13 +336,13 @@ lineMaxOdds.title = 'Line Max Odds'
 lineMaxOdds.description = 'Generic helper: places a line bet and maximum odds behind it once a point is set. Parameterised by betKey (pass or come).'
 
 minPassLineMaxOdds.title = 'Min Pass Line + Max Odds'
-minPassLineMaxOdds.description = 'Pass line at minBet plus maximum odds behind the line once a point is set.'
+minPassLineMaxOdds.description = 'Pass line at minBet plus max odds behind the line once a point is set.'
 
 minPassLineMidOdds.title = 'Min Pass Line + Mid Odds'
-minPassLineMidOdds.description = 'Pass line at minBet plus approximately half of maximum odds once a point is set. Odds multiple is Math.ceil(maxOddsMultiple / 2).'
+minPassLineMidOdds.description = 'Pass line at minBet plus mid odds behind the line once a point is set. Odds multiple is Math.ceil(maxOddsMultiple / 2).'
 
 minPassLineMinOdds.title = 'Min Pass Line + Min Odds'
-minPassLineMinOdds.description = 'Pass line at minBet plus minimum payable odds once a point is set. Rounds to nearest $5 for points 6/8, nearest even number for points 5/9, exact minBet for points 4/10.'
+minPassLineMinOdds.description = 'Pass line at minBet plus min odds behind the line once a point is set. Rounds up to nearest $5 for points 6/8, nearest even number for points 5/9, exact minBet for points 4/10.'
 
 placeSixEight.title = 'Place Six and Eight'
 placeSixEight.description = 'Place the 6 and 8 at the nearest multiple of $6 >= minBet. No pass line. Bets come down on a win and are re-placed next turn.'
@@ -357,19 +357,19 @@ minPassLinePlaceSixEight.title = 'Min Pass Line + Place Six and Eight'
 minPassLinePlaceSixEight.description = 'Pass line plus place 6 and 8, skipping whichever number is the current point.'
 
 minPassLineMaxOddsPlaceSixEight.title = 'Min Pass Line + Max Odds + Place Six and Eight'
-minPassLineMaxOddsPlaceSixEight.description = 'Pass line plus maximum odds plus place 6 and 8, skipping the current point.'
+minPassLineMaxOddsPlaceSixEight.description = 'Pass line plus max odds plus place 6 and 8, skipping the current point.'
 
 minPassLineMaxOddsMinComeLineMaxOdds.title = 'Min Pass Line + Max Odds + Min Come Line + Max Odds'
-minPassLineMaxOddsMinComeLineMaxOdds.description = 'Pass line plus maximum odds plus one come bet with maximum odds.'
+minPassLineMaxOddsMinComeLineMaxOdds.description = 'Pass line plus max odds plus one come bet with max odds behind each.'
 
 minComeLineMaxOdds.title = 'Min Come Line + Max Odds'
-minComeLineMaxOdds.description = 'One come bet at minBet with maximum odds once it travels to a point.'
+minComeLineMaxOdds.description = 'One come bet at minBet with max odds once it travels to a point.'
 
 passCome68.title = 'Pass + Come + Place Six and Eight'
-passCome68.description = 'Pass line plus maximum odds plus one come bet plus place 6 and 8, skipping numbers already covered by pass or come.'
+passCome68.description = 'Pass line plus max odds plus one come bet with max odds plus place 6 and 8, skipping numbers already covered by pass or come.'
 
 passcome2place68.title = 'Pass + Two Come Bets + Place Six and Eight'
-passcome2place68.description = 'Pass line plus maximum odds plus up to two come bets plus place 6 and 8, skipping numbers already covered by pass or come.'
+passcome2place68.description = 'Pass line plus max odds plus up to two come bets with max odds plus place 6 and 8, skipping numbers already covered by pass or come.'
 
 pressPlaceSixEight.title = 'Press Place Six and Eight'
 pressPlaceSixEight.description = 'Place 6 and 8. On each win, press the winning number by one $6 unit. Starts at Math.ceil(minBet/6)*6. State resets each hand.'
