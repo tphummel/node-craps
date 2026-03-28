@@ -2,7 +2,9 @@
   "name": "craps",
   "version": "1.0.0",
   "description": "craps simulator",
+  "type": "module",
   "main": "index.js",
+  "exports": "./index.js",
   "scripts": {
     "test": "standard && NODE_ENV=test tap *.test.js --no-check-coverage --coverage-report=text-summary",
     "cov": "standard && NODE_ENV=test tap *.test.js --no-check-coverage --coverage-report=html",
@@ -25,7 +27,7 @@
   },
   "homepage": "https://github.com/tphummel/node-craps#readme",
   "devDependencies": {
-    "standard": "^16.0.3",
+    "standard": "^17.1.2",
     "tap": "^15.0.9"
   },
   "bin": {

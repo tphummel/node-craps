@@ -1,7 +1,5 @@
-'use strict'
-
-const settle = require('./settle.js')
-const betting = require('./betting.js')
+import * as settle from './settle.js'
+import * as betting from './betting.js'
 
 function rollD6 () {
   return 1 + Math.floor(Math.random() * 6)
@@ -112,10 +110,4 @@ function playHand ({ rules, bettingStrategy, roll = rollD6, balance = 0 }) {
   return { history, balance }
 }
 
-module.exports = {
-  rollD6,
-  shoot,
-  playHand,
-  betting,
-  defaultRules
-}
+export { rollD6, shoot, playHand, betting, defaultRules }

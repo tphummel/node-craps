@@ -1,7 +1,5 @@
-'use strict'
-
-const tap = require('tap')
-const settle = require('./settle.js')
+import tap from 'tap'
+import * as settle from './settle.js'
 
 tap.test('passLine: comeout win', function (t) {
   const bets = {

@@ -275,12 +275,4 @@ function all ({ bets, hand, rules }) {
   return bets
 }
 
-module.exports = {
-  passLine,
-  passOdds,
-  placeBet,
-  placeSix,
-  placeEight,
-  comeLine,
-  all
-}
+export { passLine, passOdds, placeBet, placeSix, placeEight, comeLine, all }

@@ -1,3 +1,5 @@
+import { withFiveCount } from './fiveCount.js'
+
 function minPassLineOnly (opts) {
   const { rules, bets: existingBets, hand } = opts
   const bets = Object.assign({ new: 0 }, existingBets)
@@ -316,8 +318,6 @@ function pressPlaceSixEight ({ rules, bets: existingBets, hand, playerMind }) {
   return bets
 }
 
-const { withFiveCount } = require('./fiveCount.js')
-
 function noBetting () {
   return { new: 0 }
 }
@@ -326,7 +326,7 @@ function fiveCountMinPassLineMaxOddsPlaceSixEight (opts) {
   return withFiveCount(minPassLineMaxOddsPlaceSixEight)(opts)
 }
 
-module.exports = {
+export {
   noBetting,
   pressPlaceSixEight,
   fiveCountMinPassLineMaxOddsPlaceSixEight,
