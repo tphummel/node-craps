@@ -44,11 +44,11 @@ function myStrategy ({ rules, bets, hand, playerMind }) { ... }
 |---|---|
 | `noBetting` | Makes no bets. Useful as a baseline or placeholder. |
 | `minPassLineOnly` | Pass line bet at `minBet` on each come-out. No odds. |
-| `minPassLineMaxOdds` | Pass line at `minBet` + maximum free odds behind the line once a point is set (3x on 4/10, 4x on 5/9, 5x on 6/8 with default 3-4-5 table rules). |
-| `minPassLineMidOdds` | Pass line at `minBet` + approximately half of maximum odds once a point is set. Odds multiple is `Math.ceil(maxOddsMultiple / 2)` (2x on 4/10, 2x on 5/9, 3x on 6/8 with default 3-4-5 table rules). |
-| `minPassLineMinOdds` | Pass line at `minBet` + minimum payable odds (approximately 1x) once a point is set. Rounds up to nearest $5 for points 6/8, nearest even number for points 5/9, exact `minBet` for points 4/10. |
+| `minPassLineMaxOdds` | Pass line at `minBet` + max odds behind the line once a point is set. |
+| `minPassLineMidOdds` | Pass line at `minBet` + mid odds behind the line once a point is set. Odds multiple is `Math.ceil(maxOddsMultiple / 2)`. |
+| `minPassLineMinOdds` | Pass line at `minBet` + min odds behind the line once a point is set. Rounds up to nearest $5 for points 6/8, nearest even number for points 5/9, exact `minBet` for points 4/10. |
 | `placeSixEight` | Place the 6 and 8 at the nearest multiple of $6 ≥ `minBet`. No pass line. Bets come down on a win and are re-placed next turn. |
-| `minComeLineMaxOdds` | One come bet at `minBet` with max odds once it travels to a point (3x on 4/10, 4x on 5/9, 5x on 6/8 with default 3-4-5 table rules). |
+| `minComeLineMaxOdds` | One come bet at `minBet` with max odds once it travels to a point. |
 
 ### variants
 
@@ -62,10 +62,10 @@ function myStrategy ({ rules, bets, hand, playerMind }) { ... }
 | strategy | description |
 |---|---|
 | `minPassLinePlaceSixEight` | Pass line + place 6 and 8 (skips whichever is the point). |
-| `minPassLineMaxOddsPlaceSixEight` | Pass line + max odds + place 6 and 8 (skips point). Max odds: 3x on 4/10, 4x on 5/9, 5x on 6/8 with default 3-4-5 table rules. |
-| `minPassLineMaxOddsMinComeLineMaxOdds` | Pass line + max odds + one come bet with max odds behind each (3x on 4/10, 4x on 5/9, 5x on 6/8 with default 3-4-5 table rules). |
-| `passCome68` | Pass line + max odds + one come bet with max odds + place 6/8 (skips numbers covered by pass or come). Max odds: 3x on 4/10, 4x on 5/9, 5x on 6/8 with default 3-4-5 table rules. |
-| `passcome2place68` | Pass line + max odds + up to two come bets with max odds + place 6/8 (skips covered numbers). Max odds: 3x on 4/10, 4x on 5/9, 5x on 6/8 with default 3-4-5 table rules. |
+| `minPassLineMaxOddsPlaceSixEight` | Pass line + max odds + place 6 and 8 (skips point). |
+| `minPassLineMaxOddsMinComeLineMaxOdds` | Pass line + max odds + one come bet with max odds behind each. |
+| `passCome68` | Pass line + max odds + one come bet with max odds + place 6/8 (skips numbers covered by pass or come). |
+| `passcome2place68` | Pass line + max odds + up to two come bets with max odds + place 6/8 (skips covered numbers). |
 
 ### stateful strategies
 
@@ -74,7 +74,7 @@ These strategies track state across rolls within a hand via `playerMind`.
 | strategy | description |
 |---|---|
 | `pressPlaceSixEight` | Place 6 and 8. On each win, press the winning number by one $6 unit. Starts at `Math.ceil(minBet/6)*6`. Resets each hand. |
-| `fiveCountMinPassLineMaxOddsPlaceSixEight` | Applies the five-count gate before engaging `minPassLineMaxOddsPlaceSixEight`. Waits for a new shooter to establish a point (count 1) then survive four more qualifying rolls (counts 2–5) before any bets are placed (max odds: 3x on 4/10, 4x on 5/9, 5x on 6/8 with default 3-4-5 table rules). |
+| `fiveCountMinPassLineMaxOddsPlaceSixEight` | Applies the five-count gate before engaging `minPassLineMaxOddsPlaceSixEight`. Waits for a new shooter to establish a point (count 1) then survive four more qualifying rolls (counts 2–5) before any bets are placed. |
 
 ## simulate a hand
 
