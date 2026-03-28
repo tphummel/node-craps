@@ -377,8 +377,30 @@ pressPlaceSixEight.description = 'Place 6 and 8. On each win, press the winning 
 fiveCountMinPassLineMaxOddsPlaceSixEight.title = 'Five-Count: Min Pass Line + Max Odds + Place Six and Eight'
 fiveCountMinPassLineMaxOddsPlaceSixEight.description = 'Applies the five-count gate before engaging minPassLineMaxOddsPlaceSixEight. Waits for a new shooter to establish a point (count 1) then survive four more qualifying rolls (counts 2-5) before any bets are placed.'
 
+function minDontPassOnly (opts) {
+  const { rules, bets: existingBets, hand } = opts
+  const bets = Object.assign({ new: 0 }, existingBets)
+
+  const makeNewDontPassBet = hand.isComeOut && !bets?.dontPass?.line
+  if (process.env.DEBUG) console.log(`[decision] make a new dont pass line bet?: ${makeNewDontPassBet}`)
+
+  if (makeNewDontPassBet) {
+    bets.dontPass = { line: { amount: rules.minBet } }
+    bets.new += bets.dontPass.line.amount
+    if (process.env.DEBUG) console.log(`[action] make dont pass line bet $${bets.dontPass.line.amount}`)
+  } else {
+    if (process.env.DEBUG) console.log('[action] dont pass line bet unchanged')
+  }
+
+  return bets
+}
+
+minDontPassOnly.title = "Don't Pass Line Only"
+minDontPassOnly.description = "Bet the minimum on the don't pass line each come-out roll."
+
 export {
   noBetting,
+  minDontPassOnly,
   pressPlaceSixEight,
   fiveCountMinPassLineMaxOddsPlaceSixEight,
   minPassLineOnly,
