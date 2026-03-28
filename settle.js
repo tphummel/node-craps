@@ -228,6 +228,61 @@ function comeLine ({ bets, hand }) {
   return { bets, payouts }
 }
 
+function dontPassLine ({ bets, hand, rules }) {
+  if (!bets?.dontPass?.line) {
+    if (process.env.DEBUG) console.log('[decision] no dont pass line bet')
+    return { bets }
+  }
+
+  // comeout: 2 or 3 = win, 12 = bar (push/neutral), 7 or 11 = lose, point set = carry
+  if (hand.result === 'comeout loss') {
+    // shooter rolled 2 or 3 — don't pass wins; 12 is barred (push)
+    if (hand.diceSum === 12) {
+      // bar 12: push, bet stays
+      if (process.env.DEBUG) console.log('[decision] dont pass bar 12: push, bet carries')
+      return { bets }
+    }
+    const payout = {
+      type: 'dont pass win',
+      principal: bets.dontPass.line.amount,
+      profit: bets.dontPass.line.amount
+    }
+    delete bets.dontPass.line
+    if (process.env.DEBUG) console.log(`[payout] dont pass win $${payout.principal + payout.profit}`)
+    return { payout, bets }
+  }
+
+  if (hand.result === 'comeout win') {
+    // shooter rolled 7 or 11 — don't pass loses
+    if (process.env.DEBUG) console.log(`[payout] dont pass loss -$${bets.dontPass.line.amount}`)
+    delete bets.dontPass.line
+    return { bets }
+  }
+
+  if (hand.result === 'seven out') {
+    // shooter sevened out — don't pass wins
+    const payout = {
+      type: 'dont pass win',
+      principal: bets.dontPass.line.amount,
+      profit: bets.dontPass.line.amount
+    }
+    delete bets.dontPass.line
+    if (process.env.DEBUG) console.log(`[payout] dont pass win $${payout.principal + payout.profit}`)
+    return { payout, bets }
+  }
+
+  if (hand.result === 'point win') {
+    // shooter made the point — don't pass loses
+    if (process.env.DEBUG) console.log(`[payout] dont pass loss -$${bets.dontPass.line.amount}`)
+    delete bets.dontPass.line
+    return { bets }
+  }
+
+  // point set or neutral: bet carries
+  if (process.env.DEBUG) console.log(`[decision] dont pass line bet carries over (${hand.result})`)
+  return { bets }
+}
+
 function all ({ bets, hand, rules }) {
   const payouts = []
 
@@ -235,6 +290,11 @@ function all ({ bets, hand, rules }) {
 
   bets = passLineResult.bets
   payouts.push(passLineResult.payout)
+
+  const dontPassLineResult = dontPassLine({ bets, hand, rules })
+
+  bets = dontPassLineResult.bets
+  payouts.push(dontPassLineResult.payout)
 
   const passOddsResult = passOdds({ bets, hand, rules })
 
@@ -275,4 +335,4 @@ function all ({ bets, hand, rules }) {
   return bets
 }
 
-export { passLine, passOdds, placeBet, placeSix, placeEight, comeLine, all }
+export { passLine, passOdds, dontPassLine, placeBet, placeSix, placeEight, comeLine, all }

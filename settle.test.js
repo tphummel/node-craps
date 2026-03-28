@@ -355,6 +355,111 @@ tap.test('passOdds: odds bet, seven out', function (t) {
   t.end()
 })
 
+tap.test('dontPassLine: comeout 2 wins', function (t) {
+  const bets = { dontPass: { line: { amount: 5 } } }
+  const hand = { result: 'comeout loss', diceSum: 2 }
+
+  const result = settle.dontPassLine({ hand, bets })
+  t.equal(result.payout.type, 'dont pass win')
+  t.equal(result.payout.principal, 5)
+  t.equal(result.payout.profit, 5)
+  t.notOk(result.bets.dontPass.line, 'dont pass line bet is cleared on win')
+  t.end()
+})
+
+tap.test('dontPassLine: comeout 3 wins', function (t) {
+  const bets = { dontPass: { line: { amount: 5 } } }
+  const hand = { result: 'comeout loss', diceSum: 3 }
+
+  const result = settle.dontPassLine({ hand, bets })
+  t.equal(result.payout.type, 'dont pass win')
+  t.equal(result.payout.principal, 5)
+  t.equal(result.payout.profit, 5)
+  t.notOk(result.bets.dontPass.line, 'dont pass line bet is cleared on win')
+  t.end()
+})
+
+tap.test('dontPassLine: comeout 12 is barred (push)', function (t) {
+  const bets = { dontPass: { line: { amount: 5 } } }
+  const hand = { result: 'comeout loss', diceSum: 12 }
+
+  const result = settle.dontPassLine({ hand, bets })
+  t.notOk(result.payout, 'no payout on bar 12')
+  t.equal(result.bets.dontPass.line.amount, 5, 'bet carries over on bar 12')
+  t.end()
+})
+
+tap.test('dontPassLine: comeout 7 loses', function (t) {
+  const bets = { dontPass: { line: { amount: 5 } } }
+  const hand = { result: 'comeout win', diceSum: 7 }
+
+  const result = settle.dontPassLine({ hand, bets })
+  t.notOk(result.payout, 'no payout on comeout 7')
+  t.notOk(result.bets.dontPass?.line, 'dont pass line bet is cleared on loss')
+  t.end()
+})
+
+tap.test('dontPassLine: comeout 11 loses', function (t) {
+  const bets = { dontPass: { line: { amount: 5 } } }
+  const hand = { result: 'comeout win', diceSum: 11 }
+
+  const result = settle.dontPassLine({ hand, bets })
+  t.notOk(result.payout, 'no payout on comeout 11')
+  t.notOk(result.bets.dontPass?.line, 'dont pass line bet is cleared on loss')
+  t.end()
+})
+
+tap.test('dontPassLine: seven out wins', function (t) {
+  const bets = { dontPass: { line: { amount: 5 } } }
+  const hand = { result: 'seven out', diceSum: 7 }
+
+  const result = settle.dontPassLine({ hand, bets })
+  t.equal(result.payout.type, 'dont pass win')
+  t.equal(result.payout.principal, 5)
+  t.equal(result.payout.profit, 5)
+  t.notOk(result.bets.dontPass?.line, 'dont pass line bet is cleared on win')
+  t.end()
+})
+
+tap.test('dontPassLine: point win loses', function (t) {
+  const bets = { dontPass: { line: { amount: 5 } } }
+  const hand = { result: 'point win', diceSum: 8 }
+
+  const result = settle.dontPassLine({ hand, bets })
+  t.notOk(result.payout, 'no payout when shooter makes point')
+  t.notOk(result.bets.dontPass?.line, 'dont pass line bet is cleared on loss')
+  t.end()
+})
+
+tap.test('dontPassLine: no bet', function (t) {
+  const bets = {}
+  const hand = { result: 'seven out', diceSum: 7 }
+
+  const result = settle.dontPassLine({ hand, bets })
+  t.notOk(result.payout)
+  t.end()
+})
+
+tap.test('dontPassLine: bet carries on neutral roll', function (t) {
+  const bets = { dontPass: { line: { amount: 5 } } }
+  const hand = { result: 'neutral', diceSum: 9, point: 6 }
+
+  const result = settle.dontPassLine({ hand, bets })
+  t.notOk(result.payout)
+  t.equal(result.bets.dontPass.line.amount, 5, 'bet carries over')
+  t.end()
+})
+
+tap.test('dontPassLine: bet carries on point set', function (t) {
+  const bets = { dontPass: { line: { amount: 5 } } }
+  const hand = { result: 'point set', diceSum: 8 }
+
+  const result = settle.dontPassLine({ hand, bets })
+  t.notOk(result.payout)
+  t.equal(result.bets.dontPass.line.amount, 5, 'bet carries over after point set')
+  t.end()
+})
+
 tap.test('comeLine: pending come bet wins immediately', (t) => {
   const bets = { come: { pending: [{ amount: 5 }] } }
   const hand = { result: 'neutral', diceSum: 11 }
