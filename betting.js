@@ -345,6 +345,53 @@ function pressPlaceSixEight ({ rules, bets: existingBets, hand, playerMind }) {
   return bets
 }
 
+function fourBetGrindContinuous (opts) {
+  const { rules, bets: existingBets = {}, hand } = opts
+  const bets = Object.assign({ new: 0 }, existingBets)
+
+  // On come-out: place don't pass if not present
+  if (hand.isComeOut) {
+    if (!bets?.dontPass?.line) {
+      bets.dontPass = { line: { amount: rules.minBet } }
+      bets.new += rules.minBet
+      if (process.env.DEBUG) console.log(`[action] make dont pass line bet $${rules.minBet}`)
+    }
+    return bets
+  }
+
+  // Point phase: don't pass is established, work through the sequence
+  bets.come = bets.come || {}
+  bets.come.pending = bets.come.pending || []
+  bets.come.points = bets.come.points || {}
+  bets.dontCome = bets.dontCome || {}
+  bets.dontCome.pending = bets.dontCome.pending || []
+  bets.dontCome.points = bets.dontCome.points || {}
+
+  const comePointCount = Object.values(bets.come.points).reduce((sum, arr) => sum + arr.length, 0)
+  const comePendingCount = bets.come.pending.length
+  const dontComePointCount = Object.values(bets.dontCome.points).reduce((sum, arr) => sum + arr.length, 0)
+  const dontComePendingCount = bets.dontCome.pending.length
+
+  if (comePendingCount === 0 && comePointCount < 2) {
+    // Place next come bet (first or second) once none are pending
+    bets.come.pending.push({ amount: rules.minBet })
+    bets.new += rules.minBet
+    if (process.env.DEBUG) console.log(`[action] make come line bet $${rules.minBet} (come point count: ${comePointCount})`)
+    return bets
+  }
+
+  if (comePointCount >= 2 && comePendingCount === 0 && dontComePointCount === 0 && dontComePendingCount === 0) {
+    // Both come bets established, now place don't come
+    bets.dontCome.pending.push({ amount: rules.minBet })
+    bets.new += rules.minBet
+    if (process.env.DEBUG) console.log(`[action] make dont come line bet $${rules.minBet}`)
+    return bets
+  }
+
+  // All four established (or waiting for pending bets to establish) - no new bets
+  return bets
+}
+
 function noBetting () {
   return { new: 0 }
 }
@@ -428,6 +475,9 @@ function minDontPassOnly (opts) {
 minDontPassOnly.title = "Don't Pass Line Only"
 minDontPassOnly.description = "Bet the minimum on the don't pass line each come-out roll."
 
+fourBetGrindContinuous.title = 'Four Bet Grind Continuous'
+fourBetGrindContinuous.description = "Places four bets in sequence at table minimum: don't pass, come, come, don't come. Each bet is placed only after the previous is established (moved to a point). Once all four are established, no new bets are placed unless one needs to be replaced. Continuous — no per-hand limit on replacement."
+
 export {
   noBetting,
   minDontPassOnly,
@@ -447,5 +497,6 @@ export {
   minPassLineMaxOddsMinComeLineMaxOdds,
   minComeLineMaxOdds,
   passCome68,
-  passcome2place68
+  passcome2place68,
+  fourBetGrindContinuous
 }

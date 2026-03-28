@@ -1413,3 +1413,164 @@ tap.test('minPassLineMidOdds: no odds on come-out', (t) => {
   t.notOk(result.pass?.odds, 'no odds on come-out')
   t.end()
 })
+
+const fourBetRules = {
+  minBet: 5,
+  maxOddsMultiple: { 4: 3, 5: 4, 6: 5, 8: 5, 9: 4, 10: 3 }
+}
+
+tap.test('fourBetGrindContinuous: come-out places dont pass', (t) => {
+  const hand = { isComeOut: true }
+  const bets = lib.fourBetGrindContinuous({ rules: fourBetRules, hand })
+
+  t.equal(bets.dontPass.line.amount, fourBetRules.minBet, "don't pass placed at minBet")
+  t.equal(bets.new, fourBetRules.minBet)
+  t.end()
+})
+
+tap.test('fourBetGrindContinuous: come-out with existing dont pass does nothing', (t) => {
+  const hand = { isComeOut: true }
+  const bets = lib.fourBetGrindContinuous({
+    rules: fourBetRules,
+    hand,
+    bets: { dontPass: { line: { amount: 5 } } }
+  })
+
+  t.equal(bets.new, 0, 'no new bets when dont pass already placed')
+  t.end()
+})
+
+tap.test('fourBetGrindContinuous: point phase places first come bet', (t) => {
+  const hand = { isComeOut: false, point: 6 }
+  const existingBets = { dontPass: { line: { amount: 5 } } }
+  const bets = lib.fourBetGrindContinuous({ rules: fourBetRules, hand, bets: existingBets })
+
+  t.equal(bets.come.pending.length, 1, 'one come bet pending')
+  t.equal(bets.come.pending[0].amount, fourBetRules.minBet)
+  t.equal(bets.new, fourBetRules.minBet)
+  t.end()
+})
+
+tap.test('fourBetGrindContinuous: waits while come bet is pending', (t) => {
+  const hand = { isComeOut: false, point: 6 }
+  const existingBets = {
+    dontPass: { line: { amount: 5 } },
+    come: { pending: [{ amount: 5 }], points: {} }
+  }
+  const bets = lib.fourBetGrindContinuous({ rules: fourBetRules, hand, bets: existingBets })
+
+  t.equal(bets.come.pending.length, 1, 'still only one pending come bet')
+  t.equal(bets.new, 0, 'no new bets while pending')
+  t.end()
+})
+
+tap.test('fourBetGrindContinuous: one come established places second come bet', (t) => {
+  const hand = { isComeOut: false, point: 6 }
+  const existingBets = {
+    dontPass: { line: { amount: 5 } },
+    come: { pending: [], points: { 4: [{ line: { amount: 5 } }] } }
+  }
+  const bets = lib.fourBetGrindContinuous({ rules: fourBetRules, hand, bets: existingBets })
+
+  t.equal(bets.come.pending.length, 1, 'second come bet pending')
+  t.equal(bets.new, fourBetRules.minBet)
+  t.end()
+})
+
+tap.test('fourBetGrindContinuous: waits while second come bet is pending', (t) => {
+  const hand = { isComeOut: false, point: 6 }
+  const existingBets = {
+    dontPass: { line: { amount: 5 } },
+    come: { pending: [{ amount: 5 }], points: { 4: [{ line: { amount: 5 } }] } }
+  }
+  const bets = lib.fourBetGrindContinuous({ rules: fourBetRules, hand, bets: existingBets })
+
+  t.equal(bets.come.pending.length, 1, 'still only one pending')
+  t.equal(bets.new, 0)
+  t.end()
+})
+
+tap.test('fourBetGrindContinuous: two come bets established places dont come', (t) => {
+  const hand = { isComeOut: false, point: 6 }
+  const existingBets = {
+    dontPass: { line: { amount: 5 } },
+    come: { pending: [], points: { 4: [{ line: { amount: 5 } }], 9: [{ line: { amount: 5 } }] } }
+  }
+  const bets = lib.fourBetGrindContinuous({ rules: fourBetRules, hand, bets: existingBets })
+
+  t.equal(bets.dontCome.pending.length, 1, "don't come pending")
+  t.equal(bets.dontCome.pending[0].amount, fourBetRules.minBet)
+  t.equal(bets.new, fourBetRules.minBet)
+  t.end()
+})
+
+tap.test('fourBetGrindContinuous: waits while dont come is pending', (t) => {
+  const hand = { isComeOut: false, point: 6 }
+  const existingBets = {
+    dontPass: { line: { amount: 5 } },
+    come: { pending: [], points: { 4: [{ line: { amount: 5 } }], 9: [{ line: { amount: 5 } }] } },
+    dontCome: { pending: [{ amount: 5 }], points: {} }
+  }
+  const bets = lib.fourBetGrindContinuous({ rules: fourBetRules, hand, bets: existingBets })
+
+  t.equal(bets.dontCome.pending.length, 1, 'still only one pending dont come')
+  t.equal(bets.new, 0)
+  t.end()
+})
+
+tap.test('fourBetGrindContinuous: all four established - no new bets', (t) => {
+  const hand = { isComeOut: false, point: 6 }
+  const existingBets = {
+    dontPass: { line: { amount: 5 } },
+    come: { pending: [], points: { 4: [{ line: { amount: 5 } }], 9: [{ line: { amount: 5 } }] } },
+    dontCome: { pending: [], points: { 8: [{ line: { amount: 5 } }] } }
+  }
+  const bets = lib.fourBetGrindContinuous({ rules: fourBetRules, hand, bets: existingBets })
+
+  t.equal(bets.new, 0, 'no bets when all four established')
+  t.end()
+})
+
+tap.test('fourBetGrindContinuous: replaces lost come bet', (t) => {
+  const hand = { isComeOut: false, point: 6 }
+  // One come bet was won/lost, only one remains
+  const existingBets = {
+    dontPass: { line: { amount: 5 } },
+    come: { pending: [], points: { 4: [{ line: { amount: 5 } }] } },
+    dontCome: { pending: [], points: { 8: [{ line: { amount: 5 } }] } }
+  }
+  const bets = lib.fourBetGrindContinuous({ rules: fourBetRules, hand, bets: existingBets })
+
+  t.equal(bets.come.pending.length, 1, 'replacement come bet placed')
+  t.equal(bets.new, fourBetRules.minBet)
+  t.end()
+})
+
+tap.test('fourBetGrindContinuous: replaces lost dont come bet', (t) => {
+  const hand = { isComeOut: false, point: 6 }
+  // Don't come was lost (its point was rolled), two come bets still established
+  const existingBets = {
+    dontPass: { line: { amount: 5 } },
+    come: { pending: [], points: { 4: [{ line: { amount: 5 } }], 9: [{ line: { amount: 5 } }] } },
+    dontCome: { pending: [], points: {} }
+  }
+  const bets = lib.fourBetGrindContinuous({ rules: fourBetRules, hand, bets: existingBets })
+
+  t.equal(bets.dontCome.pending.length, 1, "replacement don't come placed")
+  t.equal(bets.new, fourBetRules.minBet)
+  t.end()
+})
+
+tap.test('fourBetGrindContinuous: new come-out after point win places dont pass', (t) => {
+  const hand = { isComeOut: true }
+  // After a point win: dont pass was settled out, come bets may remain
+  const existingBets = {
+    come: { pending: [], points: { 9: [{ line: { amount: 5 } }] } },
+    dontCome: { pending: [], points: { 8: [{ line: { amount: 5 } }] } }
+  }
+  const bets = lib.fourBetGrindContinuous({ rules: fourBetRules, hand, bets: existingBets })
+
+  t.equal(bets.dontPass.line.amount, fourBetRules.minBet, "don't pass re-placed on new come-out")
+  t.equal(bets.new, fourBetRules.minBet)
+  t.end()
+})
