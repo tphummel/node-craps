@@ -159,20 +159,23 @@ function placeSixEight (opts) {
 }
 
 function placeSixEightUnlessPoint (opts) {
-  const { hand } = opts
+  const { hand, bets: existingBets } = opts
 
-  // Use the regular place bet logic first
+  // Capture pre-existing state before placeSixEight mutates the shared place reference
+  const hadSix = !!(existingBets?.place?.six)
+  const hadEight = !!(existingBets?.place?.eight)
+
   const bets = placeSixEight(opts)
 
-  // Remove any newly created bet that matches the point
+  // Remove any bet that matches the point; only deduct from bets.new if it was newly created
   if (hand.point === 6 && bets.place?.six) {
-    bets.new -= bets.place.six.amount
+    if (!hadSix) bets.new -= bets.place.six.amount
     delete bets.place.six
     if (process.env.DEBUG) console.log('[decision] removed place 6 bet matching point')
   }
 
   if (hand.point === 8 && bets.place?.eight) {
-    bets.new -= bets.place.eight.amount
+    if (!hadEight) bets.new -= bets.place.eight.amount
     delete bets.place.eight
     if (process.env.DEBUG) console.log('[decision] removed place 8 bet matching point')
   }
@@ -185,18 +188,22 @@ function placeSixEightUnlessPoint (opts) {
 function placeSixEightUnlessPassOrCome (opts) {
   const { hand, bets: existingBets } = opts
 
+  // Capture pre-existing state before placeSixEight mutates the shared place reference
+  const hadSix = !!(existingBets?.place?.six)
+  const hadEight = !!(existingBets?.place?.eight)
+
   const bets = placeSixEight(opts)
   const comePoints = Object.keys(existingBets?.come?.points || {})
   const coveredPoints = new Set([hand.point, ...comePoints.map(Number)])
 
   if (coveredPoints.has(6) && bets.place?.six) {
-    bets.new -= bets.place.six.amount
+    if (!hadSix) bets.new -= bets.place.six.amount
     delete bets.place.six
     if (process.env.DEBUG) console.log('[decision] removed place 6 bet matching pass or come point')
   }
 
   if (coveredPoints.has(8) && bets.place?.eight) {
-    bets.new -= bets.place.eight.amount
+    if (!hadEight) bets.new -= bets.place.eight.amount
     delete bets.place.eight
     if (process.env.DEBUG) console.log('[decision] removed place 8 bet matching pass or come point')
   }
