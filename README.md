@@ -211,15 +211,15 @@ bets.place.six = { amount: 18, working: false }
 ## use as a module
 
 ```js
-const simulateHands = require('./hands.js')
+import { simulateHands } from './hands.js'
 const { sessionSummary } = simulateHands({ numHands: 100, bettingStrategy: 'pressPlaceSixEight' })
 console.log(sessionSummary)
 ```
 
 ```js
-const { monteCarlo } = require('./monte-carlo.js')
-const { playHand } = require('./index.js')
-const betting = require('./betting.js')
+import { monteCarlo } from './monte-carlo.js'
+import { playHand } from './index.js'
+import * as betting from './betting.js'
 
 const rules = { minBet: 15, maxOddsMultiple: { 4: 3, 5: 4, 6: 5, 8: 5, 9: 4, 10: 3 } }
 const results = monteCarlo({
