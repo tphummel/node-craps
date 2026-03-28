@@ -392,6 +392,75 @@ function fourBetGrindContinuous (opts) {
   return bets
 }
 
+function fourBetGrindLimit (opts) {
+  const { rules, bets: existingBets = {}, hand, playerMind } = opts
+  const bets = Object.assign({ new: 0 }, existingBets)
+
+  // Initialize per-hand state
+  if (!playerMind.fourBetGrindLimit) {
+    playerMind.fourBetGrindLimit = { unitsRemaining: 4 }
+  }
+  const state = playerMind.fourBetGrindLimit
+
+  // Credit wins from the previous roll
+  if (hand.payouts) {
+    for (const payout of hand.payouts) {
+      if (payout.profit > 0) {
+        state.unitsRemaining += 1
+        if (process.env.DEBUG) console.log(`[four-bet-grind] win credited, unitsRemaining: ${state.unitsRemaining}`)
+      }
+    }
+  }
+
+  // No budget left — sit out the rest of the hand
+  if (state.unitsRemaining <= 0) {
+    if (process.env.DEBUG) console.log('[four-bet-grind] no units remaining, skipping bet')
+    return bets
+  }
+
+  // On come-out: place don't pass if not present
+  if (hand.isComeOut) {
+    if (!bets?.dontPass?.line) {
+      bets.dontPass = { line: { amount: rules.minBet } }
+      bets.new += rules.minBet
+      state.unitsRemaining -= 1
+      if (process.env.DEBUG) console.log(`[four-bet-grind] make dont pass line bet $${rules.minBet}, unitsRemaining: ${state.unitsRemaining}`)
+    }
+    return bets
+  }
+
+  // Point phase: work through the same sequence as the continuous variant
+  bets.come = bets.come || {}
+  bets.come.pending = bets.come.pending || []
+  bets.come.points = bets.come.points || {}
+  bets.dontCome = bets.dontCome || {}
+  bets.dontCome.pending = bets.dontCome.pending || []
+  bets.dontCome.points = bets.dontCome.points || {}
+
+  const comePointCount = Object.values(bets.come.points).reduce((sum, arr) => sum + arr.length, 0)
+  const comePendingCount = bets.come.pending.length
+  const dontComePointCount = Object.values(bets.dontCome.points).reduce((sum, arr) => sum + arr.length, 0)
+  const dontComePendingCount = bets.dontCome.pending.length
+
+  if (comePendingCount === 0 && comePointCount < 2) {
+    bets.come.pending.push({ amount: rules.minBet })
+    bets.new += rules.minBet
+    state.unitsRemaining -= 1
+    if (process.env.DEBUG) console.log(`[four-bet-grind] make come line bet $${rules.minBet}, unitsRemaining: ${state.unitsRemaining}`)
+    return bets
+  }
+
+  if (comePointCount >= 2 && comePendingCount === 0 && dontComePointCount === 0 && dontComePendingCount === 0) {
+    bets.dontCome.pending.push({ amount: rules.minBet })
+    bets.new += rules.minBet
+    state.unitsRemaining -= 1
+    if (process.env.DEBUG) console.log(`[four-bet-grind] make dont come line bet $${rules.minBet}, unitsRemaining: ${state.unitsRemaining}`)
+    return bets
+  }
+
+  return bets
+}
+
 function noBetting () {
   return { new: 0 }
 }
@@ -478,6 +547,9 @@ minDontPassOnly.description = "Bet the minimum on the don't pass line each come-
 fourBetGrindContinuous.title = 'Four Bet Grind Continuous'
 fourBetGrindContinuous.description = "Places four bets in sequence at table minimum: don't pass, come, come, don't come. Each bet is placed only after the previous is established (moved to a point). Once all four are established, no new bets are placed unless one needs to be replaced. Continuous — no per-hand limit on replacement."
 
+fourBetGrindLimit.title = 'Four Bet Grind Limit'
+fourBetGrindLimit.description = "Same sequence as Four Bet Grind Continuous (don't pass, come, come, don't come) but with a per-hand budget of four units at table minimum. Each new bet costs one unit. Each win earns one unit back. Once the budget reaches zero, no further bets are placed for the remainder of the hand."
+
 export {
   noBetting,
   minDontPassOnly,
@@ -498,5 +570,6 @@ export {
   minComeLineMaxOdds,
   passCome68,
   passcome2place68,
-  fourBetGrindContinuous
+  fourBetGrindContinuous,
+  fourBetGrindLimit
 }
