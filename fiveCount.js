@@ -1,5 +1,3 @@
-'use strict'
-
 const POINT_NUMBERS = [4, 5, 6, 8, 9, 10]
 
 function updateFiveCount (count, hand) {
@@ -30,4 +28,4 @@ function withFiveCount (strategy) {
   }
 }
 
-module.exports = { updateFiveCount, withFiveCount }
+export { updateFiveCount, withFiveCount }

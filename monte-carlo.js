@@ -1,8 +1,8 @@
 #!/usr/bin/env node
-'use strict'
 
-const { playHand } = require('./index.js')
-const bettingStrategies = require('./betting.js')
+import { fileURLToPath } from 'url'
+import { playHand } from './index.js'
+import * as bettingStrategies from './betting.js'
 
 function parseOdds (str) {
   const parts = String(str).split('-').map(n => parseInt(n, 10))
@@ -123,7 +123,9 @@ function printResults (results) {
   console.log(`95% CI: [${rollSummary.ci95Low.toFixed(2)}, ${rollSummary.ci95High.toFixed(2)}]`)
 }
 
-if (require.main === module) {
+export { monteCarlo, simulateTrial, summary }
+
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
   const trials = parseInt(process.argv[2], 10)
   const handsPerTrial = parseInt(process.argv[3], 10)
   const startingBankroll = parseInt(process.argv[4], 10)
@@ -150,6 +152,4 @@ if (require.main === module) {
   console.log(`betting strategy: ${bettingStrategy}`)
   const results = monteCarlo({ trials, handsPerTrial, startingBankroll, rules, bettingStrategy: bettingStrategies[bettingStrategy] })
   printResults(results)
-} else {
-  module.exports = { monteCarlo, simulateTrial, summary }
 }

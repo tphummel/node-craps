@@ -1,8 +1,6 @@
-'use strict'
-
-const tap = require('tap')
-const lib = require('./')
-const betting = require('./betting')
+import tap from 'tap'
+import * as lib from './index.js'
+import * as betting from './betting.js'
 
 tap.test('roll d6', function (t) {
   const result = lib.rollD6()

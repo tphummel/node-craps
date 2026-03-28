@@ -2,7 +2,9 @@
   "name": "craps",
   "version": "1.0.0",
   "description": "craps simulator",
+  "type": "module",
   "main": "index.js",
+  "exports": "./index.js",
   "scripts": {
     "test": "standard && NODE_ENV=test tap *.test.js --no-check-coverage --coverage-report=text-summary",
     "cov": "standard && NODE_ENV=test tap *.test.js --no-check-coverage --coverage-report=html",

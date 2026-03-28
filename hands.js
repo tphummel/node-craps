@@ -1,8 +1,8 @@
 #!/usr/bin/env node
-'use strict'
 
-const { playHand } = require('./index.js')
-const bettingStrategies = require('./betting.js')
+import { fileURLToPath } from 'url'
+import { playHand } from './index.js'
+import * as bettingStrategies from './betting.js'
 
 function simulateHands ({ numHands, bettingStrategy, showDetail }) {
   const summaryTemplate = {
@@ -391,7 +391,9 @@ function printResults ({ sessionSummary, hands, showDetail, rules }) {
   }
 }
 
-if (require.main === module) {
+export { simulateHands }
+
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
   const numHands = parseInt(process.argv[2], 10)
   const bettingStrategy = process.argv[3]
   const showDetail = process.argv[4]
@@ -399,6 +401,4 @@ if (require.main === module) {
   console.log(`Using betting strategy: ${bettingStrategy}`)
   const result = simulateHands({ numHands, showDetail, bettingStrategy })
   printResults({ ...result, showDetail })
-} else {
-  module.exports = simulateHands
 }

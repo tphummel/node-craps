@@ -1,9 +1,7 @@
-'use strict'
-
-const tap = require('tap')
-const { updateFiveCount, withFiveCount } = require('./fiveCount.js')
-const betting = require('./betting.js')
-const { playHand } = require('./index.js')
+import tap from 'tap'
+import { updateFiveCount, withFiveCount } from './fiveCount.js'
+import * as betting from './betting.js'
+import { playHand } from './index.js'
 
 const rules = { minBet: 5, maxOddsMultiple: { 4: 3, 5: 4, 6: 5, 8: 5, 9: 4, 10: 3 } }
 

@@ -1,7 +1,5 @@
-'use strict'
-
-const tap = require('tap')
-const lib = require('./betting.js')
+import tap from 'tap'
+import * as lib from './betting.js'
 
 tap.test('minPassLineOnly: no bets yet, coming out', function (t) {
   const rules = {
