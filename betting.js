@@ -326,6 +326,57 @@ function fiveCountMinPassLineMaxOddsPlaceSixEight (opts) {
   return withFiveCount(minPassLineMaxOddsPlaceSixEight)(opts)
 }
 
+noBetting.title = 'No Betting'
+noBetting.description = 'Makes no bets. Useful as a baseline or placeholder.'
+
+minPassLineOnly.title = 'Min Pass Line Only'
+minPassLineOnly.description = 'Pass line bet at minBet on each come-out. No odds.'
+
+lineMaxOdds.title = 'Line Max Odds'
+lineMaxOdds.description = 'Generic helper: places a line bet and maximum odds behind it once a point is set. Parameterised by betKey (pass or come).'
+
+minPassLineMaxOdds.title = 'Min Pass Line + Max Odds'
+minPassLineMaxOdds.description = 'Pass line at minBet plus maximum odds behind the line once a point is set.'
+
+minPassLineMidOdds.title = 'Min Pass Line + Mid Odds'
+minPassLineMidOdds.description = 'Pass line at minBet plus approximately half of maximum odds once a point is set. Odds multiple is Math.ceil(maxOddsMultiple / 2).'
+
+minPassLineMinOdds.title = 'Min Pass Line + Min Odds'
+minPassLineMinOdds.description = 'Pass line at minBet plus minimum payable odds once a point is set. Rounds to nearest $5 for points 6/8, nearest even number for points 5/9, exact minBet for points 4/10.'
+
+placeSixEight.title = 'Place Six and Eight'
+placeSixEight.description = 'Place the 6 and 8 at the nearest multiple of $6 >= minBet. No pass line. Bets come down on a win and are re-placed next turn.'
+
+placeSixEightUnlessPoint.title = 'Place Six and Eight (Skip Point)'
+placeSixEightUnlessPoint.description = 'Place 6 and 8, but skip whichever number is the current point to avoid redundant coverage.'
+
+placeSixEightUnlessPassOrCome.title = 'Place Six and Eight (Skip Pass or Come)'
+placeSixEightUnlessPassOrCome.description = 'Place 6 and 8, but skip any number already covered by a pass or come bet.'
+
+minPassLinePlaceSixEight.title = 'Min Pass Line + Place Six and Eight'
+minPassLinePlaceSixEight.description = 'Pass line plus place 6 and 8, skipping whichever number is the current point.'
+
+minPassLineMaxOddsPlaceSixEight.title = 'Min Pass Line + Max Odds + Place Six and Eight'
+minPassLineMaxOddsPlaceSixEight.description = 'Pass line plus maximum odds plus place 6 and 8, skipping the current point.'
+
+minPassLineMaxOddsMinComeLineMaxOdds.title = 'Min Pass Line + Max Odds + Min Come Line + Max Odds'
+minPassLineMaxOddsMinComeLineMaxOdds.description = 'Pass line plus maximum odds plus one come bet with maximum odds.'
+
+minComeLineMaxOdds.title = 'Min Come Line + Max Odds'
+minComeLineMaxOdds.description = 'One come bet at minBet with maximum odds once it travels to a point.'
+
+passCome68.title = 'Pass + Come + Place Six and Eight'
+passCome68.description = 'Pass line plus maximum odds plus one come bet plus place 6 and 8, skipping numbers already covered by pass or come.'
+
+passcome2place68.title = 'Pass + Two Come Bets + Place Six and Eight'
+passcome2place68.description = 'Pass line plus maximum odds plus up to two come bets plus place 6 and 8, skipping numbers already covered by pass or come.'
+
+pressPlaceSixEight.title = 'Press Place Six and Eight'
+pressPlaceSixEight.description = 'Place 6 and 8. On each win, press the winning number by one $6 unit. Starts at Math.ceil(minBet/6)*6. State resets each hand.'
+
+fiveCountMinPassLineMaxOddsPlaceSixEight.title = 'Five-Count: Min Pass Line + Max Odds + Place Six and Eight'
+fiveCountMinPassLineMaxOddsPlaceSixEight.description = 'Applies the five-count gate before engaging minPassLineMaxOddsPlaceSixEight. Waits for a new shooter to establish a point (count 1) then survive four more qualifying rolls (counts 2-5) before any bets are placed.'
+
 export {
   noBetting,
   pressPlaceSixEight,
