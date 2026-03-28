@@ -299,28 +299,11 @@ function dontComeLine ({ bets, hand }) {
       bets.dontCome.points[point].forEach(bet => {
         // Seven out: don't come WINS (7 before point)
         if (hand.result === 'seven out') {
-          const linePayout = {
+          payouts.push({
             type: 'dont come line win',
             principal: bet.line.amount,
             profit: bet.line.amount
-          }
-          payouts.push(linePayout)
-
-          if (bet.odds) {
-            const oddsPayouts = {
-              4: 1 / 2,
-              5: 2 / 3,
-              6: 5 / 6,
-              8: 5 / 6,
-              9: 2 / 3,
-              10: 1 / 2
-            }
-            payouts.push({
-              type: 'dont come odds win',
-              principal: bet.odds.amount,
-              profit: bet.odds.amount * oddsPayouts[point]
-            })
-          }
+          })
           return
         }
 

@@ -867,35 +867,6 @@ tap.test('dontComeLine: established bet carries over on neutral roll', (t) => {
   t.end()
 })
 
-tap.test('dontComeLine: established bet wins with lay odds on seven out (point 4)', (t) => {
-  const bets = { dontCome: { points: { 4: [{ line: { amount: 5 }, odds: { amount: 20 } }] } } }
-  const hand = { result: 'seven out', diceSum: 7 }
-
-  const result = settle.dontComeLine({ bets, hand })
-
-  const lineWin = result.payouts.find(p => p.type === 'dont come line win')
-  const oddsWin = result.payouts.find(p => p.type === 'dont come odds win')
-
-  t.equal(lineWin.profit, 5)
-  t.equal(oddsWin.principal, 20)
-  t.equal(oddsWin.profit, 10)
-  t.notOk(result.bets.dontCome)
-  t.end()
-})
-
-tap.test('dontComeLine: established bet wins with lay odds on seven out (point 6)', (t) => {
-  const bets = { dontCome: { points: { 6: [{ line: { amount: 5 }, odds: { amount: 30 } }] } } }
-  const hand = { result: 'seven out', diceSum: 7 }
-
-  const result = settle.dontComeLine({ bets, hand })
-
-  const oddsWin = result.payouts.find(p => p.type === 'dont come odds win')
-
-  t.equal(oddsWin.principal, 30)
-  t.equal(oddsWin.profit, 25)
-  t.end()
-})
-
 tap.test('dontComeLine: no bet', (t) => {
   const bets = {}
   const hand = { result: 'neutral', diceSum: 8 }
