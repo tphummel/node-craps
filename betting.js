@@ -277,6 +277,33 @@ function minComeLineMaxOdds (opts) {
   return bets
 }
 
+function minDontComeLine (opts) {
+  const { rules, bets: existingBets = {}, hand } = opts
+  const bets = Object.assign({ new: 0 }, existingBets)
+
+  if (hand.isComeOut) {
+    if (process.env.DEBUG) console.log('[decision] skip dont come bet on comeout')
+    return bets
+  }
+
+  bets.dontCome = bets.dontCome || {}
+  bets.dontCome.pending = bets.dontCome.pending || []
+  bets.dontCome.points = bets.dontCome.points || {}
+
+  const pendingCount = bets.dontCome.pending.length
+  const pointCount = Object.values(bets.dontCome.points).reduce((memo, pointBets) => {
+    return memo + pointBets.length
+  }, 0)
+
+  if (pendingCount === 0 && pointCount < 1) {
+    bets.dontCome.pending.push({ amount: rules.minBet })
+    bets.new += rules.minBet
+    if (process.env.DEBUG) console.log(`[action] make dont come line bet $${rules.minBet}`)
+  }
+
+  return bets
+}
+
 function pressPlaceSixEight ({ rules, bets: existingBets, hand, playerMind }) {
   const initialAmount = Math.ceil(rules.minBet / 6) * 6
 
@@ -371,6 +398,9 @@ passCome68.description = 'Pass line plus max odds plus one come bet with max odd
 passcome2place68.title = 'Pass + Two Come Bets + Place Six and Eight'
 passcome2place68.description = 'Pass line plus max odds plus up to two come bets with max odds plus place 6 and 8, skipping numbers already covered by pass or come.'
 
+minDontComeLine.title = 'Min Dont Come Line'
+minDontComeLine.description = 'One dont come bet at minBet. Wins when 7 is rolled before the established point. Loses immediately on 7 or 11; wins immediately on 2 or 3; pushes on 12.'
+
 pressPlaceSixEight.title = 'Press Place Six and Eight'
 pressPlaceSixEight.description = 'Place 6 and 8. On each win, press the winning number by one $6 unit. Starts at Math.ceil(minBet/6)*6. State resets each hand.'
 
@@ -401,6 +431,7 @@ minDontPassOnly.description = "Bet the minimum on the don't pass line each come-
 export {
   noBetting,
   minDontPassOnly,
+  minDontComeLine,
   pressPlaceSixEight,
   fiveCountMinPassLineMaxOddsPlaceSixEight,
   minPassLineOnly,

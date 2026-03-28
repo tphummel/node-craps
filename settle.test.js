@@ -758,3 +758,121 @@ tap.test('place bet: working:false on bet overrides table placeBetsOffOnComeOut:
   t.equal(settled.payouts.total, 0)
   t.end()
 })
+
+tap.test('dontComeLine: pending bet wins immediately on 2', (t) => {
+  const bets = { dontCome: { pending: [{ amount: 5 }] } }
+  const hand = { result: 'neutral', diceSum: 2 }
+
+  const result = settle.dontComeLine({ bets, hand })
+
+  t.equal(result.payouts[0].type, 'dont come line win')
+  t.equal(result.payouts[0].principal, 5)
+  t.equal(result.payouts[0].profit, 5)
+  t.notOk(result.bets.dontCome)
+  t.end()
+})
+
+tap.test('dontComeLine: pending bet wins immediately on 3', (t) => {
+  const bets = { dontCome: { pending: [{ amount: 5 }] } }
+  const hand = { result: 'neutral', diceSum: 3 }
+
+  const result = settle.dontComeLine({ bets, hand })
+
+  t.equal(result.payouts[0].type, 'dont come line win')
+  t.equal(result.payouts[0].principal, 5)
+  t.equal(result.payouts[0].profit, 5)
+  t.notOk(result.bets.dontCome)
+  t.end()
+})
+
+tap.test('dontComeLine: pending bet loses immediately on 7', (t) => {
+  const bets = { dontCome: { pending: [{ amount: 5 }] } }
+  const hand = { result: 'seven out', diceSum: 7 }
+
+  const result = settle.dontComeLine({ bets, hand })
+
+  t.notOk(result.payouts?.length)
+  t.notOk(result.bets.dontCome)
+  t.end()
+})
+
+tap.test('dontComeLine: pending bet loses immediately on 11', (t) => {
+  const bets = { dontCome: { pending: [{ amount: 5 }] } }
+  const hand = { result: 'neutral', diceSum: 11 }
+
+  const result = settle.dontComeLine({ bets, hand })
+
+  t.notOk(result.payouts?.length)
+  t.notOk(result.bets.dontCome)
+  t.end()
+})
+
+tap.test('dontComeLine: pending bet pushes on 12', (t) => {
+  const bets = { dontCome: { pending: [{ amount: 5 }] } }
+  const hand = { result: 'neutral', diceSum: 12 }
+
+  const result = settle.dontComeLine({ bets, hand })
+
+  t.equal(result.payouts[0].type, 'dont come line push')
+  t.equal(result.payouts[0].principal, 5)
+  t.equal(result.payouts[0].profit, 0)
+  t.notOk(result.bets.dontCome)
+  t.end()
+})
+
+tap.test('dontComeLine: pending bet moves to point', (t) => {
+  const bets = { dontCome: { pending: [{ amount: 5 }] } }
+  const hand = { result: 'neutral', diceSum: 8 }
+
+  const result = settle.dontComeLine({ bets, hand })
+
+  t.notOk(result.payouts?.length)
+  t.equal(result.bets.dontCome.points[8][0].line.amount, 5)
+  t.notOk(result.bets.dontCome.pending)
+  t.end()
+})
+
+tap.test('dontComeLine: established bet wins on seven out', (t) => {
+  const bets = { dontCome: { points: { 8: [{ line: { amount: 5 } }] } } }
+  const hand = { result: 'seven out', diceSum: 7 }
+
+  const result = settle.dontComeLine({ bets, hand })
+
+  t.equal(result.payouts[0].type, 'dont come line win')
+  t.equal(result.payouts[0].principal, 5)
+  t.equal(result.payouts[0].profit, 5)
+  t.notOk(result.bets.dontCome)
+  t.end()
+})
+
+tap.test('dontComeLine: established bet loses when point is rolled', (t) => {
+  const bets = { dontCome: { points: { 8: [{ line: { amount: 5 } }] } } }
+  const hand = { result: 'neutral', diceSum: 8 }
+
+  const result = settle.dontComeLine({ bets, hand })
+
+  t.notOk(result.payouts?.length)
+  t.notOk(result.bets.dontCome)
+  t.end()
+})
+
+tap.test('dontComeLine: established bet carries over on neutral roll', (t) => {
+  const bets = { dontCome: { points: { 8: [{ line: { amount: 5 } }] } } }
+  const hand = { result: 'neutral', diceSum: 5 }
+
+  const result = settle.dontComeLine({ bets, hand })
+
+  t.notOk(result.payouts?.length)
+  t.equal(result.bets.dontCome.points[8][0].line.amount, 5)
+  t.end()
+})
+
+tap.test('dontComeLine: no bet', (t) => {
+  const bets = {}
+  const hand = { result: 'neutral', diceSum: 8 }
+
+  const result = settle.dontComeLine({ bets, hand })
+
+  t.notOk(result.payouts)
+  t.end()
+})
