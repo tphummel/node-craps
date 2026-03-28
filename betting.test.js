@@ -1574,3 +1574,135 @@ tap.test('fourBetGrindContinuous: new come-out after point win places dont pass'
   t.equal(bets.new, fourBetRules.minBet)
   t.end()
 })
+
+tap.test('fourBetGrindLimit: come-out places dont pass and decrements budget', (t) => {
+  const hand = { isComeOut: true }
+  const playerMind = {}
+  const bets = lib.fourBetGrindLimit({ rules: fourBetRules, hand, playerMind })
+
+  t.equal(bets.dontPass.line.amount, fourBetRules.minBet, "don't pass placed at minBet")
+  t.equal(bets.new, fourBetRules.minBet)
+  t.equal(playerMind.fourBetGrindLimit.unitsRemaining, 3, 'budget decremented to 3')
+  t.end()
+})
+
+tap.test('fourBetGrindLimit: come-out with existing dont pass does nothing', (t) => {
+  const hand = { isComeOut: true }
+  const playerMind = { fourBetGrindLimit: { unitsRemaining: 3 } }
+  const bets = lib.fourBetGrindLimit({
+    rules: fourBetRules,
+    hand,
+    playerMind,
+    bets: { dontPass: { line: { amount: 5 } } }
+  })
+
+  t.equal(bets.new, 0, 'no new bets when dont pass already placed')
+  t.equal(playerMind.fourBetGrindLimit.unitsRemaining, 3, 'budget unchanged')
+  t.end()
+})
+
+tap.test('fourBetGrindLimit: point phase places first come bet', (t) => {
+  const hand = { isComeOut: false, point: 6 }
+  const playerMind = { fourBetGrindLimit: { unitsRemaining: 3 } }
+  const existingBets = { dontPass: { line: { amount: 5 } } }
+  const bets = lib.fourBetGrindLimit({ rules: fourBetRules, hand, playerMind, bets: existingBets })
+
+  t.equal(bets.come.pending.length, 1, 'one come bet pending')
+  t.equal(bets.come.pending[0].amount, fourBetRules.minBet)
+  t.equal(bets.new, fourBetRules.minBet)
+  t.equal(playerMind.fourBetGrindLimit.unitsRemaining, 2, 'budget decremented to 2')
+  t.end()
+})
+
+tap.test('fourBetGrindLimit: stops betting when budget reaches zero', (t) => {
+  const hand = { isComeOut: false, point: 6 }
+  const playerMind = { fourBetGrindLimit: { unitsRemaining: 0 } }
+  const existingBets = { dontPass: { line: { amount: 5 } } }
+  const bets = lib.fourBetGrindLimit({ rules: fourBetRules, hand, playerMind, bets: existingBets })
+
+  t.equal(bets.new, 0, 'no bets placed when budget is zero')
+  t.equal(bets.come, undefined, 'no come bet structure added')
+  t.end()
+})
+
+tap.test('fourBetGrindLimit: win credits one unit back to budget', (t) => {
+  const hand = {
+    isComeOut: false,
+    point: 6,
+    payouts: [{ type: 'come point win', principal: 5, profit: 5 }]
+  }
+  const playerMind = { fourBetGrindLimit: { unitsRemaining: 0 } }
+  const existingBets = {
+    dontPass: { line: { amount: 5 } },
+    come: { pending: [], points: { 9: [{ line: { amount: 5 } }] } }
+  }
+  const bets = lib.fourBetGrindLimit({ rules: fourBetRules, hand, playerMind, bets: existingBets })
+
+  t.equal(playerMind.fourBetGrindLimit.unitsRemaining, 0, 'win added 1, then bet placed cost 1 — net zero')
+  t.equal(bets.come.pending.length, 1, 'was able to place a come bet after win credited')
+  t.equal(bets.new, fourBetRules.minBet)
+  t.end()
+})
+
+tap.test('fourBetGrindLimit: multiple wins in one roll credit multiple units', (t) => {
+  const hand = {
+    isComeOut: false,
+    point: 6,
+    payouts: [
+      { type: 'come point win', principal: 5, profit: 5 },
+      { type: 'dont come win', principal: 5, profit: 5 }
+    ]
+  }
+  const playerMind = { fourBetGrindLimit: { unitsRemaining: 0 } }
+  const existingBets = { dontPass: { line: { amount: 5 } } }
+  const bets = lib.fourBetGrindLimit({ rules: fourBetRules, hand, playerMind, bets: existingBets })
+
+  t.equal(playerMind.fourBetGrindLimit.unitsRemaining, 1, '2 wins credited, 1 bet placed — net 1 remaining')
+  t.equal(bets.new, fourBetRules.minBet, 'one bet placed')
+  t.end()
+})
+
+tap.test('fourBetGrindLimit: push (profit=0) does not credit a unit', (t) => {
+  const hand = {
+    isComeOut: false,
+    point: 6,
+    payouts: [{ type: 'push', principal: 5, profit: 0 }]
+  }
+  const playerMind = { fourBetGrindLimit: { unitsRemaining: 0 } }
+  const existingBets = { dontPass: { line: { amount: 5 } } }
+  const bets = lib.fourBetGrindLimit({ rules: fourBetRules, hand, playerMind, bets: existingBets })
+
+  t.equal(playerMind.fourBetGrindLimit.unitsRemaining, 0, 'push does not increase budget')
+  t.equal(bets.new, 0, 'no bet placed')
+  t.end()
+})
+
+tap.test('fourBetGrindLimit: all four established - no new bets', (t) => {
+  const hand = { isComeOut: false, point: 6 }
+  const playerMind = { fourBetGrindLimit: { unitsRemaining: 0 } }
+  const existingBets = {
+    dontPass: { line: { amount: 5 } },
+    come: { pending: [], points: { 4: [{ line: { amount: 5 } }], 9: [{ line: { amount: 5 } }] } },
+    dontCome: { pending: [], points: { 8: [{ line: { amount: 5 } }] } }
+  }
+  const bets = lib.fourBetGrindLimit({ rules: fourBetRules, hand, playerMind, bets: existingBets })
+
+  t.equal(bets.new, 0, 'no bets when all four established and budget zero')
+  t.end()
+})
+
+tap.test('fourBetGrindLimit: does not replace lost come bet when budget exhausted', (t) => {
+  const hand = { isComeOut: false, point: 6 }
+  const playerMind = { fourBetGrindLimit: { unitsRemaining: 0 } }
+  // One come bet was lost, only one remains — but budget is zero
+  const existingBets = {
+    dontPass: { line: { amount: 5 } },
+    come: { pending: [], points: { 4: [{ line: { amount: 5 } }] } },
+    dontCome: { pending: [], points: { 8: [{ line: { amount: 5 } }] } }
+  }
+  const bets = lib.fourBetGrindLimit({ rules: fourBetRules, hand, playerMind, bets: existingBets })
+
+  t.equal(bets.come.pending.length, 0, 'no replacement come bet when budget is zero')
+  t.equal(bets.new, 0)
+  t.end()
+})
