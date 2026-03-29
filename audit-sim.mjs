@@ -53,14 +53,14 @@ for (const name of strategyNames) {
     hand.history.forEach((roll, idx) => {
       const prevRoll = idx === 0 ? null : hand.history[idx - 1]
       const prevIsCO = idx === 0 ? true : prevRoll.isComeOut
-      const prevPt   = idx === 0 ? '-'  : (prevRoll.point ?? '-')
+      const prevPt = idx === 0 ? '-' : (prevRoll.point ?? '-')
 
       const bets = roll.betsBefore || {}
       const parts = []
-      if (bets.pass?.line)   parts.push(`pass=$${bets.pass.line.amount}`)
-      if (bets.pass?.odds)   parts.push(`passOdds=$${bets.pass.odds.amount}`)
+      if (bets.pass?.line) parts.push(`pass=$${bets.pass.line.amount}`)
+      if (bets.pass?.odds) parts.push(`passOdds=$${bets.pass.odds.amount}`)
       if (bets.dontPass?.line) parts.push(`dp=$${bets.dontPass.line.amount}`)
-      if (bets.place?.six)   parts.push(`p6=$${bets.place.six.amount}`)
+      if (bets.place?.six) parts.push(`p6=$${bets.place.six.amount}`)
       if (bets.place?.eight) parts.push(`p8=$${bets.place.eight.amount}`)
       if (bets.come?.pending?.length) parts.push(`comePend=$${bets.come.pending[0].amount}`)
       if (bets.come?.points) {
@@ -96,25 +96,25 @@ console.log('AUDIT SUMMARY')
 console.log('='.repeat(80))
 
 const events = {
-  passLineWins:      0,
-  passLineLosses:    0,
-  passOddsWins:      0,
-  passOddsLosses:    0,
-  dontPassWins:      0,
-  dontPassLosses:    0,
-  dontPassBar12:     0,
-  comeLineWins:      0,
-  comeLineLosses:    0,
-  comeOddsWins:      0,
-  comeOddsLosses:    0,
-  dontComeWins:      0,
-  dontComeLosses:    0,
-  dontComePushes:    0,
-  placeSixWins:      0,
-  placeSixLosses:    0,
-  placeEightWins:    0,
-  placeEightLosses:  0,
-  placeBetOffOnCO:   0,
+  passLineWins: 0,
+  passLineLosses: 0,
+  passOddsWins: 0,
+  passOddsLosses: 0,
+  dontPassWins: 0,
+  dontPassLosses: 0,
+  dontPassBar12: 0,
+  comeLineWins: 0,
+  comeLineLosses: 0,
+  comeOddsWins: 0,
+  comeOddsLosses: 0,
+  dontComeWins: 0,
+  dontComeLosses: 0,
+  dontComePushes: 0,
+  placeSixWins: 0,
+  placeSixLosses: 0,
+  placeEightWins: 0,
+  placeEightLosses: 0,
+  placeBetOffOnCO: 0,
   comeOddsWithoutLine: 0,
   unknownPayoutTypes: []
 }
@@ -172,9 +172,9 @@ for (const name of strategyNames) {
 
       // Seven-out losses / dark-side wins
       if (result === 'seven out') {
-        if (bets.pass?.line)   events.passLineLosses++
-        if (bets.pass?.odds)   events.passOddsLosses++
-        if (bets.place?.six)   events.placeSixLosses++
+        if (bets.pass?.line) events.passLineLosses++
+        if (bets.pass?.odds) events.passOddsLosses++
+        if (bets.place?.six) events.placeSixLosses++
         if (bets.place?.eight) events.placeEightLosses++
         if (bets.come?.points) {
           Object.values(bets.come.points).forEach(arr => {
@@ -208,16 +208,16 @@ for (const name of strategyNames) {
           events.unknownPayoutTypes.push({ type: po.type, strategy: name })
         }
         switch (po.type) {
-          case 'point win':            events.passLineWins++; break
-          case 'comeout win':          events.passLineWins++; break
-          case 'pass odds win':        events.passOddsWins++; break
-          case 'dont pass win':        break // counted above
-          case 'come line win':        events.comeLineWins++; break
-          case 'come odds win':        events.comeOddsWins++; break
-          case 'dont come line win':   events.dontComeWins++; break
-          case 'dont come line push':  events.dontComePushes++; break
-          case 'place 6 win':          events.placeSixWins++; break
-          case 'place 8 win':          events.placeEightWins++; break
+          case 'point win': events.passLineWins++; break
+          case 'comeout win': events.passLineWins++; break
+          case 'pass odds win': events.passOddsWins++; break
+          case 'dont pass win': break // counted above
+          case 'come line win': events.comeLineWins++; break
+          case 'come odds win': events.comeOddsWins++; break
+          case 'dont come line win': events.dontComeWins++; break
+          case 'dont come line push': events.dontComePushes++; break
+          case 'place 6 win': events.placeSixWins++; break
+          case 'place 8 win': events.placeEightWins++; break
         }
       })
     }
@@ -281,24 +281,24 @@ for (const name of strategyNames) {
 
 console.log('\nEvent counts across all strategies × 5 hands:')
 console.table({
-  'Pass line wins':         events.passLineWins,
-  'Pass line losses':       events.passLineLosses,
-  'Pass odds wins':         events.passOddsWins,
-  'Pass odds losses':       events.passOddsLosses,
-  "Don't pass wins":        events.dontPassWins,
-  "Don't pass losses":      events.dontPassLosses,
+  'Pass line wins': events.passLineWins,
+  'Pass line losses': events.passLineLosses,
+  'Pass odds wins': events.passOddsWins,
+  'Pass odds losses': events.passOddsLosses,
+  "Don't pass wins": events.dontPassWins,
+  "Don't pass losses": events.dontPassLosses,
   "Don't pass bar-12 push": events.dontPassBar12,
-  'Come line wins':         events.comeLineWins,
-  'Come line losses':       events.comeLineLosses,
-  'Come odds wins':         events.comeOddsWins,
-  'Come odds losses':       events.comeOddsLosses,
-  "Don't come wins":        events.dontComeWins,
-  "Don't come losses":      events.dontComeLosses,
-  "Don't come pushes":      events.dontComePushes,
-  'Place 6 wins':           events.placeSixWins,
-  'Place 6 losses':         events.placeSixLosses,
-  'Place 8 wins':           events.placeEightWins,
-  'Place 8 losses':         events.placeEightLosses,
+  'Come line wins': events.comeLineWins,
+  'Come line losses': events.comeLineLosses,
+  'Come odds wins': events.comeOddsWins,
+  'Come odds losses': events.comeOddsLosses,
+  "Don't come wins": events.dontComeWins,
+  "Don't come losses": events.dontComeLosses,
+  "Don't come pushes": events.dontComePushes,
+  'Place 6 wins': events.placeSixWins,
+  'Place 6 losses': events.placeSixLosses,
+  'Place 8 wins': events.placeEightWins,
+  'Place 8 losses': events.placeEightLosses
 })
 
 console.log('\n--- Edge Case / Integrity Flags ---')
