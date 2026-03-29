@@ -77,7 +77,10 @@ function passOdds ({ bets, hand, rules }) {
 }
 
 function placeBet ({ rules, bets, hand, placeNumber }) {
-  const label = placeNumber === 6 ? 'six' : placeNumber === 8 ? 'eight' : String(placeNumber)
+  if (placeNumber !== 6 && placeNumber !== 8) {
+    throw new Error(`placeBet only supports 6 and 8; got ${placeNumber}`)
+  }
+  const label = placeNumber === 6 ? 'six' : 'eight'
 
   if (!bets?.place?.[label]) {
     if (process.env.DEBUG) console.log(`[decision] no place ${placeNumber} bet`)
@@ -234,12 +237,12 @@ function dontPassLine ({ bets, hand, rules }) {
     return { bets }
   }
 
-  // comeout: 2 or 3 = win, 12 = bar (push/neutral), 7 or 11 = lose, point set = carry
+  // comeout: 2 or 3 = win, bar number = push, 7 or 11 = lose, point set = carry
   if (hand.result === 'comeout loss') {
-    // shooter rolled 2 or 3 — don't pass wins; 12 is barred (push)
-    if (hand.diceSum === 12) {
-      // bar 12: push, bet stays
-      if (process.env.DEBUG) console.log('[decision] dont pass bar 12: push, bet carries')
+    const barNumber = rules?.dontPassBar ?? 12
+    if (hand.diceSum === barNumber) {
+      // bar: push, bet stays
+      if (process.env.DEBUG) console.log(`[decision] dont pass bar ${barNumber}: push, bet carries`)
       return { bets }
     }
     const payout = {

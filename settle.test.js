@@ -389,6 +389,27 @@ tap.test('dontPassLine: comeout 12 is barred (push)', function (t) {
   t.end()
 })
 
+tap.test('dontPassLine: bar number is configurable via rules.dontPassBar', function (t) {
+  const rules = { dontPassBar: 2 }
+  const bets = { dontPass: { line: { amount: 5 } } }
+  const hand = { result: 'comeout loss', diceSum: 2 }
+
+  const result = settle.dontPassLine({ hand, bets, rules })
+  t.notOk(result.payout, 'no payout when dontPassBar is 2 and dice show 2')
+  t.equal(result.bets.dontPass.line.amount, 5, 'bet carries over on configured bar number')
+  t.end()
+})
+
+tap.test('dontPassLine: default bar is 12 when rules.dontPassBar is absent', function (t) {
+  const bets = { dontPass: { line: { amount: 5 } } }
+  const hand = { result: 'comeout loss', diceSum: 12 }
+
+  const result = settle.dontPassLine({ hand, bets })
+  t.notOk(result.payout, 'no payout on default bar 12 with no rules provided')
+  t.equal(result.bets.dontPass.line.amount, 5, 'bet carries over')
+  t.end()
+})
+
 tap.test('dontPassLine: comeout 7 loses', function (t) {
   const bets = { dontPass: { line: { amount: 5 } } }
   const hand = { result: 'comeout win', diceSum: 7 }
@@ -756,6 +777,18 @@ tap.test('place bet: working:false on bet overrides table placeBetsOffOnComeOut:
 
   t.equal(settled.place.six.amount, 6, 'place six carries over (bet opted off)')
   t.equal(settled.payouts.total, 0)
+  t.end()
+})
+
+tap.test('placeBet: throws for unsupported place number', (t) => {
+  const bets = { place: { 5: { amount: 10 } } }
+  const hand = { result: 'neutral', diceSum: 5, isComeOut: false }
+
+  t.throws(
+    () => settle.placeBet({ rules: {}, bets, hand, placeNumber: 5 }),
+    /placeBet only supports 6 and 8/,
+    'throws with a descriptive message for non-6/8 place number'
+  )
   t.end()
 })
 

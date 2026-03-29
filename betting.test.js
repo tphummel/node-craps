@@ -407,6 +407,65 @@ tap.test('placeSixEightUnlessPoint: skip place bet matching point', (t) => {
   t.end()
 })
 
+tap.test('placeSixEightUnlessPoint: pre-existing place 6 removed when point changes to 6, bets.new stays 0', (t) => {
+  const rules = { minBet: 6 }
+  const existingBets = { place: { six: { amount: 6 }, eight: { amount: 6 } } }
+  const hand = { isComeOut: false, point: 6 }
+
+  const result = lib.placeSixEightUnlessPoint({ rules, hand, bets: existingBets })
+
+  t.notOk(result.place?.six, 'pre-existing place 6 is removed when it matches the point')
+  t.equal(result.place?.eight?.amount, 6, 'place 8 is untouched')
+  t.equal(result.new, 0, 'bets.new is 0 — no free credit for removing a pre-existing bet')
+
+  t.end()
+})
+
+tap.test('placeSixEightUnlessPoint: pre-existing place 8 removed when point changes to 8, bets.new stays 0', (t) => {
+  const rules = { minBet: 6 }
+  const existingBets = { place: { six: { amount: 6 }, eight: { amount: 6 } } }
+  const hand = { isComeOut: false, point: 8 }
+
+  const result = lib.placeSixEightUnlessPoint({ rules, hand, bets: existingBets })
+
+  t.equal(result.place?.six?.amount, 6, 'place 6 is untouched')
+  t.notOk(result.place?.eight, 'pre-existing place 8 is removed when it matches the point')
+  t.equal(result.new, 0, 'bets.new is 0 — no free credit for removing a pre-existing bet')
+
+  t.end()
+})
+
+tap.test('placeSixEightUnlessPassOrCome: pre-existing place 6 removed when covered by pass point, bets.new stays 0', (t) => {
+  const rules = { minBet: 6 }
+  const existingBets = { place: { six: { amount: 6 }, eight: { amount: 6 } } }
+  const hand = { isComeOut: false, point: 6 }
+
+  const result = lib.placeSixEightUnlessPassOrCome({ rules, hand, bets: existingBets })
+
+  t.notOk(result.place?.six, 'pre-existing place 6 is removed when covered by the pass point')
+  t.equal(result.place?.eight?.amount, 6, 'place 8 is untouched')
+  t.equal(result.new, 0, 'bets.new is 0 — no free credit for removing a pre-existing bet')
+
+  t.end()
+})
+
+tap.test('placeSixEightUnlessPassOrCome: pre-existing place 6 removed when covered by come bet, bets.new stays 0', (t) => {
+  const rules = { minBet: 6 }
+  const existingBets = {
+    place: { six: { amount: 6 }, eight: { amount: 6 } },
+    come: { points: { 6: [{ line: { amount: 6 } }] } }
+  }
+  const hand = { isComeOut: false, point: 9 }
+
+  const result = lib.placeSixEightUnlessPassOrCome({ rules, hand, bets: existingBets })
+
+  t.notOk(result.place?.six, 'pre-existing place 6 is removed when a come bet covers 6')
+  t.equal(result.place?.eight?.amount, 6, 'place 8 is untouched')
+  t.equal(result.new, 0, 'bets.new is 0 — no free credit for removing a pre-existing bet')
+
+  t.end()
+})
+
 tap.test('minPassLineMaxOddsPlaceSixEight: odds and place bets adjusted', (t) => {
   const rules = {
     minBet: 5,

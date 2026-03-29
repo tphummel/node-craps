@@ -8,7 +8,8 @@ function rollD6 () {
 const defaultRules = {
   comeOutLoss: [2, 3, 12],
   comeOutWin: [7, 11],
-  placeBetsOffOnComeOut: true
+  placeBetsOffOnComeOut: true,
+  dontPassBar: 12
 }
 
 function shoot (before, dice, rules = defaultRules) {
